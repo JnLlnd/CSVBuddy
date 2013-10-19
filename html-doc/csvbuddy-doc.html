@@ -1,0 +1,359 @@
+﻿<html>
+<head>
+<title>CSV Buddy - Documentation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="csvbuddy-doc.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<H1>CSV Buddy (v0.8.0 BETA) - Documentation</H1>
+
+<P>CSV Buddy helps you make your CSV files ready to be imported by a variety of software. You can load files with all sort of field delimiters (comma, tad, semi-colon, etc.) and encapsulators (double/single-quotes or any other character). Convert line breaks in data field making your file XL ready. Rename/reorder fields, edit records, save with any delimiters and export to fixed-width, HTML templates or XML formats. Freeware.</P>
+
+<H2>First things first...</H2>
+
+<H4>Installation</H4>
+
+<P><P>Absolutely free to download and use, for personal or commercial use.</P><OL><LI>Download <A HREF="http://www.jeanlalonde.ca/ahk/csvbuddy/csvbuddy.zip">csvbuddy.zip</A></LI><LI>There is no software to install. Just extract the zip file content to the folder of your choice.</LI><LI>Run the .EXE file from this folder (choose the 32-bits or 64-bits version depending on your system). Make sure it will run with <EM>read/write</EM> access to this folder.</LI><LI>At your convenience, create a shorcut on your Desktop or your Start menu.</LI></OL><P>CSV Buddy can be freely distributed over the internet in an unchanged form.</P></P>
+
+<H4>Description</H4>
+
+<P>Even if the CSV file format is a widely accepted standard, it is still found in multiple flavors. In some implementations, fields are separated by comma. Others are delimited with tab, semi-colon or a variety of characters depending on the OS. Most CSV file records stand on one line. However, some programs export multi-line data with line breaks inside fields (try to load in Excel a CSV export from Outlook or Gmail contacts with multi-line notes text fields). Many programs will have a hard time importing these various variations of the CSV format.<BR /><BR />The freeware CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sorts of field delimiters (auto-detection of comma, tab, semi-colon, etc.). Field containing delimiters or line breaks can be embedded in various encapsulators (double-quotes, single-quotes, pipes or any character). Get field names from the file's header (first line) or set your own column titles. Load data with line-breaks.<BR /><BR />Rename, select or reorder fields. In a grid, edit or delete records. Sort them on alphabetical or numeric values (integer or float). Save all or selected rows to a new file using any delimiters, with header or not.  Replace line breaks in data fields with a marker to make your file ready to load in software (like MS-Excel) that can only load single-line fields.<BR /><BR />Export your data to fixed-width files with specific width for each field, truncating data or padding it with spaces. Export to HTML using your own template with markers to insert your data fields in the web page. Also export to XML standard format.<BR /><BR />CSV Buddy can load files having up to 200 fields (columns) and cells with up to 8191 characters. With the 32-bits version, file loading is limited by available physical memory. Tests were successful with files over 100 MB. With the 64-bits version, there is no limitation to file size thanks to virtual RAM. However, loading and saving time will increase as files get huge (in the hundreds of megs).</P>
+
+<A HREF="img/CSVBuddy-01.jpg" TARGET="_blank" TITLE="1) Load CSV File"><IMG SRC="img/CSVBuddy-01.jpg" BORDER="1" WIDTH="250" HEIGHT="175" ALT="1) Load CSV File"></A>
+
+<A HREF="img/CSVBuddy-02.jpg" TARGET="_blank" TITLE="2) Edit Columns"><IMG SRC="img/CSVBuddy-02.jpg" BORDER="1" WIDTH="250" HEIGHT="175" ALT="2) Edit Columns"></A>
+
+<A HREF="img/CSVBuddy-03.jpg" TARGET="_blank" TITLE="Edit row"><IMG SRC="img/CSVBuddy-03.jpg" BORDER="1" WIDTH="250" HEIGHT="175" ALT="Edit row"></A>
+
+<A HREF="img/CSVBuddy-04.jpg" TARGET="_blank" TITLE="3) Save CSV File"><IMG SRC="img/CSVBuddy-04.jpg" BORDER="1" WIDTH="250" HEIGHT="175" ALT="3) Save CSV File"></A>
+
+<A HREF="img/CSVBuddy-05.jpg" TARGET="_blank" TITLE="4) Export"><IMG SRC="img/CSVBuddy-05.jpg" BORDER="1" WIDTH="250" HEIGHT="175" ALT="4) Export"></A>
+
+<H4>Features</H4>
+
+<P>1) Load CSV file to a list view<BR />
+- Select and preview the file to load<BR />
+- Get field names from the file header (first line of the file)<BR />
+- Set the header of your choice to customize field names<BR />
+- Use any single-character custom field delimiter (comma, tab, semi-colon, etc.)<BR />
+- Use any single-character custom field encapsulator (double-quotes, single-quoted, etc.) to embed field containing a delimiters or line breaks<BR />
+- Auto-detection of field delimiter (comma, tab, semi-colon, colon, pipe or tilde) and field encapsulator (double-quote, single-quote, tilde or pipe) from file's first line<BR />
+- Load multi-line fields (do not consider a line break between double-quotes as the end of a record)<BR />
+- Restore line breaks within fields by replacing a temporary character of your choice (like ") with line break<BR />
+- Load to file into a list allowing these features:<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;- Sort rows on any field by clicking on column headers<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;- Sorting type: alphabetical, numeric integer or numeric float, ascending or descending<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;- Double-click on a row to edit a record in a dialog box (field names are uses as form labels)<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;- Right-click anywhere in the list view to select all rows, deselect all rows, reverse selection, edit a record or delete selected rows.<BR />
+<BR />
+2) Edit columns<BR />
+- Rename fields by entering a delimited string with the new field names<BR />
+- Select fields to keep in the list view by entering a delimited string with the names of these fields<BR />
+- Order fields by entering a delimited string with the names of the fields in the desired order<BR />
+<BR />
+3) Save list view to CSV file<BR />
+- Choose destination file name (default to original name + 1 or 2, etc.)<BR />
+- Check the content of the destination file if it exists<BR />
+- Overwrite or append data if destination file exists<BR />
+- Set any single-character as field delimiter in the destination file<BR />
+- Set any single-character as field encapsulator in the destination file<BR />
+- Save the file with or without a CSV header (first line of the file with field names)<BR />
+- Save multi-line fields (embedded with the encapsulator character)<BR />
+- Convert multi-line fields to single-line by replacing line breaks within fields with a replacement character of your choice (like ")<BR />
+- Save rows in the order they appear in the list view<BR />
+- Save all rows or only selected rows<BR />
+<BR />
+4) Export<BR />
+- Export to fixed-with file<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;- Choose fixed-width for each field<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;- Truncate data or pad with space<BR />
+- Export to HTML using an HTML template<BR />
+- Export to XML<BR />
+- Export to other format using a custom row template<BR />
+</P>
+
+<A name="help"></a>
+<H2>Help</H2>
+
+<P>Throughout CSV Buddy, you'll find help capsules available by clicking the <CODE>?</CODE> button. You will find below a compilation of help messages for each function in their logical sequence of use. Read the whole thing now for a quick overview of CSV Buddy or, if you prefer, read it as you need it in each of the four tabs of the CSV Buddy.</P>
+
+<H3>1) Load CSV File tab</H3>
+
+<P ALIGN="LEFT"><IMG SRC="img/CSVBuddy-tab1.jpg" BORDER="1"></P>
+
+<H4>CSV File To Load</H4>
+
+<P>Hit "Select" to choose the CSV file to load.<BR />
+<BR />
+Click on the various Help (?) buttons to learn about the options offered by CSV Buddy. When setting are ready, hit "Load" to import the file.<BR />
+<BR />
+Note that CSV Buddy can load CSV files with up to 200 fields. Also, although up to 8,191 characters of text can be stored in each cell, only the first 260 characters are displayed.</P>
+
+<H4>CSV Header</H4>
+
+<P>Most of the time, the first line of a CSV file contains the CSV header, a list of field names separated by a field delimiter. If your file contains a CSV Header, select the radio button "Get CSV Header". When you select a file (using the "Select" button), the "CSV Header" zone displays the first line of the selected file.<BR />
+<BR />
+Note that invisible characters used as delimiters (for example Tab) are displayed with an escape character. For example, Tabs are shown as "`t".<BR />
+<BR />
+If the file does not contain a CSV header, select the radio button "Set CSV Header" and enter in the "CSV Header" zone the field names for each column of data in the file, seperated by the field delimiter.</P>
+
+<H4>CSV Get/Set CSV Header</H4>
+
+<P>If the first line of the CSV file contains the list of field names, click "Get header from CSV file". If not, click "Set CSV header" and enter the list of field names separated by the "Field delimiter".</P>
+
+<H4>Field Delimiter</H4>
+
+<P>Each field in the CSV header and in data rows of the file must be separated by a field delimiter. This is often comma ( , ), semicolon ( ; ) or Tab.<BR />
+<BR />
+CSV Buddy will detect the delimiter if one of these characters is found in the first line of the file: tab, semi-colon, comma, colon, pipe or tilde. If this is not the correct delimiter, enter any single character or one of these replacement letters for invisible characters:<BR />
+<BR />
+t&nbsp;&nbsp;&nbsp;&nbsp;Tab (HT)<BR />
+n&nbsp;&nbsp;&nbsp;&nbsp;Linefeed (LF)<BR />
+r&nbsp;&nbsp;&nbsp;&nbsp;Carriage return (CR)<BR />
+f&nbsp;&nbsp;&nbsp;&nbsp;Form feed (FF)<BR />
+<BR />
+Space can also be used as delimiter. Just enter a space in the text zone.<BR />
+<BR />
+Tip: Use the "Preview" button to find what is the field delimiter in the selected file.</P>
+
+<H4>Field Encapsulator</H4>
+
+<P>When data fields in a CSV file contain characters used as delimiter or end-of-line, they must be enclosed in a field encapsulator. This encapsulator is often double-quotes ( "..." ) or single quotes ( '...' ). For example, if comma is used as field delimiter in a CSV file, the data field "Smith, John" must be encapsulated because it contains a comma.<BR />
+<BR />
+If a field contains the character used as encapsulator, this character must be doubled. For example, the data "John "Junior" Smith" must be stated as "John ""Junior"" Smith".<BR />
+<BR />
+CSV Buddy will detect the encapsulator if one of these characters is found in the first line of the file: double-quote, single-quote, tilde or pipe. If this is not the correct encapsulator, enter any single character.<BR />
+<BR />
+Tip: Use the "Preview" button to find what is the field encapsulator in the selected file.</P>
+
+<H4>Multi-line Fields</H4>
+
+<P>Most CSV files do not contain line breaks inside text field. But some do. For example, you can find multi-lines "Notes" fields in Google or Outlook contacts exported files.<BR />
+<BR />
+If text fields in your CSV file contain line breaks, select this checkbox to turn this option ON. If not, keep it OFF since this will improve loading performance.<BR />
+<BR />
+If you turn Multi-line ON, you have the additional option to choose a character (or string) that will be converted to line-breaks if found in the CSV file.</P>
+
+<H4>Ready to edit</H4>
+
+<P>Your CSV file is loaded.<BR />
+<BR />
+You can sort rows by clicking on column headers. Choose sorting type: alphabetical, numeric integer or numeric float, ascending or descending.<BR />
+<BR />
+Double-click on a row to edit a record.  Right-click anywhere in the list view to select all rows, deselect all rows, reverse selection, edit a record or delete selected rows.<BR />
+<BR />
+You can use the "2) Edit Columns" tab to edit field names, select fields to keep or change fields order.<BR />
+<BR />
+When you will be ready, go to the "3) Save CSV File" tab to save all or selected rows in a new CSV file or to the "4) Export" tab to export your data to fixed-width, HTML or XML format.</P>
+
+<H3>2) Edit Columns tab</H3>
+
+<P ALIGN="LEFT"><IMG SRC="img/CSVBuddy-tab2.jpg" BORDER="1"></P>
+
+<H4>Rename Fields</H4>
+
+<P>To change field names (column headers), enter a new name for each field, in the order they actually appear in the list, separated by the field delimiter ( usually comma ) and click "Rename".<BR />
+<BR />
+If you enter less names than the number of fields (or no field name at all), "C" + numbers are used as field names for remaining columns.<BR />
+<BR />
+Field names including the separator character ( comma ) must be enclosed by the encapsulator character ( usually double-quotes ).<BR />
+<BR />
+To save the file, click on the tab "3) Save CSV File".</P>
+
+<H4>Select Fields</H4>
+
+<P>To remove fields (columns) from the list, enter the name of fields you want to keep, in the order they actually appear in the list, separated by the field delimiter ( usually comma ) and click "Select".<BR />
+<BR />
+To save the file, click on the last tab "3) Save CSV File".</P>
+
+<H4>Order Fields</H4>
+
+<P>To change the order of fields (columns) in the list, enter the field names in the new order you want to apply, separated by the field delimiter ( usually comma ) and click "Order".<BR />
+<BR />
+If you enter less field names than in the original header, fields not included in the new order are removed from the list. However, if you only want to remove fields from the list (without changing the order), the "Select" button gives better performance on large files.<BR />
+<BR />
+To save the file, click on the last tab "3) Save CSV File".</P>
+
+<H3>3) Save CSV File tab</H3>
+
+<H4>CSV File To Save</H4>
+
+<P>Enter the name of the destination CSV file (the current program's directory is used if an absolute path isn't specified) or hit "Select" to choose the CSV destination file. If the destination file exists, data can overwrite the existing file or be appended to it. When other options are OK, hit "Save" to save all or selected rows to the CSV file.<BR />
+<BR />
+Note that all rows are saved by default. But if one or more rows are selected, only these rows are saved. You can select one row (using Click), a series of adjacent rows (using Shift-Click) or non contiguous rows (using Ctrl-Click or Shift-Ctrl-Click). You can also Right-Click in the list to select or deselect all rows, or to reverse the current row selection.<BR />
+<BR />
+Note that fields are saved in the order they appear in the list and that rows are saved according to the current sorting order (click on a column name to sort rows).</P>
+
+<P ALIGN="LEFT"><IMG SRC="img/CSVBuddy-tab3.jpg" BORDER="1"></P>
+
+<H4>Save CSV Header</H4>
+
+<P>To save the field names as the first line of the CSV file, select "Save with header".<BR />
+<BR />
+If you select "Save without header", the first line of the file will contain the data of the first row of the list.</P>
+
+<H4>Field Delimiter</H4>
+
+<P>Each field in the CSV header and in data rows of the file must be separated by a field delimiter. Enter the field delimiter character to use in the destination file.<BR />
+<BR />
+It can be comma ( , ), semicolon ( ; ), Tab or any single character.<BR />
+<BR />
+Use the letters on the left as replacement for the following invisible characters:<BR />
+<BR />
+t&nbsp;&nbsp;&nbsp;&nbsp;Tab (HT)<BR />
+n&nbsp;&nbsp;&nbsp;&nbsp;Linefeed (LF)<BR />
+r&nbsp;&nbsp;&nbsp;&nbsp;Carriage return (CR)<BR />
+f&nbsp;&nbsp;&nbsp;&nbsp;Form feed (FF)</P>
+
+<H4>Field Encapsulator</H4>
+
+<P>Data fields in a CSV file containing the character used as field delimiter or an end-of-line must be enclosed in a field encapsulator. Enter the field encapsulator character to use in the destination file.<BR />
+<BR />
+The encapsulator is often double-quotes ( "..." ) or single quotes ( '...' ). In the example "Smith, John", the data field containing a comma will be encapsulated because comma is also the field delimiter.<BR />
+<BR />
+If a field contains the character used as encapsulator, this encapsulator will be doubled. For example, the data "John "Junior" Smith" will be entered as "John ""Junior"" Smith".</P>
+
+<H4>Saving multi-line fields</H4>
+
+<P>If a field contains line break, you can decide if this line break is saved as is or if it is replaced with a character (or a sequence of characters) in order to keep the field on a single line. This can be useful if, later, you want to open this file in a software that do not support multi-line fields (e.g. MS Excel).<BR />
+<BR />
+If you select "Save multi-line", line breaks are saved unchanged.<BR />
+<BR />
+If you select "Save single-line", enter the replacement sequence for line breaks in the "End-of-line replacement:" zone. By default, the replacement character is "¶" (ASCII code 182).</P>
+
+<H3>4) Export tab</H3>
+
+<P ALIGN="LEFT"><IMG SRC="img/CSVBuddy-tab4.jpg" BORDER="1"></P>
+
+<H4>Export data</H4>
+
+<P>Enter the name of the destination file of the export (the current program's directory is used if an absolute path isn't specified) or hit "Select" to choose the destination file. When other options are OK, hit "Export" to export all or selected rows to the destination file.<BR />
+<BR />
+Note that all rows are exported by default. But if one or more rows are selected, only these rows are exported. You can select one row (using Click), a series of adjacent rows (using Shift-Click) or non contiguous rows (using Ctrl-Click or Shift-Ctrl-Click). You can also Right-Click in the list to select or deselect all rows, or to reverse the current row selection.<BR />
+<BR />
+Rows are exported according to the current sorting order (click on a column name to sort rows).</P>
+
+<H4>Export Format</H4>
+
+<P>Choose one of these export formats:<BR />
+<BR />
+» Fixed-width: To export to a text file where each record appears on a separate line, and the width of each field remains consistent across records. Field names can be optionally inserted on the first line. Field names and data fields shorter than their width are padded with trailing spaces. Field names and data fields longer than their width are truncated at their maximal width. Fields are exported in the order they appear in the list. If the destination file exists, data can overwrite the existing file or be appended to it.<BR />
+<BR />
+» HTML: To build an HTML file based on a template file specifying header and footer templates, and a row template where variable names are replaced with the content of each record in the collection. If the destination file exists, it is overwritten.<BR />
+<BR />
+» XML: To build an XML file from the content of the collection. You must ensure that field names and field data comply with the rules of XML syntax. Fields are exported in the order they appear in the list. If the destination file exists, it is overwritten.<BR />
+<BR />
+» Express: To build a text file based on a row template where variable names are replaced with the content of each record in the collection. If the destination file exists, it is overwritten.<BR />
+<BR />
+Select the export format. An additional "&lt;format&gt; Export Help" button will provide more instructions about the selected format.<BR />
+<BR />
+Click the "Export" button to export data and the "Check" button to see the result in the destination file.</P>
+
+<H4>Fixed-width Export</H4>
+
+<P>Transfer the selected fields from a collection of objects to a fixed-width file.<BR />
+<BR />
+In the "Fields width:", enter each field name to include in the file, followed by the width of this field. Field names and width values are separated by the field delimiter ( usually comma ) specified in the tab "3) Save CSV File". Initially, the "Fields width:" zone includes all fields with a default width of 16 characters. To change the default width, click the "Change default width" button.<BR />
+<BR />
+Field names and data fields shorter than their width are padded with trailing spaces. Field names and data fields longer than their width are truncated at their maximal width.<BR />
+<BR />
+Field names can be optionnaly included on the first line of the file according to the selected option "Save with header" or "Save without header" on the tab "3) Save CSV File".<BR />
+<BR />
+A fixed-width file should not include end-of-line within data. If it does and if a value is entered in the "End-of-line replacement:" on the tab "3) Save CSV File" (click "Save single-line" to see this option), end-of-line in multi-line fields are replaced by a character or string of your choice. This string is included in the fixed-width character count.<BR />
+<BR />
+Click the "Export" button to export data and the "Check" button to see the result in the destination file.</P>
+
+<H4>HTML Export</H4>
+
+<P>Build an HTML file based on a template file specifying header and footer templates, and a row template where variable names are replaced with the content of each record in the collection.<BR />
+<BR />
+Enter the template file name in the "HTML template:" or click "Select HTML template" to choose it. The template is divided in three sections: the header template (from the start of the file to the start of the row template), the row template (delimited by the markups ~ROWS~ and ~/ROWS~) and the footer template (from the end of the row template to the end of the file).<BR />
+<BR />
+The row template is repeated in the output file for each record in the collection. Field names encapsulated by the ~ character (ASCII code 164) are replaced by the matching data in each record. Also, ~ROWNUMBER~ is replaced by the current row number.<BR />
+<BR />
+In the header and footer, the following variables are replaced by parts of the destination file name:<BR />
+  ~FILENAME~ file name without its path, but including its extension<BR />
+  ~DIR~ drive letter or share name, if present, and directory of the file, final backslash excluded<BR />
+  ~EXTENSION~ file's extension, dot excluded<BR />
+  ~NAMENOEXT~ file name without its path, dot and extension<BR />
+  ~DRIVE~ drive letter or server name, if present<BR />
+<BR />
+This simple example, where each record has two fields named "Field1" and "Field2", shows the use of the various markups and variables:<BR />
+<BR />
+&lt;HEAD&gt;<BR />
+  &lt;TITLE&gt;~NAMENOEXT~&lt;/TITLE&gt;<BR />
+&lt;/HEAD&gt;<BR />
+&lt;BODY&gt;<BR />
+  &lt;H1&gt;~FILENAME~&lt;/H1&gt;<BR />
+  &lt;TABLE&gt;<BR />
+    &lt;TR&gt;<BR />
+      &lt;TH&gt;Row #&lt;/TH&gt;&lt;TH&gt;Field One&lt;/TH&gt;&lt;TH&gt;Field Two&lt;/TH&gt;<BR />
+    &lt;/TR&gt;<BR />
+~ROWS~<BR />
+    &lt;TR&gt;<BR />
+      &lt;TD&gt;~ROWNUMBER~&lt;/TD&gt;&lt;TD&gt;~Field1~&lt;/TD&gt;&lt;TD&gt;~Field2~&lt;/TD&gt;<BR />
+    &lt;/TR&gt;<BR />
+~/ROWS~<BR />
+  &lt;/TABLE&gt;<BR />
+  Source: ~DIR~\~FILENAME~<BR />
+&lt;/BODY&gt;<BR />
+<BR />
+Click the "Export" button to export data and the "Check" button to see the resulting HTML file in your default browser.</P>
+
+<H4>XML Export</H4>
+
+<P>Build an XML file from the content of the collection. You must ensure that field names and field data comply with the rules of XML syntax.<BR />
+<BR />
+This simple example, where each record has two fields named "Field1" and "Field2", shows the XML output format:<BR />
+<BR />
+&lt;?xml version='1.0'?&gt;<BR />
+&lt;XMLExport&gt;<BR />
+    &lt;Record&gt;<BR />
+        &lt;Field1&gt;Value Row 1 Col 1&lt;/Field1&gt;<BR />
+        &lt;Field2&gt;Value Row 1 Col 2&lt;/Field1&gt;<BR />
+    &lt;/Record&gt;<BR />
+    &lt;Record&gt;<BR />
+        &lt;Field1&gt;Value Row 2 Col 1&lt;/Field1&gt;<BR />
+        &lt;Field2&gt;Value Row 2 Col 2&lt;/Field1&gt;<BR />
+    &lt;/Record&gt;<BR />
+&lt;/XMLExport&gt;<BR />
+<BR />
+Click the "Export" button to export data and the "Check" button to see the result in the destination file.</P>
+
+<H4>XML Export</H4>
+
+<P>Build a text file based on a row template where variable names are replaced with the content of each record in the collection.<BR />
+<BR />
+In the "Express template:" zone, enter the template for each row of data in the collection. In this template, field names encapsulated by the character ~ (tilde) are replaced by the matching data in each record. Also, ~ROWNUMBER~ is replaced by the current row number.<BR />
+<BR />
+Additionaly, these special characters can be inserted in the template:<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;`t&nbsp;&nbsp;&nbsp;&nbsp;replaced by Tab (HT)<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;`n&nbsp;&nbsp;&nbsp;&nbsp;replaced by Linefeed (LF)<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;`r&nbsp;&nbsp;&nbsp;&nbsp;replaced by Carriage return (CR)<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;`f&nbsp;&nbsp;&nbsp;&nbsp;replaced by Form feed (FF)<BR />
+<BR />
+The "Express template:" zone is initialized with all fields encapsulated by the character ~ (tilde) and delimited with spaces.<BR />
+<BR />
+Click the "Export" button to export data and the "Check" button to see the result in the destination file.</P>
+
+<H2>Getting support</H2>
+
+<P><ul><li>Online support: <a href="https://www.facebook.com/CSVBuddy" target="_blank">Facebook Page</a></li><li>Email: <a href="mailto:ahk@jeanlalonde.ca">ahk@jeanlalonde.ca</a></li><li>Bug reports: <a href="https://github.com/JnLlnd/CSVBuddy/issues" target="_blank">GitHub issues</a> (you will need a GitHub account)</li></ul></P>
+
+<H2>Copyright</H2>
+
+<P>CSV Buddy - Copyright (C) 2013  Jean Lalonde<BR />
+<BR />
+This software is provided 'as-is', without any express or implied warranty.  In no event will the authors be held liable for any damages arising from the use of this software.<BR />
+<BR />
+Permission is granted to anyone to use this software for any purpose,  including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:<BR />
+<BR />
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.<BR />
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.<BR />
+3. This notice may not be removed or altered from any source distribution.<BR />
+<BR />
+Jean Lalonde, <A HREF="mailto:ahk@jeanlalonde.ca">ahk@jeanlalonde.ca</A></P>
+
+</body>
+</html>
+
