@@ -20,18 +20,31 @@ This script uses the library ObjCSV v0.3 (https://github.com/JnLlnd/ObjCSV)
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 0.8.0 BETA
+;@Ahk2Exe-SetVersion 0.8.1 BETA
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
 
 ; --------------------- GLOBAL AND DEFAULT VALUES --------------------------
 
-IniRead, intDefaultWidth, %A_ScriptDir%\CSVBuddy.ini, global, intDefaultWidth ; used when export to fixed-width format
-IniRead, strTemplateDelimiter, %A_ScriptDir%\CSVBuddy.ini, global, strTemplateDelimiter ; Default ~ (tilde), used when export to HTML and Express formats
-IniRead, intProgressType, %A_ScriptDir%\CSVBuddy.ini, global, intProgressType ; Default -2, Status Bar part 2
-IniRead, strTextEditorExe, %A_ScriptDir%\CSVBuddy.ini, global, strTextEditorExe ; Default notepad.exe
-IniRead, blnSkipHelpReadyToEdit, %A_ScriptDir%\CSVBuddy.ini, global, blnSkipHelpReadyToEdit ; Default 0
+strIniFile := A_ScriptDir . "\CSVBuddy.ini"
+IfNotExist, %strIniFile%
+	FileAppend,
+		(LTrim Join`r`n
+			[global]
+			intDefaultWidth=16
+			strTemplateDelimiter=~
+			strTextEditorExe=notepad.exe
+			blnSkipHelpReadyToEdit=1
+		)
+		, %strIniFile%
+
+IniRead, intDefaultWidth, %strIniFile%, global, intDefaultWidth ; used when export to fixed-width format
+IniRead, strTemplateDelimiter, %strIniFile%, global, strTemplateDelimiter ; Default ~ (tilde), used when export to HTML and Express formats
+IniRead, strTextEditorExe, %strIniFile%, global, strTextEditorExe ; Default notepad.exe
+IniRead, blnSkipHelpReadyToEdit, %strIniFile%, global, blnSkipHelpReadyToEdit ; Default 0
+
+intProgressType := -2 ; Status Bar, part 2
 
 
 ; --------------------- GUI1 --------------------------

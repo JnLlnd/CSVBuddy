@@ -24,6 +24,8 @@ B("[Download 32-bits / 64-bits](http://www.jeanlalonde.ca/ahk/csvbuddy/csvbuddy.
 B("[Description and documentation](http://www.jeanlalonde.ca/ahk/csvbuddy/)")
 
 H(2, "History")
+H(3, "2013-10-20 v0.8.1")
+B("If an .ini file is not found in the program's folder, it is created with default values")
 H(3, "2013-10-18 v0.8.0")
 B("First release of BETA version")
 B("History of ALPHA phase on [BitBucket](https://bitbucket.org/JnLlnd/csvbuddy/) (private repository)")

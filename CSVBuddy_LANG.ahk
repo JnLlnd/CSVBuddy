@@ -1,5 +1,5 @@
 global lAppName := "CSV Buddy"
-global lAppVersion := "0.8.0" ; 2013-10-18
+global lAppVersion := "0.8.1" ; 2013-10-20
 global lAppVersionLong := "v" . lAppVersion . " BETA"
 global lExportErrorTempFile := "An error occured while creating a temporary template file."
 global lExportFixedMustBeInteger := """~1~"" in field #~2~ ""~3~"" must be an integer number."

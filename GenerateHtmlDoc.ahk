@@ -93,12 +93,13 @@ Help(lTab4HelpExportHTML)
 Help(lTab4HelpExportXML)
 Help(lTab4HelpExportExpress)
 
-H(2, lDocSupportTitle)
+H(2, lDocKeyboardHelp)
+W(lDocKeyboardHelpDetail)
 
+H(2, lDocSupportTitle)
 P(lDocSupportText)
 
 H(2, lDocCopyrightTitle)
-
 P(lDocCopyrightText)
 
 W("</body>")
