@@ -8,6 +8,7 @@ This script uses the library ObjCSV v0.3 (https://github.com/JnLlnd/ObjCSV)
 ;===============================================
 
 #NoEnv
+#NoTrayIcon 
 #SingleInstance force
 #Include %A_ScriptDir%\..\ObjCSV\lib\ObjCSV.ahk
 #Include %A_ScriptDir%\CSVBuddy_LANG.ahk
@@ -20,7 +21,7 @@ This script uses the library ObjCSV v0.3 (https://github.com/JnLlnd/ObjCSV)
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 0.8.1 BETA
+;@Ahk2Exe-SetVersion 0.9 BETA
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -35,7 +36,7 @@ IfNotExist, %strIniFile%
 			intDefaultWidth=16
 			strTemplateDelimiter=~
 			strTextEditorExe=notepad.exe
-			blnSkipHelpReadyToEdit=1
+			blnSkipHelpReadyToEdit=0
 		)
 		, %strIniFile%
 
@@ -425,7 +426,7 @@ if (ErrorLevel)
 	SB_SetText(lSBEmpty, 1)
 	return
 }
-SB_SetText(L(lSBRecordsSize, LV_GetCount(), intActualSize), 1)
+SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"), 1)
 Gosub, UpdateCurrentHeader
 if (!blnSkipHelpReadyToEdit)
 	Help(lTab1HelpReadyToEdit)
@@ -1164,7 +1165,7 @@ GuiControl, +Redraw, lvData ; redraw the ListView
 intNewNbRows := LV_GetCount()
 intActualSize := Round(intActualSize * intNewNbRows / intPrevNbRows)
 if (intNewNbRows)
-	SB_SetText(L(lSBRecordsSize, intNewNbRows, intActualSize))
+	SB_SetText(L(lSBRecordsSize, intNewNbRows, (intActualSize) ? intActualSize : " <1"))
 else
 	SB_SetText(L(lSBEmpty), 1)
 return

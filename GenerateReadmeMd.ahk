@@ -24,6 +24,11 @@ B("[Download 32-bits / 64-bits](http://www.jeanlalonde.ca/ahk/csvbuddy/csvbuddy.
 B("[Description and documentation](http://www.jeanlalonde.ca/ahk/csvbuddy/)")
 
 H(2, "History")
+H(3, "2013-11-03 v0.9")
+B("Display ""<1"" (instead of ""0"") in status bar when file size is smaller than 0.5 K")
+B("Removed CSV Buddy icon from the Tray")
+B("Add three test delimited files to the package (see README.txt in the zip file)")
+B("Fix default value of blnSkipHelpReadyToEdit in ini file to 0")
 H(3, "2013-10-20 v0.8.1")
 B("If an .ini file is not found in the program's folder, it is created with default values")
 H(3, "2013-10-18 v0.8.0")

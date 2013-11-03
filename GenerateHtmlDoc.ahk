@@ -31,7 +31,8 @@ H(2, lDocIntro)
 H(4, lDocInstallationTitle)
 
 P(lDocInstallationDetail)
-
+P(lDocInstallationTestFiles)
+ 
 H(4, lDocDescription)
 
 P(lDocDesc2000)
