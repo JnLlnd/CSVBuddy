@@ -1,0 +1,105 @@
+str_Name	str_Album	lng_Track_Number	str_Genre	lng_Total_Time	lng_Size
+Hey Jude - Sgt. Pepper's Lonely Hearts Club Band (Reprise) (LOVE)	LOVE	24	Pop	320914	5159544
+March Of The Meanies	Yellow Submarine	11	Soundtrack	139415	3388931
+Tell Me What You See	Help!	11	Pop	158040	3840243
+Sea Of Holes	Yellow Submarine	9	Soundtrack	136751	3324973
+Love Me Do [Original Single Version] [Mono]	Past Masters, Vol. 1	1	Pop	145946	3532853
+She Loves You [Mono]	Past Masters, Vol. 1	4	Pop	141400	3423743
+Eight Days A Week	Beatles For Sale	8	Pop	163657	3971278
+Taxman	Revolver	1	Pop	158928	3866084
+Matchbox	Past Masters, Vol. 1	13	Rock	118804	2881415
+The Word	Rubber Soul	6	Pop	163160	3998939
+Till There Was You	With The Beatles	6	Folk	133564	3246913
+Ticket To Ride	Help!	7	Pop	189753	4601341
+I Me Mine (naked)	Let It Be...Naked CD1	9	Pop	141244	2283040
+She's Leaving Home	Sgt. Pepper's Lonely Hearts Club Band	6	Pop	215222	5265669
+Savoy Truffle	The Beatles (White Album)	10	Pop	174524	4212361
+Baby You're A Rich Man	Magical Mystery Tour	10	Pop	181368	4440159
+Yer Blues	The Beatles (White Album)	2	Blues	240509	5796016
+Lady Madonna (LOVE)	LOVE	18	Pop	175568	2833973
+Ob-La-Di, Ob-La-Da	The Beatles (White Album)	4	Pop	189022	4560337
+All You Need Is Love	Magical Mystery Tour	11	Pop	230452	5618175
+Dizzy Miss Lizzy	Help!	14	Rock	176561	4284729
+No Reply	Beatles For Sale	1	Pop	136124	3310473
+Piggies	The Beatles (White Album)	12	Pop	124342	3008043
+Why Don't We Do It In The Road?	The Beatles (White Album)	15	Rock	101224	2453211
+Not A Second Time	With The Beatles	13	Pop	126902	3087056
+Sea Of Monsters	Yellow Submarine	10	Soundtrack	216764	5245290
+"I Am The Walrus (""No You're not"", said Little Nicola)"	Magical Mystery Tour	6	Rock	275931	6709669
+Gnik Nus (LOVE)	LOVE	8	Pop	54360	894655
+I Should Have Known Better	A Hard Day's Night	2	Pop	163134	3994605
+Sun King - Mean Mr. Mustard - Polythene Pam - She Came In Through The Bathroom Window	Abbey Road	10	Pop	404140	9746533
+I've Just Seen A Face	Help!	12	Folk	125100	3049674
+Mother Nature's Son	The Beatles (White Album)	3	Folk	168097	4058151
+Revolution 1	The Beatles (White Album)	8	Pop	255764	6162151
+Come Together	Abbey Road	1	Pop	260022	6287639
+Tell Me Why	A Hard Day's Night	6	Pop	128757	3169541
+Sgt. Pepper's Lonely Hearts Club Band (Reprise)	Sgt. Pepper's Lonely Hearts Club Band	12	Pop	79124	1999348
+Yesterday	Help!	13	Pop	125727	3064709
+Norwegian Wood (This Bird Has Flown)	Rubber Soul	2	Folk	124760	3077345
+Something	Abbey Road	2	Pop	182360	4423733
+Don't Let Me Down (naked)	Let It Be...Naked CD1	8	Pop	198713	3202559
+Dig A Pony (naked)	Let It Be...Naked CD1	2	Pop	218200	3514349
+Across The Universe (naked)	Let It Be...Naked CD1	10	Pop	218200	3514358
+Here Comes The Sun	Abbey Road	7	Folk	185808	4506499
+Blackbird - Yesterday (LOVE)	LOVE	13	Folk	152346	2462434
+Michelle	Rubber Soul	7	Folk	162429	3981385
+Act Naturally	Help!	8	Country	150439	3657798
+You Can't Do That	A Hard Day's Night	12	Pop	154958	3798367
+Hey Jude	Past Masters, Vol. 2	7	Pop	430001	10346766
+Lucy In The Sky With Diamonds	Sgt. Pepper's Lonely Hearts Club Band	3	Pop	208535	5105183
+Within You Without You	Sgt. Pepper's Lonely Hearts Club Band	8	Pop	304744	7414179
+Please Please Me	Please Please Me	7	Pop	120920	2993058
+Baby's In Black	Beatles For Sale	3	Pop	124577	3033374
+Money (That's What I Want)	With The Beatles	14	Rock	169560	4110852
+Get Back - Glass Onion (LOVE)	LOVE	2	Rock	212271	3421232
+Honey Pie	The Beatles (White Album)	9	Pop	161227	3893257
+I Wanna Be Your Man	With The Beatles	11	Pop	119562	2910887
+Baby It's You	Please Please Me	10	Pop	160574	3944788
+Martha My Dear	The Beatles (White Album)	9	Pop	148636	3591087
+I Want to hold your hand (LOVE)	LOVE	6	Pop	89182	1451793
+Julia	The Beatles (White Album)	17	Folk	176744	4265665
+Help! (LOVE)	LOVE	12	Pop	138553	2241718
+Drive My Car	Rubber Soul	1	Pop	148950	3657888
+Can't Buy Me Love	A Hard Day's Night	7	Rock	131944	3246034
+All You Need Is Love (LOVE)	LOVE	25	Pop	219245	3532826
+Think For Yourself	Rubber Soul	5	Pop	138579	3408990
+Roll Over Beethoven	With The Beatles	8	Rock	165537	4014283
+I've Got A Feeling	Let It Be	8	Pop	217626	5273070
+Her Majesty	Abbey Road	17	Folk	26044	672148
+Day Tripper	Past Masters, Vol. 2	1	Pop	169221	4088045
+Run For Your Life	Rubber Soul	14	Pop	141165	3471066
+For No One	Revolver	10	Pop	119875	2928800
+Back In The USSR	The Beatles (White Album)	1	Rock	163526	3948443
+A Taste Of Honey	Please Please Me	12	Country	123533	3055826
+All Together Now	Yellow Submarine	3	Pop	130951	3185814
+Good Day Sunshine	Revolver	8	Pop	129358	3156384
+Devil In Her Heart	With The Beatles	12	Pop	146285	3552275
+Every Little Thing	Beatles For Sale	11	Pop	123872	3016449
+P.S. I Love You [Mono]	Please Please Me	9	Pop	124421	3077077
+You're Going To Lose That Girl	Help!	6	Pop	138736	3376944
+And Your Bird Can Sing	Revolver	9	Pop	120555	2945109
+Across The Universe	Past Masters, Vol. 2	13	Pop	229250	5528751
+Yes It Is	Past Masters, Vol. 1	17	Folk	162481	3929674
+Blackbird	The Beatles (White Album)	11	Folk	138448	3346577
+Sgt. Pepper's Lonely Hearts Club Band - With A Little Help From My Friends	Sgt. Pepper's Lonely Hearts Club Band	1	Pop	287059	6989806
+Love You To	Revolver	4	Pop	179879	4368878
+Pepperland	Yellow Submarine	7	Soundtrack	140800	3422145
+For You Blue	Let It Be	11	Pop	152267	3704453
+Nowhere Man	Rubber Soul	4	Pop	163761	4013362
+Two Of Us (naked)	Let It Be...Naked CD1	5	Folk	201116	3241003
+Wild Honey Pie	The Beatles (White Album)	5	Pop	53028	1296491
+There's A Place	Please Please Me	13	Pop	110550	2744162
+While My Guitar Gently Weeps	The Beatles (White Album)	7	Pop	285074	6865618
+Only A Northern Song [Mono]	Yellow Submarine	2	Pop	204564	4952525
+When I Get Home	A Hard Day's Night	11	Pop	136698	3360134
+Wait	Rubber Soul	12	Pop	134791	3318081
+Thank You Girl	Past Masters, Vol. 1	3	Pop	123663	2998047
+If I Fell	A Hard Day's Night	3	Pop	139520	3427835
+She Said She Said	Revolver	7	Pop	156107	3798367
+Bad Boy	Past Masters, Vol. 1	16	Rock	140669	3406164
+Things We Said Today	A Hard Day's Night	10	Pop	155402	3809030
+Fly On The Wall	Let It Be...Naked CD2	1	Pop	1318164	21113788
+You Like Me Too Much	Help!	10	Pop	156943	3813897
+I'll Follow The Sun	Beatles For Sale	5	Folk	108930	2657841
+Strawberry Fields Forever (LOVE)	LOVE	14	Pop	263157	4235403
