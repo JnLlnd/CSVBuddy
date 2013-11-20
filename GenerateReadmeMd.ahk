@@ -19,9 +19,9 @@ P(lDocDesc450)
 P("Written using AutoHotkey_L v1.1.09.03+ (http://www.autohotkey.com)`nBy JnLlnd on [AHK forum](http://www.autohotkey.com/board/)`nFirst release BETA: 2013-10-18")
 
 H(2, "Links")
-B("[Application home](http://www.jeanlalonde.ca/csvbuddy/)")
+B("[Application home](http://code.jeanlalonde.ca/csvbuddy/)")
 B("[Download 32-bits / 64-bits](http://www.jeanlalonde.ca/ahk/csvbuddy/csvbuddy.zip) (latest version)")
-B("[Description and documentation](http://www.jeanlalonde.ca/ahk/csvbuddy/)")
+B("[Description and documentation](http://www.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
 H(3, "2013-11-03 v0.9")

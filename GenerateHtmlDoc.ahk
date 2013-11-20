@@ -97,11 +97,17 @@ Help(lTab4HelpExportExpress)
 H(2, lDocKeyboardHelp)
 W(lDocKeyboardHelpDetail)
 
+H(2, lDocIniTitle)
+W(lDocIniHelp)
+
 H(2, lDocSupportTitle)
 P(lDocSupportText)
 
 H(2, lDocCopyrightTitle)
 P(lDocCopyrightText)
+
+Loop, 30
+	P("&nbsp;")
 
 W("</body>")
 W("</html>")
