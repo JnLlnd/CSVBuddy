@@ -1,7 +1,7 @@
 ;===============================================
 /*
 CSV Buddy - Generate HTML Doc
-Written using AutoHotkey_L v1.1.09.03+ (http://l.autohotkey.net/)
+Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
 */ 
 ;===============================================

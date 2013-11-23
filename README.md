@@ -13,8 +13,8 @@ First release BETA: 2013-10-18
 ## Links
 
 * [Application home](http://code.jeanlalonde.ca/csvbuddy/)
-* [Download 32-bits / 64-bits](http://www.jeanlalonde.ca/ahk/csvbuddy/csvbuddy.zip) (latest version)
-* [Description and documentation](http://www.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)
+* [Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy.zip) (latest version)
+* [Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)
 
 ## History
 

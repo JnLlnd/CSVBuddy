@@ -1,15 +1,18 @@
 ;===============================================
 /*
 CSV Buddy
-Written using AutoHotkey_L v1.1.09.03+ (http://l.autohotkey.net/)
+Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
 This script uses the library ObjCSV v0.3 (https://github.com/JnLlnd/ObjCSV)
 */ 
 ;===============================================
 
+#KeyHistory 0
 #NoEnv
 #NoTrayIcon 
 #SingleInstance force
+ListLines, Off
+
 #Include %A_ScriptDir%\..\ObjCSV\lib\ObjCSV.ahk
 #Include %A_ScriptDir%\CSVBuddy_LANG.ahk
 
@@ -21,7 +24,7 @@ This script uses the library ObjCSV v0.3 (https://github.com/JnLlnd/ObjCSV)
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 0.9 BETA
+;@Ahk2Exe-SetVersion 1.0
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -37,6 +40,7 @@ IfNotExist, %strIniFile%
 			strTemplateDelimiter=~
 			strTextEditorExe=notepad.exe
 			blnSkipHelpReadyToEdit=0
+			strLatestSkipped=%lAppVersion%
 		)
 		, %strIniFile%
 
@@ -142,11 +146,12 @@ Gui, 1:Add, Button,		y137	x+5		vbtnCheckExportFile gButtonCheckExportFile hidden
 Gui, 1:Tab, 5
 Gui, 1:Font, s10 w700, Verdana
 str32or64 := A_PtrSize  * 8
-Gui, 1:Add, Link,		y+10	x10		vlblAboutText1, % L(lTab5Abouttext1, lAppName, lAppVersionLong, str32or64)
+Gui, 1:Add, Link,		y+10	x25		vlblAboutText1, % L(lTab5Abouttext1, lAppName, lAppVersionLong, str32or64)
 Gui, 1:Font, s9 w500, Arial
-Gui, 1:Add, Link,		y+4	x10		vlblAboutText2, % L(lTab5Abouttext2)
+Gui, 1:Add, Link,		y+20	x25		vlblAboutText2, % L(lTab5Abouttext2)
+Gui, 1:Add, Link,		yp		x+150	vlblAboutText3, % L(lTab5Abouttext3)
 Gui, 1:Font
-Gui, 1:Add, Link,		y+4	x10		vlblAboutText3, % L(lTab5Abouttext3)
+Gui, 1:Add, Button,						vbtnCheck4Update gButtonCheck4Update, % L(lTab5Check4Update)
 
 Gui, 1:Tab
 
@@ -163,6 +168,9 @@ else
 GuiControl, 1:Focus, btnSelectFileToLoad
 GuiControl, 1:+Default, btnSelectFileToLoad
 Gui, 1:Show, Autosize
+
+blnButtonCheck4Update := False
+Gosub, Check4Update
 
 return
 
@@ -1001,6 +1009,14 @@ return
 
 
 
+; --------------------- TAB 5 --------------------------
+
+
+ButtonCheck4Update:
+blnButtonCheck4Update := True
+Gosub, Check4Update
+return
+
 ; --------------------- LISTVIEW EVENTS --------------------------
 
 
@@ -1408,6 +1424,57 @@ obj := ; release object
 return
 
 
+Check4Update:
+blnDebug := false
+
+IniRead, strLatestSkipped, %strIniFile%, global, strLatestSkipped, 0.0
+strLatestVersion := Url2Var("https://raw.github.com/JnLlnd/CSVBuddy/1.0_check4update/latest-version.txt") ; ### REMPLACER 1.0_check4update PAR master
+if (blnDebug)
+	lAppVersion := "1.0" ; ###
+if (blnDebug)
+	strLatestVersion := "1.0.1" ; ###
+
+if (blnDebug)
+	###_D("strLatestSkipped " . strLatestSkipped . " vs strLatestVersion " . strLatestVersion . " = " . FirstVsSecondIs(strLatestSkipped, strLatestVersion) . "`nblnButtonCheck4Update: " . blnButtonCheck4Update)
+if RegExMatch(strCurrentVersion, "(alpha|beta)")
+	or (FirstVsSecondIs(strLatestSkipped, strLatestVersion) >= 0 and (!blnButtonCheck4Update))
+	return
+
+if (blnDebug)
+	###_D("strLatestVersion " . strLatestVersion . " vs lAppVersion " . lAppVersion . " = " . FirstVsSecondIs(strLatestVersion, lAppVersion))
+if FirstVsSecondIs(strLatestVersion, lAppVersion) = 1
+{
+	Gui, +OwnDialogs
+	SetTimer, ChangeButtonNames, 50
+
+	MsgBox, 3, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdatePrompt, lAppName, lAppVersion, strLatestVersion), 30
+	IfMsgBox, Yes
+		Run, http://code.jeanlalonde.ca/csvbuddy/
+	IfMsgBox, No
+		IniWrite, %strLatestVersion%, %strIniFile%, global, strLatestSkipped
+	IfMsgBox, Cancel ; Remind me
+		IniWrite, 0.0, %strIniFile%, Global, LatestVersionSkipped
+	IfMsgBox, TIMEOUT ; Remind me
+		IniWrite, 0.0, %strIniFile%, Global, LatestVersionSkipped
+}
+else if (blnButtonCheck4Update)
+{
+	MsgBox, 4, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdateYouHaveLatest, lAppVersion, lAppName)
+	IfMsgBox, Yes
+		Run, http://code.jeanlalonde.ca/csvbuddy/
+}
+blnDebug := false
+return
+
+
+ChangeButtonNames: 
+IfWinNotExist, % l(lTab5UpdateTitle, lAppName)
+    return  ; Keep waiting.
+SetTimer, ChangeButtonNames, Off 
+WinActivate 
+ControlSetText, Button3, %lTab5ButtonRemind%
+return
+
 
 
 ; --------------------- FUNCTIONS --------------------------
@@ -1647,4 +1714,37 @@ L(strMessage, objVariables*)
 	}
 	return strMessage
 }
+
+
+
+Url2Var(strUrl)
+{
+	ComObjError(False)
+	objWebRequest := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+	objWebRequest.Open("GET", strUrl)
+	objWebRequest.Send()
+
+	Return objWebRequest.ResponseText()
+}
+
+
+
+FirstVsSecondIs(strFirstVersion, strSecondVersion)
+{
+	StringSplit, arrFirstVersion, strFirstVersion, `.
+	StringSplit, arrSecondVersion, strSecondVersion, `.
+	if (arrFirstVersion0 > arrSecondVersion0)
+		intLoop := arrFirstVersion0
+	else
+		intLoop := arrSecondVersion0
+
+	Loop %intLoop%
+		if (arrFirstVersion%A_index% > arrSecondVersion%A_index%)
+			return 1 ; greater
+		else if (arrFirstVersion%A_index% < arrSecondVersion%A_index%)
+			return -1 ; smaller
+		
+	return 0 ; equal
+}
+
 

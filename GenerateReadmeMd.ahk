@@ -1,7 +1,7 @@
 ;===============================================
 /*
 CSV Buddy - Generate Readme Doc
-Written using AutoHotkey_L v1.1.09.03+ (http://l.autohotkey.net/)
+Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
 */ 
 ;===============================================
@@ -20,8 +20,8 @@ P("Written using AutoHotkey_L v1.1.09.03+ (http://www.autohotkey.com)`nBy JnLlnd
 
 H(2, "Links")
 B("[Application home](http://code.jeanlalonde.ca/csvbuddy/)")
-B("[Download 32-bits / 64-bits](http://www.jeanlalonde.ca/ahk/csvbuddy/csvbuddy.zip) (latest version)")
-B("[Description and documentation](http://www.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
+B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy.zip) (latest version)")
+B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
 H(3, "2013-11-03 v0.9")
