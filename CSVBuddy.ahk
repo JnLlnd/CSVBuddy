@@ -1425,23 +1425,13 @@ return
 
 
 Check4Update:
-blnDebug := false
-
 IniRead, strLatestSkipped, %strIniFile%, global, strLatestSkipped, 0.0
-strLatestVersion := Url2Var("https://raw.github.com/JnLlnd/CSVBuddy/1.0_check4update/latest-version.txt") ; ### REMPLACER 1.0_check4update PAR master
-if (blnDebug)
-	lAppVersion := "1.0" ; ###
-if (blnDebug)
-	strLatestVersion := "1.0.1" ; ###
+strLatestVersion := Url2Var("https://raw.github.com/JnLlnd/CSVBuddy/master/latest-version.txt")
 
-if (blnDebug)
-	###_D("strLatestSkipped " . strLatestSkipped . " vs strLatestVersion " . strLatestVersion . " = " . FirstVsSecondIs(strLatestSkipped, strLatestVersion) . "`nblnButtonCheck4Update: " . blnButtonCheck4Update)
 if RegExMatch(strCurrentVersion, "(alpha|beta)")
 	or (FirstVsSecondIs(strLatestSkipped, strLatestVersion) >= 0 and (!blnButtonCheck4Update))
 	return
 
-if (blnDebug)
-	###_D("strLatestVersion " . strLatestVersion . " vs lAppVersion " . lAppVersion . " = " . FirstVsSecondIs(strLatestVersion, lAppVersion))
 if FirstVsSecondIs(strLatestVersion, lAppVersion) = 1
 {
 	Gui, +OwnDialogs
@@ -1463,7 +1453,6 @@ else if (blnButtonCheck4Update)
 	IfMsgBox, Yes
 		Run, http://code.jeanlalonde.ca/csvbuddy/
 }
-blnDebug := false
 return
 
 
