@@ -24,6 +24,10 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
+H(3, "2013-11-24 v1.0")
+B("Load the file added as first parameter of the command line")
+B("Add records to existing data (right-click in the data grid)")
+B("Create a new file from scratch (right-click in an empty data grid)")
 H(3, "2013-11-03 v0.9")
 B("Display ""<1"" (instead of ""0"") in status bar when file size is smaller than 0.5 K")
 B("Removed CSV Buddy icon from the Tray")
