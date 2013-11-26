@@ -12,6 +12,7 @@ This script uses the library ObjCSV v0.3 (https://github.com/JnLlnd/ObjCSV)
 #NoTrayIcon 
 #SingleInstance force
 ListLines, Off
+SetWorkingDir, %A_ScriptDir%
 
 #Include %A_ScriptDir%\..\ObjCSV\lib\ObjCSV.ahk
 #Include %A_ScriptDir%\CSVBuddy_LANG.ahk
@@ -65,13 +66,13 @@ Gui, 1:Font
 
 Gui, 1:Tab, 1
 Gui, 1:Add, Text,		y+10	x10		vlblCSVFileToLoad w85 right, % L(lTab1CSVFileToLoad)
-Gui, 1:Add, Edit,		yp		x100	vstrFileToLoad disabled gChangedFileToLoad
+Gui, 1:Add, Edit,		yp		x100	vstrFileToLoad gChangedFileToLoad
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpFileToLoad gButtonHelpFileToLoad, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToLoad gButtonSelectFileToLoad default, % L(lTab1Select)
+Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToLoad gButtonSelectFileToLoad w45 default, % L(lTab1Select)
 Gui, 1:Add, Text,		y+10	x10 	vlblHeader w85 right, % L(lTab1CSVFileHeader)
 Gui, 1:Add, Edit,		yp		x100	vstrFileHeaderEscaped disabled
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpHeader gButtonHelpHeader, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,		yp		x+5		vbtnPreviewFile gButtonPreviewFile hidden, % L(lTab1Preview)
+Gui, 1:Add, Button,		yp		x+5		vbtnPreviewFile gButtonPreviewFile w45, % L(lTab1PreviewFile)
 Gui, 1:Add, Radio,		y+10	x100	vradGetHeader gClickRadGetHeader checked, % L(lTab1Getheaderfromfile)
 Gui, 1:Add, Radio,		yp		x+5		vradSetHeader gClickRadSetHeader, % L(lTab1Setheader)
 Gui, 1:Add, Button,		yp		x+0		vbtnHelpSetHeader gButtonHelpSetHeader, % L(lTab0QuestionMark)
@@ -85,27 +86,27 @@ Gui, 1:Add, Checkbox,	yp		x+27	vblnMultiline1 gChangedMultiline1, % L(lTab1Multi
 Gui, 1:Add, Button,		yp		x+0		vbtnHelpMultiline1 gButtonHelpMultiline1, % L(lTab0QuestionMark)
 Gui, 1:Add, Text,		yp		x+5		vlblEndoflineReplacement1 hidden, % L(lTab1EOLreplacement)
 Gui, 1:Add, Edit,		yp		x+5		vstrEndoflineReplacement1 w30 center hidden
-Gui, 1:Add, Button,		yp		x+5		vbtnLoadFile gButtonLoadFile hidden, % L(lTab1Load)
+Gui, 1:Add, Button,		yp		x+5		vbtnLoadFile gButtonLoadFile w45 hidden, % L(lTab1Load)
 
 Gui, 1:Tab, 2
 Gui, 1:Add, Text,		y+10	x10		vlblRenameFields w85 right, % L(lTab2Renamefields)
 Gui, 1:Add, Edit,		yp		x100	vstrRenameEscaped
-Gui, 1:Add, Button,		yp		x+0		vbtnSetRename gButtonSetRename, % L(lTab2Rename)
+Gui, 1:Add, Button,		yp		x+0		vbtnSetRename gButtonSetRename w50, % L(lTab2Rename)
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpRename gButtonHelpRename, % L(lTab0QuestionMark)
 Gui, 1:Add, Text,		y+10	x10		vlblSelectFields w85 right, % L(lTab2Selectfields)
 Gui, 1:Add, Edit,		yp		x100	vstrSelectEscaped
-Gui, 1:Add, Button,		yp		x+0		vbtnSetSelect gButtonSetSelect, % L(lTab2Select)
+Gui, 1:Add, Button,		yp		x+0		vbtnSetSelect gButtonSetSelect w50, % L(lTab2Select)
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpSelect gButtonHelpSelect, % L(lTab0QuestionMark)
 Gui, 1:Add, Text,		y+10	x10		vlblOrderFields w85 right, % L(lTab2Orderfields)
 Gui, 1:Add, Edit,		yp		x100	vstrOrderEscaped
-Gui, 1:Add, Button,		yp		x+0		vbtnSetOrder gButtonSetOrder, % L(lTab2Order)
+Gui, 1:Add, Button,		yp		x+0		vbtnSetOrder gButtonSetOrder w50, % L(lTab2Order)
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpOrder gButtonHelpOrder, % L(lTab0QuestionMark)
 
 Gui, 1:Tab, 3
 Gui, 1:Add, Text,		y+10	x10		vlblCSVFileToSave w85 right, % L(lTab3CSVfiletosave)
 Gui, 1:Add, Edit,		yp		x100	vstrFileToSave gChangedFileToSave
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpFileToSave gButtonHelpFileToSave, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToSave gButtonSelectFileToSave default, % L(lTab3Select)
+Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToSave gButtonSelectFileToSave w45 default, % L(lTab3Select)
 Gui, 1:Add, Text,		y+10	x100	vlblFieldDelimiter3, % L(lTab3Fielddelimiter)
 Gui, 1:Add, Edit,		yp		x200	vstrFieldDelimiter3 gChangedFieldDelimiter3 w20 limit1 center, `, 
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpFieldDelimiter3 gButtonHelpFieldDelimiter3, % L(lTab0QuestionMark)
@@ -120,14 +121,14 @@ Gui, 1:Add, Radio,		y+10	x500	vradSaveSingleline gClickRadSaveSingleline, % L(lT
 Gui, 1:Add, Button,		y100	x620	vbtnHelpMultiline gButtonHelpSaveMultiline, % L(lTab0QuestionMark)
 Gui, 1:Add, Text,		y+25	x500	vlblEndoflineReplacement3 hidden, % L(lTab3Endoflinereplacement)
 Gui, 1:Add, Edit,		yp		x620	vstrEndoflineReplacement3 hidden w50 center, % chr(182)
-Gui, 1:Add, Button,		y105	x+5		vbtnSaveFile gButtonSaveFile hidden, % L(lTab3Save)
-Gui, 1:Add, Button,		y137	x+5		vbtnCheckFile hidden gButtonCheckFile, % L(lTab3Check)
+Gui, 1:Add, Button,		y105	x+5		vbtnSaveFile gButtonSaveFile w45 hidden, % L(lTab3Save)
+Gui, 1:Add, Button,		y137	x+5		vbtnCheckFile hidden w45 gButtonCheckFile, % L(lTab3Check)
 
 Gui, 1:Tab, 4
 Gui, 1:Add, Text,		y+10	x10		vlblCSVFileToExport w85 right, % L(lTab4Exportdatatofile)
 Gui, 1:Add, Edit,		yp		x100	vstrFileToExport gChangedFileToExport
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpFileToExport gButtonHelpFileToExport, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToExport gButtonSelectFileToExport default, % L(lTab4Select)
+Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToExport gButtonSelectFileToExport w45 default, % L(lTab4Select)
 Gui, 1:Add, Text,		y+10	x10		vlblCSVExportFormat w85 right, % L(lTab4Exportformat)
 Gui, 1:Add, Radio,		yp		x100	vradFixed gClickRadFixed, % L(lTab4Fixedwidth)
 Gui, 1:Add, Radio,		yp		x+15	vradHTML gClickRadHTML, % L(lTab4HTML)
@@ -135,13 +136,13 @@ Gui, 1:Add, Radio,		yp		x+15	vradXML gClickRadXML, % L(lTab4XML)
 Gui, 1:Add, Radio,		yp		x+15	vradExpress gClickRadExpress, % L(lTab4Express)
 Gui, 1:Add, Button,		yp		x+15	vbtnHelpExportFormat gButtonHelpExportFormat, % L(lTab0QuestionMark)
 Gui, 1:Add, Button,		yp		x+15	vbtnHelpExportMulti gButtonHelpExportMulti Hidden
-	, Lorem ipsum dolor sitm ; keep this lorem text to reserve width for the button
+	, Lorem ipsum dolor sitm ; keep this lorem text to reserve width for the button ### replace with width
 Gui, 1:Add, Text,		y+10	x10		vlblMultiPurpose w85 right hidden, Hidden Label:
 Gui, 1:Add, Edit,		yp		x100	vstrMultiPurpose hidden ; gChangedMultiPurpose unused
 Gui, 1:Add, Button,		yp		x+5		vbtnMultiPurpose gButtonMultiPurpose hidden
-	, Lorem ipsum dolor sitm ; keep this lorem text to reserve width for the button
-Gui, 1:Add, Button,		y105	x+5		vbtnExportFile gButtonExportFile hidden, % L(lTab4Export)
-Gui, 1:Add, Button,		y137	x+5		vbtnCheckExportFile gButtonCheckExportFile hidden, % L(lTab4Check)
+	, Lorem ipsum dolor sitm ; keep this lorem text to reserve width for the button ### replace with width
+Gui, 1:Add, Button,		y105	x+5		vbtnExportFile gButtonExportFile w45 hidden, % L(lTab4Export)
+Gui, 1:Add, Button,		y137	x+5		vbtnCheckExportFile gButtonCheckExportFile w45 hidden, % L(lTab4Check)
 
 Gui, 1:Tab, 5
 Gui, 1:Font, s10 w700, Verdana
@@ -171,6 +172,7 @@ Gui, 1:Show, Autosize
 
 blnButtonCheck4Update := False
 Gosub, Check4Update
+Gosub, Check4CommandLineParameter
 
 return
 
@@ -1256,11 +1258,6 @@ return
 
 
 ButtonCancel:
-Goto, 2GuiClose
-return
-
-
-
 2GuiClose:
 2GuiEscape:
 Gui, 1:-Disabled
@@ -1462,6 +1459,26 @@ IfWinNotExist, % l(lTab5UpdateTitle, lAppName)
 SetTimer, ChangeButtonNames, Off 
 WinActivate 
 ControlSetText, Button3, %lTab5ButtonRemind%
+return
+
+
+Check4CommandLineParameter:
+if 0 > 0 
+; The left side of a non-expression if-statement is always the name of a variable = %0% command line parameter
+{
+	strParam = %1%
+	if FileExist(strParam)
+	{
+		GuiControl, 1:, strFileToLoad, %strParam%
+		GuiControl, 1:, blnMultiline1, 1 ; always process as multi-line for safety
+		FileReadLine, strCurrentHeader, %strParam%, 1
+		GuiControl, 1:, strFileHeaderEscaped, % StrEscape(strCurrentHeader)
+		gosub, DetectDelimiters
+		gosub, ButtonLoadFile
+	}
+	else
+		Oops(L(lTab1CommandLineFileNotFound, strParam))
+}
 return
 
 
@@ -1697,7 +1714,7 @@ L(strMessage, objVariables*)
 	Loop
 	{
 		if InStr(strMessage, "~" . A_Index . "~")
-			StringReplace, strMessage, strMessage, ~%A_Index%~, % objVariables[A_Index]
+			StringReplace, strMessage, strMessage, ~%A_Index%~, % objVariables[A_Index], All
  		else
 			break
 	}
