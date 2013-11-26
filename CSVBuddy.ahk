@@ -72,7 +72,7 @@ Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToLoad gButtonSelectFileToLoad w45 d
 Gui, 1:Add, Text,		y+10	x10 	vlblHeader w85 right, % L(lTab1CSVFileHeader)
 Gui, 1:Add, Edit,		yp		x100	vstrFileHeaderEscaped disabled
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpHeader gButtonHelpHeader, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,		yp		x+5		vbtnPreviewFile gButtonPreviewFile w45, % L(lTab1PreviewFile)
+Gui, 1:Add, Button,		yp		x+5		vbtnPreviewFile gButtonPreviewFile w45 hidden, % L(lTab1PreviewFile)
 Gui, 1:Add, Radio,		y+10	x100	vradGetHeader gClickRadGetHeader checked, % L(lTab1Getheaderfromfile)
 Gui, 1:Add, Radio,		yp		x+5		vradSetHeader gClickRadSetHeader, % L(lTab1Setheader)
 Gui, 1:Add, Button,		yp		x+0		vbtnHelpSetHeader gButtonHelpSetHeader, % L(lTab0QuestionMark)
@@ -265,12 +265,12 @@ return
 
 ChangedFileToLoad:
 Gui, 1:Submit, NoHide
-GuiControl, 1:, strFileToSave, % NewFileName(strFileToLoad)
-GuiControl, 1:, strFileToExport, % NewFileName(strFileToLoad, "-EXPORT", "txt")
 if FileExist(strFileToLoad)
 {
 	GuiControl, 1:Show, btnPreviewFile
 	GuiControl, 1:Show, btnLoadFile
+	GuiControl, 1:, strFileToSave, % NewFileName(strFileToLoad)
+	GuiControl, 1:, strFileToExport, % NewFileName(strFileToLoad, "-EXPORT", "txt")
 }
 else
 {
@@ -385,13 +385,7 @@ if LV_GetCount("Column")
 {
 	MsgBox, 36, % L(lAppName), % L(lTab1Replacethecurrentcontentof)
 	IfMsgBox, Yes
-	{
-		LV_Delete() ; delete all rows - better performance on large files when we delete rows before columns
-		loop, % LV_GetCount("Column")
-			LV_DeleteCol(1) ; delete all columns
-		SB_SetText(L(lSBEmpty), 1)
-		intActualSize := 0
-	}
+		gosub, DeleteListviewData
 	IfMsgBox, No
 	{
 		MsgBox, 36, %lAppName%, % L(lTab1DoYouWantToAdd)
@@ -401,12 +395,15 @@ if LV_GetCount("Column")
 }
 else
 	intActualSize := 0
+
 strCurrentHeader := StrUnEscape(strFileHeaderEscaped)
 strCurrentFieldDelimiter := StrMakeRealFieldDelimiter(strFieldDelimiter1)
 strCurrentVisibleFieldDelimiter := strFieldDelimiter1
 strCurrentFieldEncapsulator := strFieldEncapsulator1
+
 FileGetSize, intFileSize, %strFileToLoad%, K
 intActualSize := intActualSize + intFileSize
+
 ; ObjCSV_CSV2Collection(strFilePath, ByRef strFieldNames [, blnHeader = 1, blnMultiline = 1, intProgressType = 0
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText := ""])
 obj := ObjCSV_CSV2Collection(strFileToLoad, strCurrentHeader, radGetHeader, blnMultiline1, intProgressType
@@ -445,6 +442,14 @@ GuiControl, 1:, strFieldEncapsulator3, %strCurrentFieldEncapsulator%
 obj := ; release object
 return
 
+
+DeleteListviewData:
+LV_Delete() ; delete all rows - better performance on large files when we delete rows before columns
+loop, % LV_GetCount("Column")
+	LV_DeleteCol(1) ; delete all columns
+SB_SetText(L(lSBEmpty), 1)
+intActualSize := 0
+return
 
 
 
@@ -1064,17 +1069,68 @@ return
 GuiContextMenu: ; Launched in response to a right-click or press of the Apps key.
 if A_GuiControl <> lvData  ; Display the menu only for clicks inside the ListView.
     return
-if !LV_GetCount("")
-	return
-intRowNumber := A_EventInfo
-Menu, SelectMenu, Add, % L(lLvEventsSelectAll), MenuSelectAll
-Menu, SelectMenu, Add, % L(lLvEventsDeselectAll), MenuSelectNone
-Menu, SelectMenu, Add, % L(lLvEventsReverseSelection), MenuSelectReverse
-Menu, SelectMenu, Add, % L(lLvEventsEditrowMenu), MenuEditRow
-Menu, SelectMenu, Add, % L(lLvEventsDeleteRowMenu), MenuDeleteRow
+Menu, SelectMenu, Add
+Menu, SelectMenu, DeleteAll ; to avoid ghost lines at the end when menu is re-created
+if !LV_GetCount("Column")
+	Menu, SelectMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
+else if !LV_GetCount("")
+	Menu, SelectMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
+else
+{
+	intRowNumber := A_EventInfo
+	Menu, SelectMenu, Add, % L(lLvEventsSelectAll), MenuSelectAll
+	Menu, SelectMenu, Add, % L(lLvEventsDeselectAll), MenuSelectNone
+	Menu, SelectMenu, Add, % L(lLvEventsReverseSelection), MenuSelectReverse
+	Menu, SelectMenu, Add
+	Menu, SelectMenu, Add, % L(lLvEventsEditrowMenu), MenuEditRow
+	Menu, SelectMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
+	Menu, SelectMenu, Add, % L(lLvEventsDeleteRowMenu), MenuDeleteRow
+}
 ; Show the menu at the provided coordinates, A_GuiX and A_GuiY.  These should be used
 ; because they provide correct coordinates even if the user pressed the Apps key:
 Menu, SelectMenu, Show, %A_GuiX%, %A_GuiY%
+return
+
+
+
+MenuCreateNewFile:
+Gui, 1:Submit, NoHide
+if !StrLen(strFileHeaderEscaped)
+{
+	Oops(L(lTab1NewFileInstructions, StrEscape(StrMakeRealFieldDelimiter(strFieldDelimiter1))))
+	GuiControl, , radSetHeader, 1
+	gosub, ClickRadSetHeader
+}
+else
+{
+	if LV_GetCount("Column")
+	{
+		MsgBox, 36, % L(lAppName), % L(lTab1Replacethecurrentcontentof)
+		IfMsgBox, Yes
+			gosub, DeleteListviewData
+		IfMsgBox, No
+			return
+	}
+	else
+		intActualSize := 0
+	
+	strCurrentHeader := StrUnEscape(strFileHeaderEscaped)
+	strCurrentFieldDelimiter := StrMakeRealFieldDelimiter(strFieldDelimiter1)
+	strCurrentVisibleFieldDelimiter := strFieldDelimiter1
+	strCurrentFieldEncapsulator := strFieldEncapsulator1
+
+	GuiControl, , strFileToLoad ; empty the file to load field
+	
+	objHeader := ObjCSV_ReturnDSVObjectArray(strCurrentHeader, strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
+	if objHeader.MaxIndex() > 200 ; ListView cannot display more that 200 columns
+		Oops(lTab1CSVfilenotcreatedMax200fields)
+	for intIndex, strFieldName in objHeader
+		LV_InsertCol(intIndex, "", Trim(strFieldName))
+	gosub, MenuAddRow
+	gosub, UpdateCurrentHeader
+	loop, % LV_GetCount("Column")
+		LV_ModifyCol(A_Index, "AutoHdr")
+}
 return
 
 
@@ -1115,8 +1171,27 @@ IsRowSelected(intRow)
 
 
 
+MenuAddRow:
 MenuEditRow:
 Gui, 1:Submit, NoHide
+if (A_ThisLabel = "MenuAddRow")
+{
+	intPrevNbRows := LV_GetCount() ; ### toujours ajouter à la fin !
+	if !LV_GetNext()
+	{
+		LV_Insert(LV_GetCount()+1, "Select Focus")
+		intRowNumber := LV_GetCount()
+	}
+	else
+	{
+		LV_Insert(LV_GetNext(), "Select Focus")
+		LV_Modify(LV_GetNext() + 1, "-Select")
+	}
+	intActualSize := Round(intActualSize + (intActualSize / intPrevNbRows))
+	SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"))
+}
+if (intRowNumber = 0)
+	intRowNumber := 1
 intGui1WinID := WinExist("A")
 Gui, 2:New, +Resize , % L(lLvEventsEditrow, lAppName)
 Gui, 2:+Owner1
