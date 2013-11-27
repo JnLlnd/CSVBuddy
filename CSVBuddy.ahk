@@ -135,12 +135,10 @@ Gui, 1:Add, Radio,		yp		x+15	vradHTML gClickRadHTML, % L(lTab4HTML)
 Gui, 1:Add, Radio,		yp		x+15	vradXML gClickRadXML, % L(lTab4XML)
 Gui, 1:Add, Radio,		yp		x+15	vradExpress gClickRadExpress, % L(lTab4Express)
 Gui, 1:Add, Button,		yp		x+15	vbtnHelpExportFormat gButtonHelpExportFormat, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,		yp		x+15	vbtnHelpExportMulti gButtonHelpExportMulti Hidden
-	, Lorem ipsum dolor sitm ; keep this lorem text to reserve width for the button ### replace with width
+Gui, 1:Add, Button,		yp		x+15	vbtnHelpExportMulti gButtonHelpExportMulti Hidden w125
 Gui, 1:Add, Text,		y+10	x10		vlblMultiPurpose w85 right hidden, Hidden Label:
 Gui, 1:Add, Edit,		yp		x100	vstrMultiPurpose hidden ; gChangedMultiPurpose unused
-Gui, 1:Add, Button,		yp		x+5		vbtnMultiPurpose gButtonMultiPurpose hidden
-	, Lorem ipsum dolor sitm ; keep this lorem text to reserve width for the button ### replace with width
+Gui, 1:Add, Button,		yp		x+5		vbtnMultiPurpose gButtonMultiPurpose hidden w120
 Gui, 1:Add, Button,		y105	x+5		vbtnExportFile gButtonExportFile w45 hidden, % L(lTab4Export)
 Gui, 1:Add, Button,		y137	x+5		vbtnCheckExportFile gButtonCheckExportFile w45 hidden, % L(lTab4Check)
 
@@ -265,7 +263,8 @@ return
 
 ChangedFileToLoad:
 Gui, 1:Submit, NoHide
-if FileExist(strFileToLoad)
+strFileAttribute := FileExist(strFileToLoad)
+if StrLen(strFileAttribute) and !InStr(strFileAttribute, "D")
 {
 	GuiControl, 1:Show, btnPreviewFile
 	GuiControl, 1:Show, btnLoadFile
@@ -276,6 +275,8 @@ else
 {
 	GuiControl, 1:Hide, btnPreviewFile
 	GuiControl, 1:Hide, btnLoadFile
+	GuiControl, 1:, strFileToSave
+	GuiControl, 1:, strFileToExport
 }
 return
 
@@ -457,6 +458,7 @@ return
 
 
 ButtonSetRename:
+Gui, 1:+OwnDialogs 
 Gui, 1:Submit, NoHide
 if !LV_GetCount()
 {
@@ -1074,7 +1076,10 @@ Menu, SelectMenu, DeleteAll ; to avoid ghost lines at the end when menu is re-cr
 if !LV_GetCount("Column")
 	Menu, SelectMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
 else if !LV_GetCount("")
+{
 	Menu, SelectMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
+	Menu, SelectMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
+}
 else
 {
 	intRowNumber := A_EventInfo
@@ -1094,6 +1099,7 @@ return
 
 
 MenuCreateNewFile:
+Gui, 1:+OwnDialogs 
 Gui, 1:Submit, NoHide
 if !StrLen(strFileHeaderEscaped)
 {
@@ -1105,7 +1111,7 @@ else
 {
 	if LV_GetCount("Column")
 	{
-		MsgBox, 36, % L(lAppName), % L(lTab1Replacethecurrentcontentof)
+		MsgBox, 36, %lAppName%, % L(lTab1Replacethecurrentcontentof)
 		IfMsgBox, Yes
 			gosub, DeleteListviewData
 		IfMsgBox, No
@@ -1176,18 +1182,11 @@ MenuEditRow:
 Gui, 1:Submit, NoHide
 if (A_ThisLabel = "MenuAddRow")
 {
-	intPrevNbRows := LV_GetCount() ; ### toujours ajouter à la fin !
-	if !LV_GetNext()
-	{
-		LV_Insert(LV_GetCount()+1, "Select Focus")
-		intRowNumber := LV_GetCount()
-	}
-	else
-	{
-		LV_Insert(LV_GetNext(), "Select Focus")
-		LV_Modify(LV_GetNext() + 1, "-Select")
-	}
-	intActualSize := Round(intActualSize + (intActualSize / intPrevNbRows))
+	LV_Modify(0, "-Select")
+	LV_Insert(0xFFFF, "Select Focus") ; add at the end of the list
+	LV_Modify(LV_GetNext(), "Vis")
+	intRowNumber := LV_GetCount()
+	intActualSize := Round(intActualSize + (intActualSize / intRowNumber))
 	SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"))
 }
 if (intRowNumber = 0)
@@ -1314,7 +1313,11 @@ return
 
 
 GuiClose:
-ExitApp
+Gui, 1:+OwnDialogs 
+MsgBox, 292, %lAppName%, % L(lQuitApp, lAppName) ; task modal
+IfMsgBox, Yes
+	ExitApp
+return
 
 
 
@@ -1345,7 +1348,6 @@ return
 2GuiSize: ; Expand or shrink the ListView in response to the user's resizing of the window.
 if A_EventInfo = 1  ; The window has been minimized.  No action needed.
     return
-; MsgBox, A_GuiWidth: %A_GuiWidth% / intCol: %intCol%
 GuiControl, 2:Move, btnSaveRecord, % "X" . (A_GuiWidth - 100)
 GuiControl, 2:Move, btnCancel, % "X" . (A_GuiWidth - 50)
 if intCol > 1 ; The window has been minimized.  No action needed.
@@ -1497,6 +1499,7 @@ return
 
 
 Check4Update:
+Gui, 1:+OwnDialogs 
 IniRead, strLatestSkipped, %strIniFile%, global, strLatestSkipped, 0.0
 strLatestVersion := Url2Var("https://raw.github.com/JnLlnd/CSVBuddy/master/latest-version.txt")
 
@@ -1507,7 +1510,7 @@ if RegExMatch(strCurrentVersion, "(alpha|beta)")
 if FirstVsSecondIs(strLatestVersion, lAppVersion) = 1
 {
 	Gui, +OwnDialogs
-	SetTimer, ChangeButtonNames, 50
+	SetTimer, ChangeButtonNames4Update, 50
 
 	MsgBox, 3, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdatePrompt, lAppName, lAppVersion, strLatestVersion), 30
 	IfMsgBox, Yes
@@ -1528,11 +1531,11 @@ else if (blnButtonCheck4Update)
 return
 
 
-ChangeButtonNames: 
+ChangeButtonNames4Update: 
 IfWinNotExist, % l(lTab5UpdateTitle, lAppName)
     return  ; Keep waiting.
-SetTimer, ChangeButtonNames, Off 
-WinActivate 
+SetTimer, ChangeButtonNames4Update, Off 
+WinActivate
 ControlSetText, Button3, %lTab5ButtonRemind%
 return
 
@@ -1565,6 +1568,8 @@ CheckOneRow()
 {
 	if (LV_GetCount("Selected") = 1)
 	{
+		Gui, 1:+OwnDialogs 
+		SetTimer, ChangeButtonNamesOneRwo, 50
 		MsgBox, 35, % L(lLvEventsOnerecordselectedTitle, lAppName), % L(lLvEventsOnerecordselectedMessage)
 		IfMsgBox, No
 		{
@@ -1576,6 +1581,17 @@ CheckOneRow()
 	}
 	return True
 }
+
+
+
+ChangeButtonNamesOneRwo: 
+IfWinNotExist, % L(lLvEventsOnerecordselectedTitle, lAppName)
+    return  ; Keep waiting.
+SetTimer, ChangeButtonNamesOneRwo, Off 
+WinActivate 
+ControlSetText, Button1, %lTab3ThisRecord%
+ControlSetText, Button2, %lTab3AllRecord%
+return
 
 
 
@@ -1672,6 +1688,7 @@ CheckIfFileExistOverwrite(strFileName)
 		return True
 	else
 	{
+		Gui, 1:+OwnDialogs 
 		MsgBox, 35, % L(lFuncIfFileExistTitle, lAppName), % L(lFuncIfFileExistMessage, strFileName)
 		IfMsgBox, Yes
 			return True
