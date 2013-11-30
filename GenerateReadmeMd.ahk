@@ -16,7 +16,7 @@ global strMD := ""
 
 H(1, L("~1~ (~2~) - Read me", lAppName, lAppVersionLong))
 P(lDocDesc450)
-P("Written using AutoHotkey_L v1.1.09.03+ (http://www.autohotkey.com)`nBy JnLlnd on [AHK forum](http://www.autohotkey.com/board/)`nFirst release BETA: 2013-10-18")
+P("Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org)`nBy JnLlnd on [AHK forum](http://www.ahkscript.org/boards/)`nFirst officiel release: 2013-11-30")
 
 H(2, "Links")
 B("[Application home](http://code.jeanlalonde.ca/csvbuddy/)")
@@ -24,10 +24,12 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
-H(3, "2013-11-24 v1.0")
-B("Load the file added as first parameter of the command line")
-B("Add records to existing data (right-click in the data grid)")
-B("Create a new file from scratch (right-click in an empty data grid)")
+H(3, "2013-11-30 v1.0")
+B("First official release")
+B("Add records to existing data (right-click in the list zone)")
+B("Create a new file from scratch (right-click in an empty list zone)")
+B("Load the file mentioned as first parameter in the command line")
+B("Add validation, confirm before exit and fix various small bugs")
 H(3, "2013-11-03 v0.9")
 B("Display ""<1"" (instead of ""0"") in status bar when file size is smaller than 0.5 K")
 B("Removed CSV Buddy icon from the Tray")

@@ -66,7 +66,7 @@ Gui, 1:Font
 
 Gui, 1:Tab, 1
 Gui, 1:Add, Text,		y+10	x10		vlblCSVFileToLoad w85 right, % L(lTab1CSVFileToLoad)
-Gui, 1:Add, Edit,		yp		x100	vstrFileToLoad gChangedFileToLoad
+Gui, 1:Add, Edit,		yp		x100	vstrFileToLoad gChangedFileToLoad disabled
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpFileToLoad gButtonHelpFileToLoad, % L(lTab0QuestionMark)
 Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToLoad gButtonSelectFileToLoad w45 default, % L(lTab1Select)
 Gui, 1:Add, Text,		y+10	x10 	vlblHeader w85 right, % L(lTab1CSVFileHeader)
@@ -1185,10 +1185,15 @@ if (A_ThisLabel = "MenuAddRow")
 	LV_Modify(0, "-Select")
 	LV_Insert(0xFFFF, "Select Focus") ; add at the end of the list
 	LV_Modify(LV_GetNext(), "Vis")
-	intRowNumber := LV_GetCount()
-	intActualSize := Round(intActualSize + (intActualSize / intRowNumber))
-	SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"))
+	strSaveRecordButton := "ButtonSaveRecordAddRow"
+	strCancelButton := "ButtonCancelAddRow"
 }
+else
+{
+	strSaveRecordButton := "ButtonSaveRecord"
+	strCancelButton := "ButtonCancel"
+}
+
 if (intRowNumber = 0)
 	intRowNumber := 1
 intGui1WinID := WinExist("A")
@@ -1208,8 +1213,8 @@ loop, % LV_GetCount("Column")
 	{
 		if (intCol = 1)
 		{
-			Gui, 2:Add, Button, y%intY% x10 vbtnSaveRecord gButtonSaveRecord, % L(lLvEventsSave)
-			Gui, 2:Add, Button, yp x+5 vbtnCancel gButtonCancel, % L(lLvEventsCancel)
+			Gui, 2:Add, Button, y%intY% x10 vbtnSaveRecord g%strSaveRecordButton%, % L(lLvEventsSave)
+			Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, % L(lLvEventsCancel)
 		}
 		if (intCol = intMaxNbCol)
 		{
@@ -1232,10 +1237,10 @@ loop, % LV_GetCount("Column")
 	intY := intY + intPosEditH + 19
 	intNbFieldsOnScreen := A_Index ; incremented at each occurence of the loop
 }
-if (intCol = 1)
+if (intCol = 1) ; duplicate of lines above in the loop, but much simpler that way
 {
-	Gui, 2:Add, Button, y%intY% x10 vbtnSaveRecord gButtonSaveRecord, % L(lLvEventsSave)
-	Gui, 2:Add, Button, yp x+5 vbtnCancel gButtonCancel, % L(lLvEventsCancel)
+	Gui, 2:Add, Button, y%intY% x10 vbtnSaveRecord g%strSaveRecordButton%, % L(lLvEventsSave)
+	Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, % L(lLvEventsCancel)
 }
 Gui, 2:Show, AutoSize Center
 Gui, 1:+Disabled
@@ -1312,6 +1317,7 @@ return
 
 
 
+GuiEscape:
 GuiClose:
 Gui, 1:+OwnDialogs 
 MsgBox, 292, %lAppName%, % L(lQuitApp, lAppName) ; task modal
@@ -1325,12 +1331,30 @@ return
 ; --------------------- GUI2  --------------------------
 
 
+ButtonSaveRecordAddRow:
+Gui, 1:Default
+intRowNumber := LV_GetCount()
+intActualSize := Round(intActualSize + (intActualSize / intRowNumber))
+SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"))
+gosub, ButtonSaveRecord
+return
+
+
+
 ButtonSaveRecord:
 Gui, 2:Submit
 Gui, 1:Default
 loop, % LV_GetCount("Column")
 	LV_Modify(intRowNumber, "Col" . A_Index, strEdit%A_Index%)
 Goto, 2GuiClose
+return
+
+
+
+ButtonCancelAddRow:
+Gui, 1:Default
+LV_Delete(LV_GetCount()) ; OK because added row is last in the list
+gosub, ButtonCancel
 return
 
 
@@ -1437,7 +1461,10 @@ obj := ObjCSV_ListView2Collection("1", "lvData", , , , intProgressType, L(lTab0R
 ObjCSV_Collection2HTML(obj, strFileToExport, strMultiPurpose, strTemplateDelimiter
 	, intProgressType, blnOverwrite, L(lExportSaving))
 if (ErrorLevel)
-	Oops(lExportUnknownerror)
+	if (ErrorLevel > 3)
+		Oops(lExportHTMLError)
+	else
+		Oops(lExportUnknownerror)
 if FileExist(strFileToExport)
 {
 	GuiControl, 1:Show, btnCheckExportFile
