@@ -97,8 +97,11 @@ Help(lTab4HelpExportExpress)
 H(2, lDocKeyboardHelp)
 W(lDocKeyboardHelpDetail)
 
-H(2, lDocIniTitle)
+H(2, lDocAdvancedTopicsTitle)
+H(3, lDocIniTitle)
 W(lDocIniHelp)
+H(3, lDocCommandLineTitle)
+W(lDocCommandLineHelp)
 
 H(2, lDocSupportTitle)
 P(lDocSupportText)
