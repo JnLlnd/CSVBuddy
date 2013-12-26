@@ -1,0 +1,41 @@
+Song Title                      str_Album                       lng_Total_Time                  
+Hey Jude - Sgt. Pepper's Lonely LOVE                            320914                          
+March Of The Meanies            Yellow Submarine                139415                          
+Tell Me What You See            Help!                           158040                          
+Sea Of Holes                    Yellow Submarine                136751                          
+Love Me Do [Original Single VersPast Masters, Vol. 1            145946                          
+She Loves You [Mono]            Past Masters, Vol. 1            141400                          
+Eight Days A Week               Beatles For Sale                163657                          
+Taxman                          Revolver                        158928                          
+Yer Blues                       The Beatles (White Album)       240509                          
+Lady Madonna (LOVE)             LOVE                            175568                          
+Ob-La-Di, Ob-La-Da              The Beatles (White Album)       189022                          
+All You Need Is Love            Magical Mystery Tour            230452                          
+Dizzy Miss Lizzy                Help!                           176561                          
+No Reply                        Beatles For Sale                136124                          
+Piggies                         The Beatles (White Album)       124342                          
+Why Don't We Do It In The Road? The Beatles (White Album)       101224                          
+Not A Second Time               With The Beatles                126902                          
+Sea Of Monsters                 Yellow Submarine                216764                          
+I Am The Walrus ("No You're not"Magical Mystery Tour            275931                          
+Gnik Nus (LOVE)                 LOVE                            54360                           
+I Should Have Known Better      A Hard Day's Night              163134                          
+Sun King - Mean Mr. Mustard - PoAbbey Road                      404140                          
+Please Please Me                Please Please Me                120920                          
+Baby's In Black                 Beatles For Sale                124577                          
+Money (That's What I Want)      With The Beatles                169560                          
+Get Back - Glass Onion (LOVE)   LOVE                            212271                          
+Honey Pie                       The Beatles (White Album)       161227                          
+I Wanna Be Your Man             With The Beatles                119562                          
+Baby It's You                   Please Please Me                160574                          
+Martha My Dear                  The Beatles (White Album)       148636                          
+I Want to hold your hand (LOVE) LOVE                            89182                           
+You're Going To Lose That Girl  Help!                           138736                          
+And Your Bird Can Sing          Revolver                        120555                          
+Across The Universe             Past Masters, Vol. 2            229250                          
+Yes It Is                       Past Masters, Vol. 1            162481                          
+Blackbird                       The Beatles (White Album)       138448                          
+Sgt. Pepper's Lonely Hearts ClubSgt. Pepper's Lonely Hearts Club287059                          
+Love You To                     Revolver                        179879                          
+Pepperland                      Yellow Submarine                140800                          
+For You Blue                    Let It Be                       152267                          
