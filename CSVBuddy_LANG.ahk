@@ -154,6 +154,7 @@ global lTab5Abouttext2 := "<a href=""http://code.jeanlalonde.ca/ahk/csvbuddy/csv
 global lTab5Abouttext3 := "Support on <a href=""http://code.jeanlalonde.ca/csvbuddy"">www.code.jeanlalonde.ca</a>"
 global lTab5ButtonRemind := "Remind me"
 global lTab5Check4Update := "Check for &update"
+global lTab5Donate := "Support Freeware!"
 global lTab5UpdatePrompt := "Update ~1~ from v~2~ to v~3~?"
 global lTab5UpdateTitle := "Update ~1~?"
 global lTab5UpdateYouHaveLatest := "You have the latest version: ~1~.`n`nVisit the ~2~ web page anyway?"

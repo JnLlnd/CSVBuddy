@@ -1,3 +1,4 @@
+global lDocAddOrEditRow := "Add or Edit row"
 global lDocAdvancedTopicsTitle := "Advanced Topics"
 global lDocCommandLineHelp := "<p>To load a file from the command-line, add the CSV file name as the first command parameter, for example <em>c:\MyProgs\CSVBuddy.exe file2load.csv</em>. The file will be loaded with the automatically detected field delimiter and field encapsulator.</p>"
 global lDocCommandLineTitle := "Command-line parameter"

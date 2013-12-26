@@ -151,6 +151,7 @@ Gui, 1:Add, Link,		y+20	x25		vlblAboutText2, % L(lTab5Abouttext2)
 Gui, 1:Add, Link,		yp		x+150	vlblAboutText3, % L(lTab5Abouttext3)
 Gui, 1:Font
 Gui, 1:Add, Button,						vbtnCheck4Update gButtonCheck4Update, % L(lTab5Check4Update)
+Gui, 1:Add, Button,		yp		x+20		vbtnDonate gButtonDonate, % L(lTab5Donate)
 
 Gui, 1:Tab
 
@@ -1090,6 +1091,8 @@ else
 	Menu, SelectMenu, Add, % L(lLvEventsEditrowMenu), MenuEditRow
 	Menu, SelectMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
 	Menu, SelectMenu, Add, % L(lLvEventsDeleteRowMenu), MenuDeleteRow
+	Menu, SelectMenu, Add
+	Menu, SelectMenu, Add, Filter out with global search, MenuFilterOutGlobal ; ###
 }
 ; Show the menu at the provided coordinates, A_GuiX and A_GuiY.  These should be used
 ; because they provide correct coordinates even if the user pressed the Apps key:
@@ -1265,6 +1268,51 @@ if (intNewNbRows)
 	SB_SetText(L(lSBRecordsSize, intNewNbRows, (intActualSize) ? intActualSize : " <1"))
 else
 	SB_SetText(L(lSBEmpty), 1)
+return
+
+
+
+MenuFilterOutGlobal:
+InputBox, strFilter, Title, Enter filter:
+intPrevNbRows := LV_GetCount()
+intRowNumber := 0 ; scan each matching row of the ListView
+; GuiControl, -Redraw, lvData ; stop drawing the ListView during filtering
+loop, % LV_GetCount()
+{
+	intRowNumber := intRowNumber + 1 ; continue searching from the row before the deleted row
+	if NotMatchingRow(intRowNumber, strFilter)
+	{
+		###_D("Delete: " . intRowNumber)
+		LV_Delete(intRowNumber)
+		intRowNumber := intRowNumber - 1 ; continue searching from the row before the deleted row
+	}
+}
+; GuiControl, +Redraw, lvData ; redraw the ListView
+intNewNbRows := LV_GetCount()
+intActualSize := Round(intActualSize * intNewNbRows / intPrevNbRows)
+if (intNewNbRows)
+	SB_SetText(L(lSBRecordsSize, intNewNbRows, (intActualSize) ? intActualSize : " <1"))
+else
+	SB_SetText(L(lSBEmpty), 1)
+return
+
+
+
+NotMatchingRow(intRow, strFilter)
+{
+	Loop, % LV_GetCount("Column")
+	{
+		LV_GetText(strCell, intRow, A_Index)
+		if InStr(strCell, strFilter)
+			return False
+	}
+	return True
+}
+
+
+
+ButtonDonate:
+Run, https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8UWKXDR5ZQNJW
 return
 
 
