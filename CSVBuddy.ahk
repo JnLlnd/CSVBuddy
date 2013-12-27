@@ -25,7 +25,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.0
+;@Ahk2Exe-SetVersion 1.1
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -41,6 +41,7 @@ IfNotExist, %strIniFile%
 			strTemplateDelimiter=~
 			strTextEditorExe=notepad.exe
 			blnSkipHelpReadyToEdit=0
+			blnSkipConfirmQuit=0
 			strLatestSkipped=%lAppVersion%
 		)
 		, %strIniFile%
@@ -49,6 +50,7 @@ IniRead, intDefaultWidth, %strIniFile%, global, intDefaultWidth ; used when expo
 IniRead, strTemplateDelimiter, %strIniFile%, global, strTemplateDelimiter ; Default ~ (tilde), used when export to HTML and Express formats
 IniRead, strTextEditorExe, %strIniFile%, global, strTextEditorExe ; Default notepad.exe
 IniRead, blnSkipHelpReadyToEdit, %strIniFile%, global, blnSkipHelpReadyToEdit ; Default 0
+IniRead, blnSkipConfirmQuit, %strIniFile%, global, blnSkipConfirmQuit ; Default 0
 
 intProgressType := -2 ; Status Bar, part 2
 
@@ -155,7 +157,7 @@ Gui, 1:Add, Button,		yp		x+20		vbtnDonate gButtonDonate, % L(lTab5Donate)
 
 Gui, 1:Tab
 
-Gui, 1:Add, ListView, 	x10 r24 w200 vlvData -ReadOnly NoSort gListViewEvents AltSubmit -LV0x10
+Gui, 1:Add, ListView, 	x10 r24 w955 vlvData -ReadOnly NoSort gListViewEvents AltSubmit -LV0x10
 
 Gui, Add, StatusBar
 SB_SetParts(200)
@@ -383,7 +385,7 @@ if !StrLen(strFileHeaderEscaped) and (radSetHeader)
 	IfMsgBox, No
 		return
 }
-if LV_GetCount("Column")
+if LV_GetCount("Column") and (A_ThisMenuItem <> lLvEventsFilterClear)
 {
 	MsgBox, 36, % L(lAppName), % L(lTab1Replacethecurrentcontentof)
 	IfMsgBox, Yes
@@ -441,6 +443,7 @@ if (!blnSkipHelpReadyToEdit)
 	Help(lTab1HelpReadyToEdit)
 GuiControl, 1:, strFieldDelimiter3, %strCurrentVisibleFieldDelimiter%
 GuiControl, 1:, strFieldEncapsulator3, %strCurrentFieldEncapsulator%
+blnFilterActive := false
 obj := ; release object
 return
 
@@ -1034,13 +1037,20 @@ ListViewEvents:
 if (A_GuiEvent = "ColClick")
 {
 	intColNumber := A_EventInfo
-	Menu, SortMenu, Add, % L(lLvEventsSortalphabetical), MenuSortText
-	Menu, SortMenu, Add, % L(lLvEventsSortnumericInteger), MenuSortInteger
-	Menu, SortMenu, Add, % L(lLvEventsSortnumericFloat), MenuSortFloat
-	Menu, SortMenu, Add, % L(lLvEventsSortdescalphabetical), MenuSortDescText
-	Menu, SortMenu, Add, % L(lLvEventsSortdescnumericInteger), MenuSortDescInteger
-	Menu, SortMenu, Add, % L(lLvEventsSortdescnumericFloat), MenuSortDescFloat
-	Menu, SortMenu, Show
+	Menu, ColumnMenu, Add
+	Menu, ColumnMenu, Delete
+	Menu, ColumnMenu, Add, % L(lLvEventsSortalphabetical), MenuColumnText
+	Menu, ColumnMenu, Add, % L(lLvEventsSortnumericInteger), MenuColumnInteger
+	Menu, ColumnMenu, Add, % L(lLvEventsSortnumericFloat), MenuColumnFloat
+	Menu, ColumnMenu, Add
+	Menu, ColumnMenu, Add, % L(lLvEventsSortdescalphabetical), MenuColumnDescText
+	Menu, ColumnMenu, Add, % L(lLvEventsSortdescnumericInteger), MenuColumnDescInteger
+	Menu, ColumnMenu, Add, % L(lLvEventsSortdescnumericFloat), MenuColumnDescFloat
+	Menu, ColumnMenu, Add
+	Menu, ColumnMenu, Add, % L(lLvEventsFilterColumn), MenuFilter
+	Menu, ColumnMenu, Add, % ((lLvEventsFilterClear)), MenuFilterClear
+	Menu, ColumnMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterClear%
+	Menu, ColumnMenu, Show
 }
 if (A_GuiEvent = "DoubleClick")
 {
@@ -1052,19 +1062,19 @@ return
 
 
 
-MenuSortText:
-MenuSortInteger:
-MenuSortFloat:
-MenuSortDescText:
-MenuSortDescInteger:
-MenuSortDescFloat:
+MenuColumnText:
+MenuColumnInteger:
+MenuColumnFloat:
+MenuColumnDescText:
+MenuColumnDescInteger:
+MenuColumnDescFloat:
 StringReplace, strOption, A_ThisLabel, Menu,
-StringReplace, strOption, strOption, Sort, % "Sort "
+StringReplace, strOption, strOption, Column, % "Sort "
 StringReplace, strOption, strOption, Sort Desc, % "SortDesc "
 LV_ModifyCol(intColNumber, strOption)
 if InStr(strOption, "Text")
 	LV_ModifyCol(intColNumber, "Left")
-Menu, SortMenu, Delete
+Menu, ColumnMenu, Delete
 return
 
 
@@ -1072,31 +1082,34 @@ return
 GuiContextMenu: ; Launched in response to a right-click or press of the Apps key.
 if A_GuiControl <> lvData  ; Display the menu only for clicks inside the ListView.
     return
-Menu, SelectMenu, Add
-Menu, SelectMenu, DeleteAll ; to avoid ghost lines at the end when menu is re-created
+intColNumber := 0 ; tell MenuFilter that search is global
+Menu, ContextMenu, Add
+Menu, ContextMenu, DeleteAll ; to avoid ghost lines at the end when menu is re-created
 if !LV_GetCount("Column")
-	Menu, SelectMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
+	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
 else if !LV_GetCount("")
 {
-	Menu, SelectMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
-	Menu, SelectMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
+	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
+	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
 }
 else
 {
 	intRowNumber := A_EventInfo
-	Menu, SelectMenu, Add, % L(lLvEventsSelectAll), MenuSelectAll
-	Menu, SelectMenu, Add, % L(lLvEventsDeselectAll), MenuSelectNone
-	Menu, SelectMenu, Add, % L(lLvEventsReverseSelection), MenuSelectReverse
-	Menu, SelectMenu, Add
-	Menu, SelectMenu, Add, % L(lLvEventsEditrowMenu), MenuEditRow
-	Menu, SelectMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
-	Menu, SelectMenu, Add, % L(lLvEventsDeleteRowMenu), MenuDeleteRow
-	Menu, SelectMenu, Add
-	Menu, SelectMenu, Add, Filter out with global search, MenuFilterOutGlobal ; ###
+	Menu, ContextMenu, Add, % L(lLvEventsSelectAll), MenuSelectAll
+	Menu, ContextMenu, Add, % L(lLvEventsDeselectAll), MenuSelectNone
+	Menu, ContextMenu, Add, % L(lLvEventsReverseSelection), MenuSelectReverse
+	Menu, ContextMenu, Add
+	Menu, ContextMenu, Add, % L(lLvEventsEditrowMenu), MenuEditRow
+	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
+	Menu, ContextMenu, Add, % L(lLvEventsDeleteRowMenu), MenuDeleteRow
+	Menu, ContextMenu, Add
+	Menu, ContextMenu, Add, % ((lLvEventsFilterGlobal)), MenuFilter
 }
+Menu, ContextMenu, Add, % ((lLvEventsFilterClear)), MenuFilterClear
+Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterClear%
 ; Show the menu at the provided coordinates, A_GuiX and A_GuiY.  These should be used
 ; because they provide correct coordinates even if the user pressed the Apps key:
-Menu, SelectMenu, Show, %A_GuiX%, %A_GuiY%
+Menu, ContextMenu, Show, %A_GuiX%, %A_GuiY%
 return
 
 
@@ -1139,6 +1152,7 @@ else
 	gosub, UpdateCurrentHeader
 	loop, % LV_GetCount("Column")
 		LV_ModifyCol(A_Index, "AutoHdr")
+	blnFilterActive := false
 }
 return
 
@@ -1147,7 +1161,7 @@ return
 MenuSelectAll:
 GuiControl, Focus, lvData
 LV_Modify(0, "Select")
-Menu, SelectMenu, Delete
+Menu, ContextMenu, Delete
 return
 
 
@@ -1155,7 +1169,7 @@ return
 MenuSelectNone:
 GuiControl, Focus, lvData
 LV_Modify(0, "-Select")
-Menu, SelectMenu, Delete
+Menu, ContextMenu, Delete
 return
 
 
@@ -1167,7 +1181,7 @@ Loop, % LV_GetCount()
 		LV_Modify(A_Index, "-Select")
 	else
 		LV_Modify(A_Index, "Select")
-Menu, SelectMenu, Delete
+Menu, ContextMenu, Delete
 return
 
 
@@ -1272,22 +1286,22 @@ return
 
 
 
-MenuFilterOutGlobal:
+MenuFilter:
 InputBox, strFilter, Title, Enter filter:
 intPrevNbRows := LV_GetCount()
 intRowNumber := 0 ; scan each matching row of the ListView
-; GuiControl, -Redraw, lvData ; stop drawing the ListView during filtering
+GuiControl, -Redraw, lvData ; stop drawing the ListView during filtering
 loop, % LV_GetCount()
 {
 	intRowNumber := intRowNumber + 1 ; continue searching from the row before the deleted row
-	if NotMatchingRow(intRowNumber, strFilter)
+	if NotMatchingRow(intRowNumber, strFilter, intColNumber)
 	{
-		###_D("Delete: " . intRowNumber)
 		LV_Delete(intRowNumber)
 		intRowNumber := intRowNumber - 1 ; continue searching from the row before the deleted row
 	}
 }
-; GuiControl, +Redraw, lvData ; redraw the ListView
+blnFilterActive := true
+GuiControl, +Redraw, lvData ; redraw the ListView
 intNewNbRows := LV_GetCount()
 intActualSize := Round(intActualSize * intNewNbRows / intPrevNbRows)
 if (intNewNbRows)
@@ -1298,14 +1312,28 @@ return
 
 
 
-NotMatchingRow(intRow, strFilter)
+MenuFilterClear:
+gosub, DeleteListviewData
+gosub, ButtonLoadFile
+return
+
+
+
+NotMatchingRow(intRow, strFilter, intColNumber)
 {
-	Loop, % LV_GetCount("Column")
+	if (intColNumber) ; column filter
 	{
-		LV_GetText(strCell, intRow, A_Index)
+		LV_GetText(strCell, intRow, intColNumber)
 		if InStr(strCell, strFilter)
 			return False
 	}
+	else ; global filter
+		Loop, % LV_GetCount("Column")
+		{
+			LV_GetText(strCell, intRow, A_Index)
+			if InStr(strCell, strFilter)
+				return False
+		}
 	return True
 }
 
@@ -1367,7 +1395,9 @@ return
 
 GuiEscape:
 GuiClose:
-Gui, 1:+OwnDialogs 
+Gui, 1:+OwnDialogs
+if (blnSkipConfirmQuit)
+	ExitApp
 MsgBox, 292, %lAppName%, % L(lQuitApp, lAppName) ; task modal
 IfMsgBox, Yes
 	ExitApp
