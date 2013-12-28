@@ -19,6 +19,7 @@ Version history
 - edited record number in edit row title bar
 - found record number in edit row title bar
 - stop display right-click menu over the header row
+- add blnSkipConfirmQuit option in ini file, default to false
 
 2013-11-30 v1.0
 - First official release
