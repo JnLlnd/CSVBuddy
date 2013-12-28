@@ -25,7 +25,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.0
+;@Ahk2Exe-SetVersion 1.01
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -1184,7 +1184,8 @@ if (A_ThisLabel = "MenuAddRow")
 {
 	LV_Modify(0, "-Select")
 	LV_Insert(0xFFFF, "Select Focus") ; add at the end of the list
-	LV_Modify(LV_GetNext(), "Vis")
+	intRowNumber := LV_GetNext()
+	LV_Modify(intRowNumber, "Vis")
 	strSaveRecordButton := "ButtonSaveRecordAddRow"
 	strCancelButton := "ButtonCancelAddRow"
 }
