@@ -1360,7 +1360,7 @@ return
 
 MenuFilter:
 InputBox, strFilter, % L(lLvEventsFilterInputTitle, lAppName), %lLvEventsFilterInput%, , , 120
-if !StrLen(strSearch)
+if !StrLen(strFilter)
 	return
 intPrevNbRows := LV_GetCount()
 intRowNumber := 0 ; scan each matching row of the ListView
