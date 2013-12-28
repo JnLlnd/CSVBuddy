@@ -4,6 +4,43 @@ CSV Buddy
 Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
 This script uses the library ObjCSV v0.3 (https://github.com/JnLlnd/ObjCSV)
+
+Version history
+---------------
+
+????-??-?? v1.1
+- filter by column: click on a header to retain only rows with the keyword appearing in this column
+- global filtering: right-click in the list to retain only rows with the keyword appearing in any column
+- search by column: open in row edit window the next row having the keyword in this column
+- global search: open in row edit window the next row having the keyword in any column
+- added filter, clear filters and search items to the column menu
+- added global filter, clear filtrees and global search to the list right-click menu
+- added stop and next buttons to edit row window when search in progress
+- edited record number in edit row title bar
+- found record number in edit row title bar
+- stop display right-click menu over the header row
+
+2013-11-30 v1.0
+- First official release
+- Add records to existing data (right-click in the list zone)
+- Create a new file from scratch (right-click in an empty list zone)
+- Load the file mentioned as first parameter in the command line
+- Add validation, confirm before exit and fix various small bugs
+
+2013-11-03 v0.9
+- Display "<1" (instead of "0") in status bar when file size is smaller than 0.5 K
+- Removed CSV Buddy icon from the Tray
+- Add three test delimited files to the package (see README.txt in the zip file)
+- Fix default value of blnSkipHelpReadyToEdit in ini file to 0
+
+2013-10-20 v0.8.1
+- If an .ini file is not found in the program's folder, it is created with default values
+
+2013-10-18 v0.8.0
+- First release of BETA version
+- History of ALPHA phase on BitBucket (private repository)
+
+
 */ 
 ;===============================================
 
@@ -1030,6 +1067,15 @@ blnButtonCheck4Update := True
 Gosub, Check4Update
 return
 
+
+
+ButtonDonate:
+Run, https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8UWKXDR5ZQNJW
+return
+
+
+
+
 ; --------------------- LISTVIEW EVENTS --------------------------
 
 
@@ -1049,6 +1095,8 @@ if (A_GuiEvent = "ColClick")
 	Menu, ColumnMenu, Add
 	Menu, ColumnMenu, Add, % L(lLvEventsFilterColumn), MenuFilter
 	Menu, ColumnMenu, Add, % ((lLvEventsFilterClear)), MenuFilterClear
+	Menu, ColumnMenu, Add
+	Menu, ColumnMenu, Add, % L(lLvEventsSearchColumn), MenuSearch
 	Menu, ColumnMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterClear%
 	Menu, ColumnMenu, Show
 }
@@ -1080,9 +1128,11 @@ return
 
 
 GuiContextMenu: ; Launched in response to a right-click or press of the Apps key.
-if A_GuiControl <> lvData  ; Display the menu only for clicks inside the ListView.
+if (A_GuiControl <> "lvData") or (A_GuiY < 239)
+	; Display the menu only for clicks inside the ListView
+	; A_Gui < 239 to exclude the header row
     return
-intColNumber := 0 ; tell MenuFilter that search is global
+intColNumber := 0 ; tell MenuFilter and MenuSearch that search is global
 Menu, ContextMenu, Add
 Menu, ContextMenu, DeleteAll ; to avoid ghost lines at the end when menu is re-created
 if !LV_GetCount("Column")
@@ -1091,6 +1141,8 @@ else if !LV_GetCount("")
 {
 	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
 	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
+	Menu, ContextMenu, Add, % ((lLvEventsFilterClear)), MenuFilterClear
+	Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterClear%
 }
 else
 {
@@ -1104,9 +1156,11 @@ else
 	Menu, ContextMenu, Add, % L(lLvEventsDeleteRowMenu), MenuDeleteRow
 	Menu, ContextMenu, Add
 	Menu, ContextMenu, Add, % ((lLvEventsFilterGlobal)), MenuFilter
+	Menu, ContextMenu, Add, % ((lLvEventsFilterClear)), MenuFilterClear
+	Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterClear%
+	Menu, ContextMenu, Add
+	Menu, ContextMenu, Add, % ((lLvEventsSearchGlobal)), MenuSearch
 }
-Menu, ContextMenu, Add, % ((lLvEventsFilterClear)), MenuFilterClear
-Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterClear%
 ; Show the menu at the provided coordinates, A_GuiX and A_GuiY.  These should be used
 ; because they provide correct coordinates even if the user pressed the Apps key:
 Menu, ContextMenu, Show, %A_GuiX%, %A_GuiY%
@@ -1196,6 +1250,7 @@ IsRowSelected(intRow)
 
 MenuAddRow:
 MenuEditRow:
+MenuSearchRow:
 Gui, 1:Submit, NoHide
 if (A_ThisLabel = "MenuAddRow")
 {
@@ -1204,18 +1259,29 @@ if (A_ThisLabel = "MenuAddRow")
 	LV_Modify(LV_GetNext(), "Vis")
 	strSaveRecordButton := "ButtonSaveRecordAddRow"
 	strCancelButton := "ButtonCancelAddRow"
+	strGuiTitle := L(lLvEventsAddrow, lAppName)
+	strCancelButtonLabel := lLvEventsCancel
 }
-else
+else if (A_ThisLabel = "MenuEditRow")
 {
 	strSaveRecordButton := "ButtonSaveRecord"
 	strCancelButton := "ButtonCancel"
+	strGuiTitle := % L(lLvEventsEditrow, lAppName, intRowNumber, LV_GetCount())
+	strCancelButtonLabel := lLvEventsCancel
+}
+else ; MenuSearchRow
+{
+	strSaveRecordButton := "ButtonSaveRecord"
+	strCancelButton := "ButtonCancel"
+	strGuiTitle := % L(lLvEventsSearchEditrow, lAppName, intRowNumber, LV_GetCount())
+	strCancelButtonLabel := lLvEventsNext
 }
 
 if (intRowNumber = 0)
 	intRowNumber := 1
 intGui1WinID := WinExist("A")
-Gui, 2:New, +Resize , % L(lLvEventsEditrow, lAppName)
-Gui, 2:+Owner1
+Gui, 2:New, +Resize , %strGuiTitle%
+Gui, 2:+Owner1 ; Make the main window (Gui #1) the owner of the EditRow window (Gui #2).
 Gui, 1:Default
 SysGet, intMonWork, MonitorWorkArea 
 intColWidth := 380
@@ -1230,8 +1296,10 @@ loop, % LV_GetCount("Column")
 	{
 		if (intCol = 1)
 		{
-			Gui, 2:Add, Button, y%intY% x10 vbtnSaveRecord g%strSaveRecordButton%, % L(lLvEventsSave)
-			Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, % L(lLvEventsCancel)
+			if (A_ThisLabel = "MenuSearchRow")
+				Gui, 2:Add, Button, y%intY% x10 vbtnStopSearch gButtonStopSearch, % L(lLvEventsStop)
+			Gui, 2:Add, Button, % (A_ThisLabel = "MenuSearchRow" ? "yp x+5" : "y" . intY . "x60") . " vbtnSaveRecord g" . strSaveRecordButton, % L(lLvEventsSave)
+			Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, %strCancelButtonLabel%
 		}
 		if (intCol = intMaxNbCol)
 		{
@@ -1256,8 +1324,10 @@ loop, % LV_GetCount("Column")
 }
 if (intCol = 1) ; duplicate of lines above in the loop, but much simpler that way
 {
-	Gui, 2:Add, Button, y%intY% x10 vbtnSaveRecord g%strSaveRecordButton%, % L(lLvEventsSave)
-	Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, % L(lLvEventsCancel)
+	if (A_ThisLabel = "MenuSearchRow")
+		Gui, 2:Add, Button, y%intY% x10 vbtnStopSearch gButtonStopSearch, % L(lLvEventsStop)
+	Gui, 2:Add, Button, % (A_ThisLabel = "MenuSearchRow" ? "yp x+5" : "y" . intY . "x60") . " vbtnSaveRecord g" . strSaveRecordButton, % L(lLvEventsSave)
+	Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, %strCancelButtonLabel%
 }
 Gui, 2:Show, AutoSize Center
 Gui, 1:+Disabled
@@ -1287,7 +1357,9 @@ return
 
 
 MenuFilter:
-InputBox, strFilter, Title, Enter filter:
+InputBox, strFilter, % L(lLvEventsFilterInputTitle, lAppName), %lLvEventsFilterInput%, , , 120
+if !StrLen(strSearch)
+	return
 intPrevNbRows := LV_GetCount()
 intRowNumber := 0 ; scan each matching row of the ListView
 GuiControl, -Redraw, lvData ; stop drawing the ListView during filtering
@@ -1319,6 +1391,30 @@ return
 
 
 
+MenuSearch:
+InputBox, strSearch, % L(lLvEventsSearchInputTitle, lAppName), %lLvEventsSearchInput%, , , 120
+if !StrLen(strSearch)
+	return
+LV_Modify(LV_GetNext(), "-Select")
+intRowNumber := 1 ; always start search from top
+intLastRow := LV_GetCount()
+Loop
+{
+	if !NotMatchingRow(intRowNumber, strSearch, intColNumber)
+	{
+		LV_Modify(intRowNumber, "Select Vis")
+		gosub, MenuSearchRow
+		WinWaitClose, %strGuiTitle%
+		LV_Modify(intRowNumber, "-Select")
+	}
+	intRowNumber := intRowNumber + 1
+	if (intRowNumber > intLastRow)
+		break
+}
+return
+
+
+
 NotMatchingRow(intRow, strFilter, intColNumber)
 {
 	if (intColNumber) ; column filter
@@ -1336,12 +1432,6 @@ NotMatchingRow(intRow, strFilter, intColNumber)
 		}
 	return True
 }
-
-
-
-ButtonDonate:
-Run, https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8UWKXDR5ZQNJW
-return
 
 
 
@@ -1409,6 +1499,14 @@ return
 ; --------------------- GUI2  --------------------------
 
 
+ButtonStopSearch:
+Gui, 1:Default
+intRowNumber := intLastRow
+gosub, ButtonCancel
+return
+
+
+
 ButtonSaveRecordAddRow:
 Gui, 1:Default
 intRowNumber := LV_GetCount()
@@ -1450,6 +1548,7 @@ return
 2GuiSize: ; Expand or shrink the ListView in response to the user's resizing of the window.
 if A_EventInfo = 1  ; The window has been minimized.  No action needed.
     return
+GuiControl, 2:Move, btnStopSearch, % "X" . (A_GuiWidth - 150)
 GuiControl, 2:Move, btnSaveRecord, % "X" . (A_GuiWidth - 100)
 GuiControl, 2:Move, btnCancel, % "X" . (A_GuiWidth - 50)
 if intCol > 1 ; The window has been minimized.  No action needed.
