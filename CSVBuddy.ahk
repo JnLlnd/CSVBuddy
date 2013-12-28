@@ -1256,7 +1256,8 @@ if (A_ThisLabel = "MenuAddRow")
 {
 	LV_Modify(0, "-Select")
 	LV_Insert(0xFFFF, "Select Focus") ; add at the end of the list
-	LV_Modify(LV_GetNext(), "Vis")
+	intRowNumber := LV_GetNext()
+	LV_Modify(intRowNumber, "Vis")
 	strSaveRecordButton := "ButtonSaveRecordAddRow"
 	strCancelButton := "ButtonCancelAddRow"
 	strGuiTitle := L(lLvEventsAddrow, lAppName)
