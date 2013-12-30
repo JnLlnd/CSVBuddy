@@ -1,13 +1,13 @@
 ﻿
-# CSV Buddy (v1.0) - Read me
+# CSV Buddy (v1.1) - Read me
 
 
-CSV Buddy helps you make your CSV files ready to be imported by a variety of software. You can load files with all sort of field delimiters (comma, tad, semi-colon, etc.) and encapsulators (double/single-quotes or any other character). Convert line breaks in data field making your file XL ready. Rename/reorder fields, add or edit records, save with any delimiters and export to fixed-width, HTML templates or XML formats. Freeware.
+CSV Buddy helps you make your CSV files ready to be imported by a variety of software. You can load files with all sort of field delimiters (comma, tad, semi-colon, etc.) and encapsulators (double/single-quotes or any other character). Convert line breaks in data field making your file XL ready. Rename/reorder fields, add or edit records, filter or search, save with any delimiters and export to fixed-width, HTML templates or XML formats. Freeware.
 
 
 Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org)  
 By JnLlnd on [AHK forum](http://www.ahkscript.org/boards/)  
-First officiel release: 2013-11-30
+First official release: 2013-11-30
 
 
 ## Links
@@ -18,6 +18,19 @@ First officiel release: 2013-11-30
 
 ## History
 
+
+### 2013-12-30 v1.1
+
+* Filter by column: click on a header to retain only rows with the keyword appearing in this column
+* Global filtering: right-click in the list zone to retain only rows with the keyword appearing in any column
+* Search by column: find the next row having the keyword in this column and open it in row edit window
+* Global search: find the next row having the keyword in any column and open it in row edit window
+* In edit row window search result, highlight the field containing the searched keyword
+* Added stop and next buttons to edit row window when search in progress
+* Added reload original file to the column menu and the list context menu
+* Display the current edited record number in edit row title bar
+* Add blnSkipConfirmQuit option in ini file to skip the quit confirm prompt, default to false
+* Use ObjCSV library v0.4 for better file system error handling
 
 ### 2013-11-30 v1.0
 

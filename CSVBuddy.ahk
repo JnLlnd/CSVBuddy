@@ -8,19 +8,16 @@ This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 Version history
 ---------------
 
-????-??-?? v1.1
+2013-12-30 v1.1
 - filter by column: click on a header to retain only rows with the keyword appearing in this column
-- global filtering: right-click in the list to retain only rows with the keyword appearing in any column
-- search by column: open in row edit window the next row having the keyword in this column
-- global search: open in row edit window the next row having the keyword in any column
-- highlight the field containing the searched keyword in edit row window
-- added filter, reload original file and search items to the column menu
-- added global filter, reload original file and global search to the list right-click menu
+- global filtering: right-click in the list zone to retain only rows with the keyword appearing in any column
+- search by column: find the next row having the keyword in this column and open it in row edit window
+- global search: find the next row having the keyword in any column and open it in row edit window
+- in edit row window search result, highlight the field containing the searched keyword
 - added stop and next buttons to edit row window when search in progress
-- edited record number in edit row title bar
-- found record number in edit row title bar
-- stop display right-click menu over the header row
-- add blnSkipConfirmQuit option in ini file, default to false
+- added reload original file to the column menu and the list context menu
+- display the current edited record number in edit row title bar
+- add blnSkipConfirmQuit option in ini file to skip the quit confirm prompt, default to false
 - use ObjCSV library v0.4 for better file system error handling
 
 2013-11-30 v1.0
