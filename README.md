@@ -32,6 +32,10 @@ First official release: 2013-11-30
 * Add blnSkipConfirmQuit option in ini file to skip the quit confirm prompt, default to false
 * Use ObjCSV library v0.4 for better file system error handling
 
+### 2013-12-27 v1.0.1
+
+* Fix a small bug in the "Add row" dialog box where default values were presented when this dialog box should not have default values
+
 ### 2013-11-30 v1.0
 
 * First official release
