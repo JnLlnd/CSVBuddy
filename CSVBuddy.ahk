@@ -3,7 +3,7 @@
 CSV Buddy
 Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
-This script uses the library ObjCSV v0.3 (https://github.com/JnLlnd/ObjCSV)
+This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 
 Version history
 ---------------
@@ -13,13 +13,15 @@ Version history
 - global filtering: right-click in the list to retain only rows with the keyword appearing in any column
 - search by column: open in row edit window the next row having the keyword in this column
 - global search: open in row edit window the next row having the keyword in any column
-- added filter, clear filters and search items to the column menu
-- added global filter, clear filtrees and global search to the list right-click menu
+- highlight the field containing the searched keyword in edit row window
+- added filter, reload original file and search items to the column menu
+- added global filter, reload original file and global search to the list right-click menu
 - added stop and next buttons to edit row window when search in progress
 - edited record number in edit row title bar
 - found record number in edit row title bar
 - stop display right-click menu over the header row
 - add blnSkipConfirmQuit option in ini file, default to false
+- use ObjCSV library v0.4 for better file system error handling
 
 2013-11-30 v1.0
 - First official release
@@ -423,7 +425,7 @@ if !StrLen(strFileHeaderEscaped) and (radSetHeader)
 	IfMsgBox, No
 		return
 }
-if LV_GetCount("Column") and (A_ThisMenuItem <> lLvEventsFilterClear)
+if LV_GetCount("Column")
 {
 	MsgBox, 36, % L(lAppName), % L(lTab1Replacethecurrentcontentof)
 	IfMsgBox, Yes
@@ -784,7 +786,7 @@ ButtonSaveFile:
 Gui, 1:Submit, NoHide
 if !DelimitersOK(3)
 	return
-blnOverwrite := CheckIfFileExistOverwrite(strFileToSave)
+blnOverwrite := CheckIfFileExistOverwrite(strFileToSave, True)
 if (blnOverwrite < 0)
 	return
 if !CheckOneRow()
@@ -803,6 +805,11 @@ strRealFieldDelimiter3 := StrMakeRealFieldDelimiter(strFieldDelimiter3)
 ObjCSV_Collection2CSV(obj, strFileToSave, radSaveWithHeader
 	, GetListViewHeader(strRealFieldDelimiter3, strFieldEncapsulator3), intProgressType, blnOverwrite
 	, strRealFieldDelimiter3, strFieldEncapsulator3, strEolReplacement, L(lTab3SavingCSV))
+if (ErrorLevel)
+	if (ErrorLevel = 1)
+		Oops(lExportSystemError, A_LastError)
+	else
+		Oops(lExportUnknownError)
 if FileExist(strFileToSave)
 {
 	GuiControl, 1:Show, btnCheckFile
@@ -1009,10 +1016,7 @@ return
 
 ButtonExportFile:
 Gui, 1:Submit, NoHide
-if (radFixed or radExpress)
-	blnOverwrite := CheckIfFileExistOverwrite(strFileToExport)
-else
-	blnOverwrite := true
+blnOverwrite := CheckIfFileExistOverwrite(strFileToExport, radFixed)
 if (blnOverwrite < 0)
 	return
 if !CheckOneRow()
@@ -1095,10 +1099,10 @@ if (A_GuiEvent = "ColClick")
 	Menu, ColumnMenu, Add, % L(lLvEventsSortdescnumericFloat), MenuColumnDescFloat
 	Menu, ColumnMenu, Add
 	Menu, ColumnMenu, Add, % L(lLvEventsFilterColumn), MenuFilter
-	Menu, ColumnMenu, Add, % ((lLvEventsFilterClear)), MenuFilterClear
+	Menu, ColumnMenu, Add, % ((lLvEventsFilterReload)), MenuFilterReload
 	Menu, ColumnMenu, Add
 	Menu, ColumnMenu, Add, % L(lLvEventsSearchColumn), MenuSearch
-	Menu, ColumnMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterClear%
+	Menu, ColumnMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterReload%
 	Menu, ColumnMenu, Show
 }
 if (A_GuiEvent = "DoubleClick")
@@ -1142,8 +1146,8 @@ else if !LV_GetCount("")
 {
 	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
 	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
-	Menu, ContextMenu, Add, % ((lLvEventsFilterClear)), MenuFilterClear
-	Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterClear%
+	Menu, ContextMenu, Add, % ((lLvEventsFilterReload)), MenuFilterReload
+	Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterReload%
 }
 else
 {
@@ -1157,8 +1161,8 @@ else
 	Menu, ContextMenu, Add, % L(lLvEventsDeleteRowMenu), MenuDeleteRow
 	Menu, ContextMenu, Add
 	Menu, ContextMenu, Add, % ((lLvEventsFilterGlobal)), MenuFilter
-	Menu, ContextMenu, Add, % ((lLvEventsFilterClear)), MenuFilterClear
-	Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterClear%
+	Menu, ContextMenu, Add, % ((lLvEventsFilterReload)), MenuFilterReload
+	Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterReload%
 	Menu, ContextMenu, Add
 	Menu, ContextMenu, Add, % ((lLvEventsSearchGlobal)), MenuSearch
 }
@@ -1251,7 +1255,7 @@ IsRowSelected(intRow)
 
 MenuAddRow:
 MenuEditRow:
-MenuSearchRow:
+SearchShowRecord:
 Gui, 1:Submit, NoHide
 if (A_ThisLabel = "MenuAddRow")
 {
@@ -1271,7 +1275,7 @@ else if (A_ThisLabel = "MenuEditRow")
 	strGuiTitle := % L(lLvEventsEditrow, lAppName, intRowNumber, LV_GetCount())
 	strCancelButtonLabel := lLvEventsCancel
 }
-else ; MenuSearchRow
+else ; SearchShowRecord
 {
 	strSaveRecordButton := "ButtonSaveRecord"
 	strCancelButton := "ButtonCancel"
@@ -1298,9 +1302,9 @@ loop, % LV_GetCount("Column")
 	{
 		if (intCol = 1)
 		{
-			if (A_ThisLabel = "MenuSearchRow")
+			if (A_ThisLabel = "SearchShowRecord")
 				Gui, 2:Add, Button, y%intY% x10 vbtnStopSearch gButtonStopSearch, % L(lLvEventsStop)
-			Gui, 2:Add, Button, % (A_ThisLabel = "MenuSearchRow" ? "yp x+5" : "y" . intY . "x60") . " vbtnSaveRecord g" . strSaveRecordButton, % L(lLvEventsSave)
+			Gui, 2:Add, Button, % (A_ThisLabel = "SearchShowRecord" ? "yp x+5" : "y" . intY . "x60") . " vbtnSaveRecord g" . strSaveRecordButton, % L(lLvEventsSave)
 			Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, %strCancelButtonLabel%
 		}
 		if (intCol = intMaxNbCol)
@@ -1326,10 +1330,15 @@ loop, % LV_GetCount("Column")
 }
 if (intCol = 1) ; duplicate of lines above in the loop, but much simpler that way
 {
-	if (A_ThisLabel = "MenuSearchRow")
+	if (A_ThisLabel = "SearchShowRecord")
 		Gui, 2:Add, Button, y%intY% x10 vbtnStopSearch gButtonStopSearch, % L(lLvEventsStop)
-	Gui, 2:Add, Button, % (A_ThisLabel = "MenuSearchRow" ? "yp x+5" : "y" . intY . "x60") . " vbtnSaveRecord g" . strSaveRecordButton, % L(lLvEventsSave)
+	Gui, 2:Add, Button, % (A_ThisLabel = "SearchShowRecord" ? "yp x+5" : "y" . intY . "x60") . " vbtnSaveRecord g" . strSaveRecordButton, % L(lLvEventsSave)
 	Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, %strCancelButtonLabel%
+}
+if (A_ThisLabel = "SearchShowRecord" and intColFound)
+{
+	GuiControl, 2:Focus, strEdit%intColFound%
+	Send, ^a
 }
 Gui, 2:Show, AutoSize Center
 Gui, 1:+Disabled
@@ -1359,24 +1368,36 @@ return
 
 
 MenuFilter:
+Gui, 1:+OwnDialogs 
+MsgBox, % (4+32+256), % L(lAppName), % L(lLvEventsFilterCaution)
+IfMsgBox, No
+	return
 InputBox, strFilter, % L(lLvEventsFilterInputTitle, lAppName), %lLvEventsFilterInput%, , , 120
 if !StrLen(strFilter)
 	return
 intPrevNbRows := LV_GetCount()
+intProgressBatchSize := ProgressBatchSize(intPrevNbRows)
+ProgressStart(intProgressType, intPrevNbRows, lLvEventsFilterProgress)
 intRowNumber := 0 ; scan each matching row of the ListView
 GuiControl, -Redraw, lvData ; stop drawing the ListView during filtering
-loop, % LV_GetCount()
+loop, %intPrevNbRows%
 {
-	intRowNumber := intRowNumber + 1 ; continue searching from the row before the deleted row
-	if NotMatchingRow(intRowNumber, strFilter, intColNumber)
+	intRowNumber := intRowNumber + 1
+	if !Mod(A_Index, intProgressBatchSize)
+		ProgressUpdate(intProgressType, A_Index, intPrevNbRows, lLvEventsFilterProgress)
+			; update progress bar only every %intProgressBatchSize% records
+	if NotMatchingRow(intRowNumber, strFilter, intColNumber, intColFound) ; ByRef intColFound not used here
 	{
 		LV_Delete(intRowNumber)
-		intRowNumber := intRowNumber - 1 ; continue searching from the row before the deleted row
+		intRowNumber := intRowNumber - 1 ; reduce the counter for deleted row
 	}
 }
-blnFilterActive := true
 GuiControl, +Redraw, lvData ; redraw the ListView
+ProgressStop(intProgressType)
+blnFilterActive := true
+
 intNewNbRows := LV_GetCount()
+LV_Modify(intNewNbRows, "Select Vis")
 intActualSize := Round(intActualSize * intNewNbRows / intPrevNbRows)
 if (intNewNbRows)
 	SB_SetText(L(lSBRecordsSize, intNewNbRows, (intActualSize) ? intActualSize : " <1"))
@@ -1386,52 +1407,77 @@ return
 
 
 
-MenuFilterClear:
-gosub, DeleteListviewData
-gosub, ButtonLoadFile
-return
-
-
-
-MenuSearch:
-InputBox, strSearch, % L(lLvEventsSearchInputTitle, lAppName), %lLvEventsSearchInput%, , , 120
-if !StrLen(strSearch)
-	return
-LV_Modify(LV_GetNext(), "-Select")
-intRowNumber := 1 ; always start search from top
-intLastRow := LV_GetCount()
-Loop
+MenuFilterReload:
+Gui, 1:+OwnDialogs 
+MsgBox, % (3+32+256), % L(lAppName), % L(lLvEventsFilterReloadPrompt)
+IfMsgBox, Yes
 {
-	if !NotMatchingRow(intRowNumber, strSearch, intColNumber)
-	{
-		LV_Modify(intRowNumber, "Select Vis")
-		gosub, MenuSearchRow
-		WinWaitClose, %strGuiTitle%
-		LV_Modify(intRowNumber, "-Select")
-	}
-	intRowNumber := intRowNumber + 1
-	if (intRowNumber > intLastRow)
-		break
+	gosub, DeleteListviewData
+	gosub, ButtonLoadFile
 }
 return
 
 
 
-NotMatchingRow(intRow, strFilter, intColNumber)
+MenuSearch:
+Gui, 1:+OwnDialogs
+intSelectedRows := LV_GetCount("Selected")
+if (intSelectedRows > 1)
+	InputBox, strSearch, % L(lLvEventsSearchInputTitle, lAppName), % L(lLvEventsSearchInputSelected, intSelectedRows), , , 150
+else
 {
-	if (intColNumber) ; column filter
+	InputBox, strSearch, % L(lLvEventsSearchInputTitle, lAppName), %lLvEventsSearchInput%, , , 120
+	intSelectedRows := 0
+}
+if !StrLen(strSearch)
+	return
+intRowNumber := 0
+intLastRow := LV_GetCount()
+blnNotFound := true
+Loop
+{
+	if (intSelectedRows > 1)
+		intRowNumber := LV_GetNext(intRowNumber) ;  returns 0 if no more selected row
+	else
+		intRowNumber := intRowNumber + 1
+	if (!intRowNumber) or (intRowNumber > intLastRow)
+		break
+	if !NotMatchingRow(intRowNumber, strSearch, intColNumber, intColFound) ; ByRef intColFound to highlight the field in edit row window
+	{
+		blnNotFound := False
+		LV_Modify(intRowNumber, "Vis")
+		gosub, SearchShowRecord
+		WinWaitClose, %strGuiTitle%
+	}
+}
+if (blnNotFound)
+	Oops(lLvEventsSearchNotFound, strSearch)
+return
+
+
+
+NotMatchingRow(intRow, strFilter, intColNumber, ByRef intColFound)
+{
+	if (intColNumber) ; column filter/search
 	{
 		LV_GetText(strCell, intRow, intColNumber)
 		if InStr(strCell, strFilter)
+		{
+			intColFound := intColNumber
 			return False
+		}
 	}
-	else ; global filter
+	else ; global filter/search
 		Loop, % LV_GetCount("Column")
 		{
 			LV_GetText(strCell, intRow, A_Index)
 			if InStr(strCell, strFilter)
+			{
+				intColFound := A_Index
 				return False
+			}
 		}
+	intColFound := 0
 	return True
 }
 
@@ -1620,6 +1666,11 @@ else
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText = ""])
 ObjCSV_Collection2Fixed(obj, strFileToExport, strFieldsWidth, radSaveWithHeader, strFieldsName, intProgressType, blnOverwrite
 	, strRealFieldDelimiter3, strFieldEncapsulator3, strEolReplacement, L(lExportSaving))
+if (ErrorLevel)
+	if (ErrorLevel = 1)
+		Oops(lExportSystemError, A_LastError)
+	else
+		Oops(lExportUnknownError)
 if FileExist(strFileToExport)
 {
 	GuiControl, 1:Show, btnCheckExportFile
@@ -1640,10 +1691,12 @@ obj := ObjCSV_ListView2Collection("1", "lvData", , , , intProgressType, L(lTab0R
 ObjCSV_Collection2HTML(obj, strFileToExport, strMultiPurpose, strTemplateDelimiter
 	, intProgressType, blnOverwrite, L(lExportSaving))
 if (ErrorLevel)
-	if (ErrorLevel > 3)
+	if (ErrorLevel = 1)
+		Oops(lExportSystemError, A_LastError)
+	else if (ErrorLevel = 4 or ErrorLevel = 5)
 		Oops(lExportHTMLError)
 	else
-		Oops(lExportUnknownerror)
+		Oops(lExportParameterError)
 if FileExist(strFileToExport)
 {
 	GuiControl, 1:Show, btnCheckExportFile
@@ -1662,7 +1715,10 @@ obj := ObjCSV_ListView2Collection("1", "lvData", , , , intProgressType, L(lTab0R
 ; ObjCSV_Collection2XML(objCollection, strFilePath [, intProgressType = 0, blnOverwrite = 0, strProgressText = ""])
 ObjCSV_Collection2XML(obj, strFileToExport, intProgressType, blnOverwrite, L(lExportSaving))
 if (ErrorLevel)
-	Oops(lExportUnknownerror)
+	if (ErrorLevel = 1)
+		Oops(lExportSystemError, A_LastError)
+	else
+		Oops(lExportUnknownError)
 if FileExist(strFileToExport)
 {
 	GuiControl, 1:Show, btnCheckExportFile
@@ -1671,6 +1727,7 @@ if FileExist(strFileToExport)
 }
 obj := ; release object
 return
+
 
 
 ExportExpress:
@@ -1690,6 +1747,13 @@ if FileExist(strExpressTemplateTempFile)
 	;	, intProgressType = 0, blnOverwrite = 0, strProgressText = ""])
 	ObjCSV_Collection2HTML(obj, strFileToExport, strExpressTemplateTempFile, strTemplateDelimiter
 		, intProgressType, blnOverwrite, L(lExportSaving))
+	if (ErrorLevel)
+		if (ErrorLevel = 1)
+			Oops(lExportSystemError, A_LastError)
+		else if (ErrorLevel = 4 or ErrorLevel = 5)
+			Oops(lExportHTMLError)
+		else
+			Oops(lExportParameterError)
 	FileDelete, %strExpressTemplateTempFile%
 	if FileExist(strFileToExport)
 	{
@@ -1704,6 +1768,7 @@ obj := ; release object
 return
 
 
+
 Check4Update:
 Gui, 1:+OwnDialogs 
 IniRead, strLatestSkipped, %strIniFile%, global, strLatestSkipped, 0.0
@@ -1715,7 +1780,7 @@ if RegExMatch(strCurrentVersion, "(alpha|beta)")
 
 if FirstVsSecondIs(strLatestVersion, lAppVersion) = 1
 {
-	Gui, +OwnDialogs
+	Gui, 1:+OwnDialogs
 	SetTimer, ChangeButtonNames4Update, 50
 
 	MsgBox, 3, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdatePrompt, lAppName, lAppVersion, strLatestVersion), 30
@@ -1886,7 +1951,7 @@ ShrinkEditControl(strEditHandle, intMaxRows, strGuiName)
 
 
 
-CheckIfFileExistOverwrite(strFileName)
+CheckIfFileExistOverwrite(strFileName, blnCanAppend)
 {
 	if !StrLen(strFileName)
 		return -1
@@ -1894,14 +1959,26 @@ CheckIfFileExistOverwrite(strFileName)
 		return True
 	else
 	{
-		Gui, 1:+OwnDialogs 
-		MsgBox, 35, % L(lFuncIfFileExistTitle, lAppName), % L(lFuncIfFileExistMessage, strFileName)
-		IfMsgBox, Yes
-			return True
-		IfMsgBox, No
-			return False
-		IfMsgBox, Cancel
-			return -1
+		if (blnCanAppend)
+		{
+			Gui, 1:+OwnDialogs 
+			MsgBox, 35, % L(lFuncIfFileExistTitle, lAppName), % L(lFuncIfFileExistMessageAppend, strFileName)
+			IfMsgBox, Yes
+				return True ; overwrite
+			IfMsgBox, No
+				return False ; append
+			IfMsgBox, Cancel
+				return -1 ; cancel
+		}
+		else
+		{
+			Gui, 1:+OwnDialogs 
+			MsgBox, 35, % L(lFuncIfFileExistTitle, lAppName), % L(lFuncIfFileExistMessage, strFileName)
+			IfMsgBox, Yes
+				return True ; overwrite
+			return -1 ; cancel
+		}
+
 	}
 }
 
