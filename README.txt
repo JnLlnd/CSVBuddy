@@ -30,6 +30,8 @@ A standard Tab-delimited DSV file (DSV stands for delimiter-sepatated values). T
 TEST-TheBeatles-Lyrics.txt
 A CSV file with line breaks inside lyrics field. Check "Multi-line fields" before loading (leave EOL replacement empty). This file is comma-delimited with double-quotes encapsulators.
 
+TEST-TheBeatles-Tab-HTML-DEMO.html
+A template to test HTML export. Load the file "TEST-TheBeatles-Tab.txt" and, in the "Export" tab, click "HTML" export format and "Select HTML template" button.
 
 
 CSV Buddy – Copyright (C) 2013 Jean Lalonde
