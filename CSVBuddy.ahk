@@ -8,6 +8,9 @@ This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 Version history
 ---------------
 
+2014-01-15 v1.2 beta
+- allow multiple instances
+
 2013-12-30 v1.1
 - filter by column: click on a header to retain only rows with the keyword appearing in this column
 - global filtering: right-click in the list zone to retain only rows with the keyword appearing in any column
@@ -47,7 +50,12 @@ Version history
 #KeyHistory 0
 #NoEnv
 #NoTrayIcon 
+#SingleInstance off
+;@Ahk2Exe-IgnoreBegin
+; Piece of code for developement phase only - won't be compiled
 #SingleInstance force
+; / Piece of code for developement phase only - won't be compiled
+;@Ahk2Exe-IgnoreEnd
 ListLines, Off
 SetWorkingDir, %A_ScriptDir%
 
@@ -62,7 +70,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.1
+;@Ahk2Exe-SetVersion 1.2
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
