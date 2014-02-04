@@ -82,20 +82,25 @@ IfNotExist, %strIniFile%
 	FileAppend,
 		(LTrim Join`r`n
 			[global]
-			intDefaultWidth=16
-			strTemplateDelimiter=~
-			strTextEditorExe=notepad.exe
-			blnSkipHelpReadyToEdit=0
-			blnSkipConfirmQuit=0
-			strLatestSkipped=%lAppVersion%
+			ListBackgroundColor=FFFFFF
+			ListTextColor=000000
+			ListGrid=1
+			DefaultWidth=16
+			TemplateDelimiter=~
+			TextEditorExe=notepad.exe
+			SkipHelpReadyToEdit=0
+			SkipConfirmQuit=0
 		)
 		, %strIniFile%
 
-IniRead, intDefaultWidth, %strIniFile%, global, intDefaultWidth ; used when export to fixed-width format
-IniRead, strTemplateDelimiter, %strIniFile%, global, strTemplateDelimiter ; Default ~ (tilde), used when export to HTML and Express formats
-IniRead, strTextEditorExe, %strIniFile%, global, strTextEditorExe ; Default notepad.exe
-IniRead, blnSkipHelpReadyToEdit, %strIniFile%, global, blnSkipHelpReadyToEdit ; Default 0
-IniRead, blnSkipConfirmQuit, %strIniFile%, global, blnSkipConfirmQuit ; Default 0
+IniRead, strListBackgroundColor, %strIniFile%, global, ListBackgroundColor
+IniRead, strListTextColor, %strIniFile%, global, ListTextColor
+IniRead, blnListGrid, %strIniFile%, global, ListGrid
+IniRead, intDefaultWidth, %strIniFile%, global, DefaultWidth ; used when export to fixed-width format
+IniRead, strTemplateDelimiter, %strIniFile%, global, TemplateDelimiter ; Default ~ (tilde), used when export to HTML and Express formats
+IniRead, strTextEditorExe, %strIniFile%, global, TextEditorExe ; Default notepad.exe
+IniRead, blnSkipHelpReadyToEdit, %strIniFile%, global, SkipHelpReadyToEdit ; Default 0
+IniRead, blnSkipConfirmQuit, %strIniFile%, global, SkipConfirmQuit ; Default 0
 
 intProgressType := -2 ; Status Bar, part 2
 
@@ -482,6 +487,8 @@ if (ErrorLevel)
 	SB_SetText(lSBEmpty, 1)
 	return
 }
+GuiControl, % (blnListGrid ? "+Grid" : "") . " Background" . strListBackgroundColor . " c" . strListTextColor, lvData
+
 SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"), 1)
 Gosub, UpdateCurrentHeader
 if (!blnSkipHelpReadyToEdit)
@@ -1776,7 +1783,7 @@ return
 
 Check4Update:
 Gui, 1:+OwnDialogs 
-IniRead, strLatestSkipped, %strIniFile%, global, strLatestSkipped, 0.0
+IniRead, strLatestSkipped, %strIniFile%, global, LatestVersionSkipped, 0.0
 strLatestVersion := Url2Var("https://raw.github.com/JnLlnd/CSVBuddy/master/latest-version.txt")
 
 if RegExMatch(strCurrentVersion, "(alpha|beta)")
@@ -1792,7 +1799,7 @@ if FirstVsSecondIs(strLatestVersion, lAppVersion) = 1
 	IfMsgBox, Yes
 		Run, http://code.jeanlalonde.ca/csvbuddy/
 	IfMsgBox, No
-		IniWrite, %strLatestVersion%, %strIniFile%, global, strLatestSkipped
+		IniWrite, %strLatestVersion%, %strIniFile%, global, LatestVersionSkipped
 	IfMsgBox, Cancel ; Remind me
 		IniWrite, 0.0, %strIniFile%, Global, LatestVersionSkipped
 	IfMsgBox, TIMEOUT ; Remind me
