@@ -8,8 +8,11 @@ This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 Version history
 ---------------
 
-2014-01-15 v1.2 beta
+2014-03-?? v1.2
 - allow multiple instances
+- options in ini fle to display grid and change colors in list zone
+- import XL CSV files with equal sign before opening field encasulator (equal sign simply skipped)
+- search and replace by column, replacement case sensitive or not
 
 2013-12-30 v1.1
 - filter by column: click on a header to retain only rows with the keyword appearing in this column
@@ -82,7 +85,7 @@ IfNotExist, %strIniFile%
 	FileAppend,
 		(LTrim Join`r`n
 			[global]
-			ListBackgroundColor=FFFFFF
+			ListBackgroundColor=D0D0D0
 			ListTextColor=000000
 			ListGrid=1
 			DefaultWidth=16
@@ -1114,6 +1117,7 @@ if (A_GuiEvent = "ColClick")
 	Menu, ColumnMenu, Add, % ((lLvEventsFilterReload)), MenuFilterReload
 	Menu, ColumnMenu, Add
 	Menu, ColumnMenu, Add, % L(lLvEventsSearchColumn), MenuSearch
+	Menu, ColumnMenu, Add, % L(lLvEventsReplaceColumn), MenuReplace
 	Menu, ColumnMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterReload%
 	Menu, ColumnMenu, Show
 }
@@ -1177,6 +1181,7 @@ else
 	Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterReload%
 	Menu, ContextMenu, Add
 	Menu, ContextMenu, Add, % ((lLvEventsSearchGlobal)), MenuSearch
+	Menu, ContextMenu, Add, % ((lLvEventsReplaceGlobal)), MenuReplace
 }
 ; Show the menu at the provided coordinates, A_GuiX and A_GuiY.  These should be used
 ; because they provide correct coordinates even if the user pressed the Apps key:
@@ -1268,8 +1273,10 @@ IsRowSelected(intRow)
 MenuAddRow:
 MenuEditRow:
 SearchShowRecord:
+ReplaceShowRecord:
+strShowRecordLabel := A_ThisLabel
 Gui, 1:Submit, NoHide
-if (A_ThisLabel = "MenuAddRow")
+if (strShowRecordLabel = "MenuAddRow")
 {
 	LV_Modify(0, "-Select")
 	LV_Insert(0xFFFF, "Select Focus") ; add at the end of the list
@@ -1280,14 +1287,21 @@ if (A_ThisLabel = "MenuAddRow")
 	strGuiTitle := L(lLvEventsAddrow, lAppName)
 	strCancelButtonLabel := lLvEventsCancel
 }
-else if (A_ThisLabel = "MenuEditRow")
+else if (strShowRecordLabel = "MenuEditRow")
 {
 	strSaveRecordButton := "ButtonSaveRecord"
 	strCancelButton := "ButtonCancel"
 	strGuiTitle := % L(lLvEventsEditrow, lAppName, intRowNumber, LV_GetCount())
 	strCancelButtonLabel := lLvEventsCancel
 }
-else ; SearchShowRecord
+else if (strShowRecordLabel = "SearchShowRecord")
+{
+	strSaveRecordButton := "ButtonSaveRecord"
+	strCancelButton := "ButtonCancel"
+	strGuiTitle := % L(lLvEventsSearchEditrow, lAppName, intRowNumber, LV_GetCount())
+	strCancelButtonLabel := lLvEventsNext
+}
+else ; ReplaceShowRecord
 {
 	strSaveRecordButton := "ButtonSaveRecord"
 	strCancelButton := "ButtonCancel"
@@ -1313,12 +1327,7 @@ loop, % LV_GetCount("Column")
 	if ((intY + 100) > intMonWorkBottom)
 	{
 		if (intCol = 1)
-		{
-			if (A_ThisLabel = "SearchShowRecord")
-				Gui, 2:Add, Button, y%intY% x10 vbtnStopSearch gButtonStopSearch, % L(lLvEventsStop)
-			Gui, 2:Add, Button, % (A_ThisLabel = "SearchShowRecord" ? "yp x+5" : "y" . intY . "x60") . " vbtnSaveRecord g" . strSaveRecordButton, % L(lLvEventsSave)
-			Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, %strCancelButtonLabel%
-		}
+			Gosub, DisplayShowRecordsButtons
 		if (intCol = intMaxNbCol)
 		{
 			intYLabel := intY
@@ -1333,6 +1342,13 @@ loop, % LV_GetCount("Column")
 	intYEdit := intY + 15
 	LV_GetText(strColHeader, 0, A_Index)
 	LV_GetText(strColData, intRowNumber, A_Index)
+	if (A_Index = intColNumber)
+	{
+		strPreviousCaseSense := A_StringCaseSense 
+		StringCaseSense, % (blnReplaceCaseSensitive ? "On" : "Off")
+		StringReplace, strColData, strColData, %strSearch%, %strReplace%, All
+		StringCaseSense, %strPreviousCaseSense%
+	}
 	Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabel%A_Index%, %strColHeader%
 	Gui, 2:Add, Edit, y%intYEdit% x%intX% w%intEditWidth% vstrEdit%A_Index% +HwndstrEditHandle, %strColData%
 	ShrinkEditControl(strEditHandle, 2, "2")
@@ -1340,20 +1356,27 @@ loop, % LV_GetCount("Column")
 	intY := intY + intPosEditH + 19
 	intNbFieldsOnScreen := A_Index ; incremented at each occurence of the loop
 }
-if (intCol = 1) ; duplicate of lines above in the loop, but much simpler that way
-{
-	if (A_ThisLabel = "SearchShowRecord")
-		Gui, 2:Add, Button, y%intY% x10 vbtnStopSearch gButtonStopSearch, % L(lLvEventsStop)
-	Gui, 2:Add, Button, % (A_ThisLabel = "SearchShowRecord" ? "yp x+5" : "y" . intY . "x60") . " vbtnSaveRecord g" . strSaveRecordButton, % L(lLvEventsSave)
-	Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, %strCancelButtonLabel%
-}
-if (A_ThisLabel = "SearchShowRecord" and intColFound)
+if (intCol = 1) ; duplicate of line above in the loop, but much simpler that way
+	Gosub, DisplayShowRecordsButtons
+
+if ((strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceShowRecord") and intColFound)
 {
 	GuiControl, 2:Focus, strEdit%intColFound%
 	Send, ^a
 }
 Gui, 2:Show, AutoSize Center
 Gui, 1:+Disabled
+return
+
+
+
+DisplayShowRecordsButtons:
+if (strShowRecordLabel = "ReplaceShowRecord")
+	Gui, 2:Add, Button, y%intY% x10 vbtnReplaceAll gButtonReplaceAll, % L(lLvEventsReplaceAll)
+if (strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceShowRecord")
+	Gui, 2:Add, Button, % (strShowRecordLabel = "ReplaceShowRecord" ? "yp x+5" : "y" . intY . "x10") . " vbtnStopSearch gButtonStopSearch", % L(lLvEventsStop)
+Gui, 2:Add, Button, % (strShowRecordLabel = "SearchShowRecord" ? "yp x+5" : "y" . intY . "x60") . " vbtnSaveRecord g" . strSaveRecordButton, % L(lLvEventsSave)
+Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, %strCancelButtonLabel%
 return
 
 
@@ -1398,7 +1421,7 @@ loop, %intPrevNbRows%
 	if !Mod(A_Index, intProgressBatchSize)
 		ProgressUpdate(intProgressType, A_Index, intPrevNbRows, lLvEventsFilterProgress)
 			; update progress bar only every %intProgressBatchSize% records
-	if NotMatchingRow(intRowNumber, strFilter, intColNumber, intColFound) ; ByRef intColFound not used here
+	if NotMatchingRow(intRowNumber, strFilter, intColNumber, intColFound, blnReplaceCaseSensitive) ; ByRef intColFound not used here
 	{
 		LV_Delete(intRowNumber)
 		intRowNumber := intRowNumber - 1 ; reduce the counter for deleted row
@@ -1432,16 +1455,30 @@ return
 
 
 MenuSearch:
+MenuReplace:
 Gui, 1:+OwnDialogs
 intSelectedRows := LV_GetCount("Selected")
 if (intSelectedRows > 1)
-	InputBox, strSearch, % L(lLvEventsSearchInputTitle, lAppName), % L(lLvEventsSearchInputSelected, intSelectedRows), , , 150
+	InputBox, strSearch, % L((A_ThisLabel = "MenuSearch" ? lLvEventsSearchInputTitle : lLvEventsReplaceInputTitle), lAppName), % L(lLvEventsSearchInputSelected, intSelectedRows), , , 150
 else
 {
-	InputBox, strSearch, % L(lLvEventsSearchInputTitle, lAppName), %lLvEventsSearchInput%, , , 120
+	InputBox, strSearch, % L((A_ThisLabel = "MenuSearch" ? lLvEventsSearchInputTitle : lLvEventsReplaceInputTitle), lAppName), %lLvEventsSearchInput%, , , 120
 	intSelectedRows := 0
 }
-if !StrLen(strSearch)
+if (A_ThisLabel = "MenuReplace")
+{
+	InputBox, strReplace, % L(lLvEventsReplaceInputTitle, lAppName), %lLvEventsReplaceInput%, , , 150
+	MsgBox, 35, % L(lLvEventsReplaceInputTitle, lAppName), %lLvEventsReplaceCaseSensitive%
+	IfMsgBox, Yes
+		blnReplaceCaseSensitive := True
+	IfMsgBox, No
+		blnReplaceCaseSensitive := False
+	IfMsgBox, Cancel
+		strReplace := ""
+}
+else
+	blnReplaceCaseSensitive := False ; required for NotMatchingRow
+if !StrLen(strSearch) or (A_ThisLabel = "MenuReplace" and !StrLen(strReplace))
 	return
 intRowNumber := 0
 intLastRow := LV_GetCount()
@@ -1454,11 +1491,14 @@ Loop
 		intRowNumber := intRowNumber + 1
 	if (!intRowNumber) or (intRowNumber > intLastRow)
 		break
-	if !NotMatchingRow(intRowNumber, strSearch, intColNumber, intColFound) ; ByRef intColFound to highlight the field in edit row window
+	if !NotMatchingRow(intRowNumber, strSearch, intColNumber, intColFound, blnReplaceCaseSensitive) ; ByRef intColFound to highlight the field in edit row window
 	{
 		blnNotFound := False
 		LV_Modify(intRowNumber, "Vis")
-		gosub, SearchShowRecord
+		if (A_ThisLabel = "MenuSearch")
+			Gosub, SearchShowRecord
+		else ; MenuReplace
+			Gosub, ReplaceShowRecord
 		WinWaitClose, %strGuiTitle%
 	}
 }
@@ -1468,12 +1508,12 @@ return
 
 
 
-NotMatchingRow(intRow, strFilter, intColNumber, ByRef intColFound)
+NotMatchingRow(intRow, strFilter, intColNumber, ByRef intColFound, blnReplaceCaseSensitive)
 {
 	if (intColNumber) ; column filter/search
 	{
 		LV_GetText(strCell, intRow, intColNumber)
-		if InStr(strCell, strFilter)
+		if InStr(strCell, strFilter, blnReplaceCaseSensitive)
 		{
 			intColFound := intColNumber
 			return False
@@ -1567,6 +1607,12 @@ return
 
 
 
+ButtonReplaceAll:
+; ####
+return
+
+
+
 ButtonSaveRecordAddRow:
 Gui, 1:Default
 intRowNumber := LV_GetCount()
@@ -1608,6 +1654,7 @@ return
 2GuiSize: ; Expand or shrink the ListView in response to the user's resizing of the window.
 if A_EventInfo = 1  ; The window has been minimized.  No action needed.
     return
+GuiControl, 2:Move, btnReplaceAll, % "X" . (A_GuiWidth - 230)
 GuiControl, 2:Move, btnStopSearch, % "X" . (A_GuiWidth - 150)
 GuiControl, 2:Move, btnSaveRecord, % "X" . (A_GuiWidth - 100)
 GuiControl, 2:Move, btnCancel, % "X" . (A_GuiWidth - 50)
