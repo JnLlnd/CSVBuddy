@@ -1,3 +1,5 @@
+; TODO
+; Replace All
 ;===============================================
 /*
 CSV Buddy
@@ -13,6 +15,7 @@ Version history
 - options in ini fle to display grid and change colors in list zone
 - import XL CSV files with equal sign before opening field encasulator (equal sign simply skipped)
 - search and replace by column, replacement case sensitive or not
+- during search or replace, select and highlight the current row when displaying the record
 
 2013-12-30 v1.1
 - filter by column: click on a header to retain only rows with the keyword appearing in this column
@@ -1494,12 +1497,13 @@ Loop
 	if !NotMatchingRow(intRowNumber, strSearch, intColNumber, intColFound, blnReplaceCaseSensitive) ; ByRef intColFound to highlight the field in edit row window
 	{
 		blnNotFound := False
-		LV_Modify(intRowNumber, "Vis")
+		LV_Modify(intRowNumber, "Vis Select")
 		if (A_ThisLabel = "MenuSearch")
 			Gosub, SearchShowRecord
 		else ; MenuReplace
 			Gosub, ReplaceShowRecord
 		WinWaitClose, %strGuiTitle%
+		LV_Modify(intRowNumber, "-Select")
 	}
 }
 if (blnNotFound)
