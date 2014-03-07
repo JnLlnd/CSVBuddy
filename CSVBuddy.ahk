@@ -1,5 +1,3 @@
-; TODO
-; Replace All
 ;===============================================
 /*
 CSV Buddy
@@ -15,6 +13,7 @@ Version history
 - options in ini fle to display grid and change colors in list zone
 - import XL CSV files with equal sign before opening field encasulator (equal sign simply skipped)
 - search and replace by column, replacement case sensitive or not
+- confirm each replacement or replace all
 - during search or replace, select and highlight the current row when displaying the record
 
 2013-12-30 v1.1
@@ -1290,26 +1289,12 @@ if (strShowRecordLabel = "MenuAddRow")
 	strGuiTitle := L(lLvEventsAddrow, lAppName)
 	strCancelButtonLabel := lLvEventsCancel
 }
-else if (strShowRecordLabel = "MenuEditRow")
+else
 {
 	strSaveRecordButton := "ButtonSaveRecord"
 	strCancelButton := "ButtonCancel"
-	strGuiTitle := % L(lLvEventsEditrow, lAppName, intRowNumber, LV_GetCount())
-	strCancelButtonLabel := lLvEventsCancel
-}
-else if (strShowRecordLabel = "SearchShowRecord")
-{
-	strSaveRecordButton := "ButtonSaveRecord"
-	strCancelButton := "ButtonCancel"
-	strGuiTitle := % L(lLvEventsSearchEditrow, lAppName, intRowNumber, LV_GetCount())
-	strCancelButtonLabel := lLvEventsNext
-}
-else ; ReplaceShowRecord
-{
-	strSaveRecordButton := "ButtonSaveRecord"
-	strCancelButton := "ButtonCancel"
-	strGuiTitle := % L(lLvEventsSearchEditrow, lAppName, intRowNumber, LV_GetCount())
-	strCancelButtonLabel := lLvEventsNext
+	strCancelButtonLabel := (strShowRecordLabel = "MenuEditRow" ? lLvEventsCancel : lLvEventsNext)
+	strGuiTitle := L((strShowRecordLabel = "MenuEditRow" ? lLvEventsEditrow : lLvEventsSearchEditrow), lAppName, intRowNumber, LV_GetCount())
 }
 
 if (intRowNumber = 0)
@@ -1344,15 +1329,15 @@ loop, % LV_GetCount("Column")
 	intYLabel := intY
 	intYEdit := intY + 15
 	LV_GetText(strColHeader, 0, A_Index)
+	Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabel%A_Index%, %strColHeader%
 	LV_GetText(strColData, intRowNumber, A_Index)
-	if (A_Index = intColNumber)
+	if (strShowRecordLabel = "ReplaceShowRecord" and A_Index = intColNumber)
 	{
 		strPreviousCaseSense := A_StringCaseSense 
 		StringCaseSense, % (blnReplaceCaseSensitive ? "On" : "Off")
 		StringReplace, strColData, strColData, %strSearch%, %strReplace%, All
 		StringCaseSense, %strPreviousCaseSense%
 	}
-	Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabel%A_Index%, %strColHeader%
 	Gui, 2:Add, Edit, y%intYEdit% x%intX% w%intEditWidth% vstrEdit%A_Index% +HwndstrEditHandle, %strColData%
 	ShrinkEditControl(strEditHandle, 2, "2")
 	GuiControlGet, intPosEdit, 2:Pos, %strEditHandle%
@@ -1486,6 +1471,7 @@ if !StrLen(strSearch) or (A_ThisLabel = "MenuReplace" and !StrLen(strReplace))
 intRowNumber := 0
 intLastRow := LV_GetCount()
 blnNotFound := true
+blnReplaceAll := false
 Loop
 {
 	if (intSelectedRows > 1)
@@ -1501,7 +1487,17 @@ Loop
 		if (A_ThisLabel = "MenuSearch")
 			Gosub, SearchShowRecord
 		else ; MenuReplace
-			Gosub, ReplaceShowRecord
+			if (blnReplaceAll)
+			{
+				LV_GetText(strCell, intRowNumber, intColNumber)
+				strPreviousCaseSense := A_StringCaseSense 
+				StringCaseSense, % (blnReplaceCaseSensitive ? "On" : "Off")
+				StringReplace, strCell, strCell, %strSearch%, %strReplace%, All
+				StringCaseSense, %strPreviousCaseSense%
+				LV_Modify(intRowNumber, "Col" . intColNumber, strCell)
+			}
+			else
+				Gosub, ReplaceShowRecord
 		WinWaitClose, %strGuiTitle%
 		LV_Modify(intRowNumber, "-Select")
 	}
@@ -1612,7 +1608,8 @@ return
 
 
 ButtonReplaceAll:
-; ####
+blnReplaceAll := true
+gosub, ButtonSaveRecord
 return
 
 
