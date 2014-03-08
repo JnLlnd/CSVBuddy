@@ -15,6 +15,7 @@ Version history
 - search and replace by column, replacement case sensitive or not
 - confirm each replacement or replace all
 - during search or replace, select and highlight the current row when displaying the record
+- up or down arrow to indicate which field is the current sort key
 
 2013-12-30 v1.1
 - filter by column: click on a header to retain only rows with the keyword appearing in this column
@@ -455,6 +456,7 @@ if LV_GetCount("Column")
 else
 	intActualSize := 0
 
+intCurrentSortColumn := 0 ; indicate that no field header has the ^ or v sort indicator
 strCurrentHeader := StrUnEscape(strFileHeaderEscaped)
 strCurrentFieldDelimiter := StrMakeRealFieldDelimiter(strFieldDelimiter1)
 strCurrentVisibleFieldDelimiter := strFieldDelimiter1
@@ -1142,9 +1144,16 @@ MenuColumnDescFloat:
 StringReplace, strOption, A_ThisLabel, Menu,
 StringReplace, strOption, strOption, Column, % "Sort "
 StringReplace, strOption, strOption, Sort Desc, % "SortDesc "
-LV_ModifyCol(intColNumber, strOption)
+
+LV_GetText(strColHeader, 0, intCurrentSortColumn)
+LV_ModifyCol(intCurrentSortColumn, , SubStr(strColHeader, 3))
+
+intCurrentSortColumn := intColNumber
+LV_ModifyCol(intCurrentSortColumn, strOption)
 if InStr(strOption, "Text")
 	LV_ModifyCol(intColNumber, "Left")
+LV_GetText(strColHeader, 0, intCurrentSortColumn)
+LV_ModifyCol(intCurrentSortColumn, , (InStr(strOption, "Desc") ? "v" : "^") . " " . strColHeader)
 Menu, ColumnMenu, Delete
 return
 
