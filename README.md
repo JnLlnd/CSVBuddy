@@ -1,8 +1,8 @@
 ﻿
-# CSV Buddy (v1.1) - Read me
+# CSV Buddy (v1.2) - Read me
 
 
-CSV Buddy helps you make your CSV files ready to be imported by a variety of software. You can load files with all sort of field delimiters (comma, tad, semi-colon, etc.) and encapsulators (double/single-quotes or any other character). Convert line breaks in data field making your file XL ready. Rename/reorder fields, add or edit records, filter or search, save with any delimiters and export to fixed-width, HTML templates or XML formats. Freeware.
+CSV Buddy helps you make your CSV files ready to be imported by a variety of software. You can load files with all sort of field delimiters (comma, tad, semi-colon, etc.) and encapsulators (double/single-quotes or any other character). Convert line breaks in data field making your file XL ready. Rename/reorder fields, add or edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Freeware.
 
 
 Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org)  
@@ -18,6 +18,17 @@ First official release: 2013-11-30
 
 ## History
 
+
+### 2014-03-07 v1.2
+
+* Search and replace by column, replacement case sensitive or not
+* Confirm each replacement or replace all
+* During search or replace, select and highlight the current row when displaying the record found
+* Option in ini file to display or not a grid around cells in list zone
+* Options in ini file to choose background and text colors in list zone
+* Up or down arrow to indicate which field is the current sort key
+* Allow multiple instances of the app to run simultaneously
+* Import CSV files created by XL that include equal sign before the opening field encasulator
 
 ### 2013-12-30 v1.1
 
@@ -63,7 +74,7 @@ First official release: 2013-11-30
 ## <a name="copyright"></a>Copyright
 
 
-CSV Buddy - Copyright (C) 2013  Jean Lalonde  
+CSV Buddy - Copyright (C) 2013-2014  Jean Lalonde  
   
 This software is provided 'as-is', without any express or implied warranty.  In no event will the authors be held liable for any damages arising from the use of this software.  
   

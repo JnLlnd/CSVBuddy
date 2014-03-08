@@ -8,14 +8,15 @@ This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 Version history
 ---------------
 
-2014-03-?? v1.2
-- allow multiple instances
-- options in ini fle to display grid and change colors in list zone
-- import XL CSV files with equal sign before opening field encasulator (equal sign simply skipped)
+2014-03-07 v1.2
 - search and replace by column, replacement case sensitive or not
 - confirm each replacement or replace all
-- during search or replace, select and highlight the current row when displaying the record
+- during search or replace, select and highlight the current row when displaying the record found
+- option in ini file to display or not a grid around cells in list zone
+- options in ini file to choose background and text colors in list zone
 - up or down arrow to indicate which field is the current sort key
+- allow multiple instances of the app to run simultaneously
+- import CSV files created by XL that include equal sign before the opening field encasulator
 
 2013-12-30 v1.1
 - filter by column: click on a header to retain only rows with the keyword appearing in this column
@@ -96,6 +97,7 @@ IfNotExist, %strIniFile%
 			TextEditorExe=notepad.exe
 			SkipHelpReadyToEdit=0
 			SkipConfirmQuit=0
+			Startups=1
 		)
 		, %strIniFile%
 
@@ -107,6 +109,9 @@ IniRead, strTemplateDelimiter, %strIniFile%, global, TemplateDelimiter ; Default
 IniRead, strTextEditorExe, %strIniFile%, global, TextEditorExe ; Default notepad.exe
 IniRead, blnSkipHelpReadyToEdit, %strIniFile%, global, SkipHelpReadyToEdit ; Default 0
 IniRead, blnSkipConfirmQuit, %strIniFile%, global, SkipConfirmQuit ; Default 0
+IniRead, strLatestSkipped, %strIniFile%, global, LatestVersionSkipped, 0.0
+IniRead, intStartups, %strIniFile%, Global, Startups, 1
+IniRead, blnDonator, %strIniFile%, Global, Donator, 0 ; Please, be fair. Don't cheat with this.
 
 intProgressType := -2 ; Status Bar, part 2
 
@@ -1840,7 +1845,20 @@ return
 
 Check4Update:
 Gui, 1:+OwnDialogs 
-IniRead, strLatestSkipped, %strIniFile%, global, LatestVersionSkipped, 0.0
+
+if GetKeyState("Shift") and GetKeyState("LWin")
+{
+	IniWrite, 1, %strIniFile%, Global, Donator ; stop Freeware donation nagging
+	MsgBox, 64, %lAppName%, %lDonateThankyou%
+}
+else if Time2Donate(intStartups, blnDonator)
+{
+	MsgBox, 36, % l(lDonateTitle, intStartups, lAppName), % l(lDonatePrompt, lAppName, intStartups)
+	IfMsgBox, Yes
+		Gosub, ButtonDonate
+}
+IniWrite, % (intStartups + 1), %strIniFile%, Global, Startups
+
 strLatestVersion := Url2Var("https://raw.github.com/JnLlnd/CSVBuddy/master/latest-version.txt")
 
 if RegExMatch(strCurrentVersion, "(alpha|beta)")
@@ -1878,6 +1896,23 @@ SetTimer, ChangeButtonNames4Update, Off
 WinActivate
 ControlSetText, Button3, %lTab5ButtonRemind%
 return
+
+
+
+Time2Donate(intStartups, blnDonator)
+{
+	if (intStartups > 200)
+		intDivisor := 50
+	else if (intStartups > 120)
+		intDivisor := 40
+	else if (intStartups > 60)
+		intDivisor := 30
+	else
+		intDivisor := 20
+		
+	return !Mod(intStartups, intDivisor) and !(blnDonator)
+}
+
 
 
 Check4CommandLineParameter:
