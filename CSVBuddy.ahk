@@ -8,6 +8,9 @@ This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 Version history
 ---------------
 
+2014-03-09 v1.2.1
+- fix bug: ini variables missing when ini file already existed making grid black text on black background
+
 2014-03-07 v1.2
 - search and replace by column, replacement case sensitive or not
 - confirm each replacement or replace all
@@ -84,29 +87,36 @@ SetWorkingDir, %A_ScriptDir%
 
 ; --------------------- GLOBAL AND DEFAULT VALUES --------------------------
 
+strListBackgroundColor := "D0D0D0"
+strListTextColor := "000000"
+blnListGrid := 1
+intDefaultWidth := 16
+strTemplateDelimiter := "~"
+strTextEditorExe := "notepad.exe"
+
 strIniFile := A_ScriptDir . "\CSVBuddy.ini"
 IfNotExist, %strIniFile%
 	FileAppend,
 		(LTrim Join`r`n
 			[global]
-			ListBackgroundColor=D0D0D0
-			ListTextColor=000000
-			ListGrid=1
-			DefaultWidth=16
-			TemplateDelimiter=~
-			TextEditorExe=notepad.exe
+			ListBackgroundColor=%strListBackgroundColor%
+			ListTextColor=%strListTextColor%
+			ListGrid=%blnListGrid%
+			DefaultWidth=%intDefaultWidth%
+			TemplateDelimiter=%strTemplateDelimiter%
+			TextEditorExe=%strTextEditorExe%
 			SkipHelpReadyToEdit=0
 			SkipConfirmQuit=0
 			Startups=1
 		)
 		, %strIniFile%
 
-IniRead, strListBackgroundColor, %strIniFile%, global, ListBackgroundColor
-IniRead, strListTextColor, %strIniFile%, global, ListTextColor
-IniRead, blnListGrid, %strIniFile%, global, ListGrid
-IniRead, intDefaultWidth, %strIniFile%, global, DefaultWidth ; used when export to fixed-width format
-IniRead, strTemplateDelimiter, %strIniFile%, global, TemplateDelimiter ; Default ~ (tilde), used when export to HTML and Express formats
-IniRead, strTextEditorExe, %strIniFile%, global, TextEditorExe ; Default notepad.exe
+IniRead, strListBackgroundColor, %strIniFile%, global, ListBackgroundColor, %strListBackgroundColor%
+IniRead, strListTextColor, %strIniFile%, global, ListTextColor, %strListTextColor%
+IniRead, blnListGrid, %strIniFile%, global, ListGrid, %blnListGrid%
+IniRead, intDefaultWidth, %strIniFile%, global, DefaultWidth, %intDefaultWidth% ; used when export to fixed-width format
+IniRead, strTemplateDelimiter, %strIniFile%, global, TemplateDelimiter, %strTemplateDelimiter% ; Default ~ (tilde), used when export to HTML and Express formats
+IniRead, strTextEditorExe, %strIniFile%, global, TextEditorExe, %strTextEditorExe% ; Default notepad.exe
 IniRead, blnSkipHelpReadyToEdit, %strIniFile%, global, SkipHelpReadyToEdit ; Default 0
 IniRead, blnSkipConfirmQuit, %strIniFile%, global, SkipConfirmQuit ; Default 0
 IniRead, strLatestSkipped, %strIniFile%, global, LatestVersionSkipped, 0.0
