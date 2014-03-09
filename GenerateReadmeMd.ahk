@@ -24,6 +24,8 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
+H(3, "2014-03-09 v1.2.1")
+B("Bug fix: ini variables missing when ini file already existed making grid black text on black background")
 H(3, "2014-03-07 v1.2")
 B("Search and replace by column, replacement case sensitive or not")
 B("Confirm each replacement or replace all")

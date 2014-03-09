@@ -9,7 +9,7 @@ Version history
 ---------------
 
 2014-03-09 v1.2.1
-- fix bug: ini variables missing when ini file already existed making grid black text on black background
+- bug fix: ini variables missing when ini file already existed making grid black text on black background
 
 2014-03-07 v1.2
 - search and replace by column, replacement case sensitive or not
@@ -80,7 +80,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.2
+;@Ahk2Exe-SetVersion 1.2.1
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
