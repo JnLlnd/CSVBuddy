@@ -8,8 +8,9 @@ This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 Version history
 ---------------
 
-2014-03-09 v1.2.1
-- bug fix: ini variables missing when ini file already existed making grid black text on black background
+2014-03-09 v1.2.1 (bug fix)
+- ini variables missing when ini file already existed making grid black text on black background
+- bug with multiple instances
 
 2014-03-07 v1.2
 - search and replace by column, replacement case sensitive or not
@@ -63,7 +64,7 @@ Version history
 #SingleInstance off
 ;@Ahk2Exe-IgnoreBegin
 ; Piece of code for developement phase only - won't be compiled
-#SingleInstance force
+; COMPILER EXCLUSION NOT WORKING FOR THIS LINE: #SingleInstance force
 ; / Piece of code for developement phase only - won't be compiled
 ;@Ahk2Exe-IgnoreEnd
 ListLines, Off
