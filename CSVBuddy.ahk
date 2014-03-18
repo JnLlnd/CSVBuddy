@@ -8,6 +8,10 @@ This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 Version history
 ---------------
 
+2014-03-17 v1.2.2 (bug fix)
+- after a column sort, fix names errors in column headers
+- by safety, remove sorting column indicator before any action in edit column tab 
+
 2014-03-09 v1.2.1 (bug fix)
 - ini variables missing when ini file already existed making grid black text on black background
 - bug with multiple instances
@@ -81,12 +85,14 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.2.1
+;@Ahk2Exe-SetVersion 1.2.2
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
 
 ; --------------------- GLOBAL AND DEFAULT VALUES --------------------------
+
+global intCurrentSortColumn
 
 strListBackgroundColor := "D0D0D0"
 strListTextColor := "000000"
@@ -539,6 +545,9 @@ return
 ButtonSetRename:
 Gui, 1:+OwnDialogs 
 Gui, 1:Submit, NoHide
+
+GoSub, RemoveSorting
+
 if !LV_GetCount()
 {
 	Oops(lTab0FirstloadaCSVfile)
@@ -584,6 +593,9 @@ return
 
 ButtonSetSelect:
 Gui, 1:Submit, NoHide
+
+GoSub, RemoveSorting
+
 if !LV_GetCount()
 {
 	Oops(lTab0FirstloadaCSVfile)
@@ -651,6 +663,9 @@ return
 
 ButtonSetOrder:
 Gui, 1:Submit, NoHide
+
+GoSub, RemoveSorting
+
 if !StrLen(strOrderEscaped)
 {
 	Oops(lTab2OrderNoString, strCurrentVisibleFieldDelimiter)
@@ -696,6 +711,14 @@ return
 ButtonHelpOrder:
 Gui, 1:Submit, NoHide
 Help(lTab2HelpOrder, strCurrentVisibleFieldDelimiter)
+return
+
+
+
+RemoveSorting:
+LV_GetText(strColHeader, 0, intCurrentSortColumn)
+LV_ModifyCol(intCurrentSortColumn, , SubStr(strColHeader, 3))
+intCurrentSortColumn := 0
 return
 
 
@@ -1354,6 +1377,8 @@ loop, % LV_GetCount("Column")
 	intYLabel := intY
 	intYEdit := intY + 15
 	LV_GetText(strColHeader, 0, A_Index)
+	if (A_Index = intCurrentSortColumn)
+		strColHeader := SubStr(strColHeader, 3)
 	Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabel%A_Index%, %strColHeader%
 	LV_GetText(strColData, intRowNumber, A_Index)
 	if (strShowRecordLabel = "ReplaceShowRecord" and A_Index = intColNumber)
@@ -1987,6 +2012,8 @@ GetListViewHeader(strRealFieldDelimiter, strFieldEncapsulator)
 	Loop, % LV_GetCount("Column")
 	{
 		LV_GetText(strColumnHeader, 0, A_Index)
+		if (A_Index = intCurrentSortColumn)
+			strColumnHeader := SubStr(strColumnHeader, 3)
 		; ObjCSV_Format4CSV(strF4C [, strFieldDelimiter = ",", strEncapsulator = """"])
 		strHeader := strHeader . ObjCSV_Format4CSV(strColumnHeader, strRealFieldDelimiter, strFieldEncapsulator) . strRealFieldDelimiter
 	}
