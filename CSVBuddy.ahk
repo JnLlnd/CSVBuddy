@@ -8,6 +8,9 @@ This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 Version history
 ---------------
 
+2014-08-31 v1.2.3 (bug fix)
+- fix bug when saving or exporting file with a column sort indicator
+
 2014-03-17 v1.2.2 (bug fix)
 - after a column sort, fix names errors in column headers
 - by safety, remove sorting column indicator before any action in edit column tab 
@@ -85,7 +88,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.2.2
+;@Ahk2Exe-SetVersion 1.2.3
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -715,14 +718,6 @@ return
 
 
 
-RemoveSorting:
-LV_GetText(strColHeader, 0, intCurrentSortColumn)
-LV_ModifyCol(intCurrentSortColumn, , SubStr(strColHeader, 3))
-intCurrentSortColumn := 0
-return
-
-
-
 
 ; --------------------- TAB 3 --------------------------
 
@@ -849,6 +844,9 @@ if (blnOverwrite < 0)
 	return
 if !CheckOneRow()
 	return
+
+GoSub, RemoveSorting
+
 ; ObjCSV_ListView2Collection([strGuiID = "", strListViewID = "", strFieldOrder = "", strFieldDelimiter = ","
 ;	, strEncapsulator = """", intProgressType = 0, strProgressText = ""])
 obj := ObjCSV_ListView2Collection("1", "lvData", , , , intProgressType, L(lTab0ReadingFromList))
@@ -1077,6 +1075,9 @@ Gui, 1:Submit, NoHide
 blnOverwrite := CheckIfFileExistOverwrite(strFileToExport, radFixed)
 if (blnOverwrite < 0)
 	return
+
+GoSub, RemoveSorting
+
 if !CheckOneRow()
 	return
 if (radFixed)
@@ -1968,6 +1969,14 @@ if 0 > 0
 	else
 		Oops(L(lTab1CommandLineFileNotFound, strParam))
 }
+return
+
+
+
+RemoveSorting:
+LV_GetText(strColHeader, 0, intCurrentSortColumn)
+LV_ModifyCol(intCurrentSortColumn, , SubStr(strColHeader, 3))
+intCurrentSortColumn := 0
 return
 
 

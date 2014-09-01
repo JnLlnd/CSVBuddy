@@ -25,6 +25,8 @@ B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbu
 
 H(2, "History")
 
+H(3, "2014-08-31 v1.2.3")
+B("Bug fix: when saving or exporting file with a column sort indicator")
 H(3, "2014-03-17 v1.2.2")
 B("Bug fix: after a column sort, fix names errors in column headers")
 B("Bug fix: by safety, remove sorting column indicator before any action in edit columns tabs")

@@ -1,5 +1,5 @@
 global lAppName := "CSV Buddy"
-global lAppVersion := "1.2.2" ; "1.01" should have been "1.0.1" !!! Next one must be "1.2" ("1.1" is not seen a an update by "1.01")
+global lAppVersion := "1.2.3" ; major.minor.fixes
 global lAppVersionLong := "v" . lAppVersion
 global lDonatePrompt := "Are you happy with ~1~?`n`n~1~ is not only FREE of charge but also FREE of nasty advertising or adware that you never know if they carry spyware or malware.`n`n~2~ times so far, ~1~ has helped you in your work. How about supporting freeware now?"
 global lDonateThankyou := "Thank you for being fair and support freeware!"
