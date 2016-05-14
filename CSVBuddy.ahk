@@ -8,6 +8,8 @@ This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 Version history
 ---------------
 
+2016-??-?? v1.3
+
 2014-08-31 v1.2.3 (bug fix)
 - fix bug when saving or exporting file with a column sort indicator
 
@@ -88,7 +90,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.2.3
+;@Ahk2Exe-SetVersion 1.3
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -118,6 +120,8 @@ IfNotExist, %strIniFile%
 			SkipHelpReadyToEdit=0
 			SkipConfirmQuit=0
 			Startups=1
+			CodePageLoad=1252
+			CodePageSave=1252
 		)
 		, %strIniFile%
 
@@ -132,6 +136,8 @@ IniRead, blnSkipConfirmQuit, %strIniFile%, global, SkipConfirmQuit ; Default 0
 IniRead, strLatestSkipped, %strIniFile%, global, LatestVersionSkipped, 0.0
 IniRead, intStartups, %strIniFile%, Global, Startups, 1
 IniRead, blnDonator, %strIniFile%, Global, Donator, 0 ; Please, be fair. Don't cheat with this.
+IniRead, strCodePageLoad, %strIniFile%, Global, CodePageLoad, 1252 ; default ANSI Latin 1, Western European (Windows)
+IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANSI Latin 1, Western European (Windows)
 
 intProgressType := -2 ; Status Bar, part 2
 
@@ -148,28 +154,30 @@ Gui, 1:Add, Tab2, w950 r4 vtabCSVBuddy gChangedTabCSVBuddy, % L(lTab0List)
 Gui, 1:Font
 
 Gui, 1:Tab, 1
-Gui, 1:Add, Text,		y+10	x10		vlblCSVFileToLoad w85 right, % L(lTab1CSVFileToLoad)
-Gui, 1:Add, Edit,		yp		x100	vstrFileToLoad gChangedFileToLoad disabled
-Gui, 1:Add, Button,		yp		x+5		vbtnHelpFileToLoad gButtonHelpFileToLoad, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToLoad gButtonSelectFileToLoad w45 default, % L(lTab1Select)
-Gui, 1:Add, Text,		y+10	x10 	vlblHeader w85 right, % L(lTab1CSVFileHeader)
-Gui, 1:Add, Edit,		yp		x100	vstrFileHeaderEscaped disabled
-Gui, 1:Add, Button,		yp		x+5		vbtnHelpHeader gButtonHelpHeader, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,		yp		x+5		vbtnPreviewFile gButtonPreviewFile w45 hidden, % L(lTab1PreviewFile)
-Gui, 1:Add, Radio,		y+10	x100	vradGetHeader gClickRadGetHeader checked, % L(lTab1Getheaderfromfile)
-Gui, 1:Add, Radio,		yp		x+5		vradSetHeader gClickRadSetHeader, % L(lTab1Setheader)
-Gui, 1:Add, Button,		yp		x+0		vbtnHelpSetHeader gButtonHelpSetHeader, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,		xp		x+27	vlblFieldDelimiter1, % L(lTab1Fielddelimiter)
-Gui, 1:Add, Edit,		yp		x+5		vstrFieldDelimiter1 w20 limit1 center, `, ; gChangedFieldDelimiter1 unused
-Gui, 1:Add, Button,		yp		x+5		vbtnHelpFieldDelimiter1 gButtonHelpFieldDelimiter1, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,		yp		x+27	vlblFieldEncapsulator1, % L(lTab1Fieldencapsulator)
-Gui, 1:Add, Edit,		yp		x+5		vstrFieldEncapsulator1 w20 limit1 center, `" ; gChangedFieldEncapsulator1 unused
-Gui, 1:Add, Button,		yp		x+5		vbtnHelpEncapsulator1 gButtonHelpEncapsulator1, % L(lTab0QuestionMark)
-Gui, 1:Add, Checkbox,	yp		x+27	vblnMultiline1 gChangedMultiline1, % L(lTab1Multilinefields)
-Gui, 1:Add, Button,		yp		x+0		vbtnHelpMultiline1 gButtonHelpMultiline1, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,		yp		x+5		vlblEndoflineReplacement1 hidden, % L(lTab1EOLreplacement)
-Gui, 1:Add, Edit,		yp		x+5		vstrEndoflineReplacement1 w30 center hidden
-Gui, 1:Add, Button,		yp		x+5		vbtnLoadFile gButtonLoadFile w45 hidden, % L(lTab1Load)
+Gui, 1:Add, Text,			y+10	x10		vlblCSVFileToLoad w85 right, % L(lTab1CSVFileToLoad)
+Gui, 1:Add, Edit,			yp		x100	vstrFileToLoad gChangedFileToLoad disabled
+Gui, 1:Add, Button,			yp		x+5		vbtnHelpFileToLoad gButtonHelpFileToLoad, % L(lTab0QuestionMark)
+Gui, 1:Add, Button,			yp		x+5		vbtnSelectFileToLoad gButtonSelectFileToLoad w45 default, % L(lTab1Select)
+Gui, 1:Add, Text,			y+10	x10 	vlblHeader w85 right, % L(lTab1CSVFileHeader)
+Gui, 1:Add, Edit,			yp		x100	vstrFileHeaderEscaped disabled
+Gui, 1:Add, Button,			yp		x+5		vbtnHelpHeader gButtonHelpHeader, % L(lTab0QuestionMark)
+Gui, 1:Add, Button,			yp		x+5		vbtnPreviewFile gButtonPreviewFile w45 hidden, % L(lTab1PreviewFile)
+Gui, 1:Add, Radio,			y+10	x20		vradGetHeader gClickRadGetHeader checked, % L(lTab1Getheaderfromfile)
+Gui, 1:Add, Radio,			yp		x+5		vradSetHeader gClickRadSetHeader, % L(lTab1Setheader)
+Gui, 1:Add, Button,			yp		x+0		vbtnHelpSetHeader gButtonHelpSetHeader, % L(lTab0QuestionMark)
+Gui, 1:Add, Text,			xp		x+20	vlblFieldDelimiter1, % L(lTab1Fielddelimiter)
+Gui, 1:Add, Edit,			yp		x+5		vstrFieldDelimiter1 w20 limit1 center, `, ; gChangedFieldDelimiter1 unused
+Gui, 1:Add, Button,			yp		x+5		vbtnHelpFieldDelimiter1 gButtonHelpFieldDelimiter1, % L(lTab0QuestionMark)
+Gui, 1:Add, Text,			yp		x+20	vlblFieldEncapsulator1, % L(lTab1Fieldencapsulator)
+Gui, 1:Add, Edit,			yp		x+5		vstrFieldEncapsulator1 w20 limit1 center, `" ; gChangedFieldEncapsulator1 unused
+Gui, 1:Add, Button,			yp		x+5		vbtnHelpEncapsulator1 gButtonHelpEncapsulator1, % L(lTab0QuestionMark)
+Gui, 1:Add, Checkbox,		yp		x+20	vblnMultiline1 gChangedMultiline1, % L(lTab1Multilinefields)
+Gui, 1:Add, Button,			yp		x+0		vbtnHelpMultiline1 gButtonHelpMultiline1, % L(lTab0QuestionMark)
+Gui, 1:Add, Text,			yp		x+5		vlblEndoflineReplacement1 hidden, % L(lTab1EOLreplacement)
+Gui, 1:Add, Edit,			yp		x+5		vstrEndoflineReplacement1 w30 center hidden
+Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding1 w85, % L(lFileEncodings, strCodePageLoad)
+Gui, 1:Add, Button,			yp		x+7		vbtnHelpFileEncoding1 gButtonHelpFileEncoding1, % L(lTab0QuestionMark)
+Gui, 1:Add, Button,			yp		x+5		vbtnLoadFile gButtonLoadFile w45 hidden, % L(lTab1Load)
 
 Gui, 1:Tab, 2
 Gui, 1:Add, Text,		y+10	x10		vlblRenameFields w85 right, % L(lTab2Renamefields)
@@ -186,26 +194,28 @@ Gui, 1:Add, Button,		yp		x+0		vbtnSetOrder gButtonSetOrder w50, % L(lTab2Order)
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpOrder gButtonHelpOrder, % L(lTab0QuestionMark)
 
 Gui, 1:Tab, 3
-Gui, 1:Add, Text,		y+10	x10		vlblCSVFileToSave w85 right, % L(lTab3CSVfiletosave)
-Gui, 1:Add, Edit,		yp		x100	vstrFileToSave gChangedFileToSave
-Gui, 1:Add, Button,		yp		x+5		vbtnHelpFileToSave gButtonHelpFileToSave, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToSave gButtonSelectFileToSave w45 default, % L(lTab3Select)
-Gui, 1:Add, Text,		y+10	x100	vlblFieldDelimiter3, % L(lTab3Fielddelimiter)
-Gui, 1:Add, Edit,		yp		x200	vstrFieldDelimiter3 gChangedFieldDelimiter3 w20 limit1 center, `, 
-Gui, 1:Add, Button,		yp		x+5		vbtnHelpFieldDelimiter3 gButtonHelpFieldDelimiter3, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,		y+10	x100	vlblFieldEncapsulator3, % L(lTab3Fieldencapsulator)
-Gui, 1:Add, Edit,		yp		x200	vstrFieldEncapsulator3 gChangedFieldEncapsulator3 w20 limit1 center, `"
-Gui, 1:Add, Button,		yp		x+5		vbtnHelpEncapsulator3 gButtonHelpEncapsulator3, % L(lTab0QuestionMark)
-Gui, 1:Add, Radio,		y100	x300	vradSaveWithHeader checked, % L(lTab3Savewithheader)
-Gui, 1:Add, Radio,		y+10	x300	vradSaveNoHeader, % L(lTab3Savewithoutheader)
-Gui, 1:Add, Button,		y100	x450	vbtnHelpSaveHeader gButtonHelpSaveHeader, % L(lTab0QuestionMark)
-Gui, 1:Add, Radio,		y100	x500	vradSaveMultiline gClickRadSaveMultiline checked, % L(lTab3Savemultiline)
-Gui, 1:Add, Radio,		y+10	x500	vradSaveSingleline gClickRadSaveSingleline, % L(lTab3Savesingleline)
-Gui, 1:Add, Button,		y100	x620	vbtnHelpMultiline gButtonHelpSaveMultiline, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,		y+25	x500	vlblEndoflineReplacement3 hidden, % L(lTab3Endoflinereplacement)
-Gui, 1:Add, Edit,		yp		x620	vstrEndoflineReplacement3 hidden w50 center, % chr(182)
-Gui, 1:Add, Button,		y105	x+5		vbtnSaveFile gButtonSaveFile w45 hidden, % L(lTab3Save)
-Gui, 1:Add, Button,		y137	x+5		vbtnCheckFile hidden w45 gButtonCheckFile, % L(lTab3Check)
+Gui, 1:Add, Text,			y+10	x10		vlblCSVFileToSave w85 right, % L(lTab3CSVfiletosave)
+Gui, 1:Add, Edit,			yp		x100	vstrFileToSave gChangedFileToSave
+Gui, 1:Add, Button,			yp		x+5		vbtnHelpFileToSave gButtonHelpFileToSave, % L(lTab0QuestionMark)
+Gui, 1:Add, Button,			yp		x+5		vbtnSelectFileToSave gButtonSelectFileToSave w45 default, % L(lTab3Select)
+Gui, 1:Add, Text,			y+10	x100	vlblFieldDelimiter3, % L(lTab3Fielddelimiter)
+Gui, 1:Add, Edit,			yp		x200	vstrFieldDelimiter3 gChangedFieldDelimiter3 w20 limit1 center, `, 
+Gui, 1:Add, Button,			yp		x+5		vbtnHelpFieldDelimiter3 gButtonHelpFieldDelimiter3, % L(lTab0QuestionMark)
+Gui, 1:Add, Text,			y+10	x100	vlblFieldEncapsulator3, % L(lTab3Fieldencapsulator)
+Gui, 1:Add, Edit,			yp		x200	vstrFieldEncapsulator3 gChangedFieldEncapsulator3 w20 limit1 center, `"
+Gui, 1:Add, Button,			yp		x+5		vbtnHelpEncapsulator3 gButtonHelpEncapsulator3, % L(lTab0QuestionMark)
+Gui, 1:Add, Radio,			y100	x300	vradSaveWithHeader checked, % L(lTab3Savewithheader)
+Gui, 1:Add, Radio,			y+10	x300	vradSaveNoHeader, % L(lTab3Savewithoutheader)
+Gui, 1:Add, Button,			y100	x450	vbtnHelpSaveHeader gButtonHelpSaveHeader, % L(lTab0QuestionMark)
+Gui, 1:Add, Radio,			y100	x500	vradSaveMultiline gClickRadSaveMultiline checked, % L(lTab3Savemultiline)
+Gui, 1:Add, Radio,			y+10	x500	vradSaveSingleline gClickRadSaveSingleline, % L(lTab3Savesingleline)
+Gui, 1:Add, Button,			y100	x620	vbtnHelpMultiline gButtonHelpSaveMultiline, % L(lTab0QuestionMark)
+Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding3 w85, % L(lFileEncodings, strCodePageSave)
+Gui, 1:Add, Button,			yp		x+7		vbtnHelpFileEncoding3 gButtonHelpFileEncoding3, % L(lTab0QuestionMark)
+Gui, 1:Add, Text,			y+25	x500	vlblEndoflineReplacement3 hidden, % L(lTab3Endoflinereplacement)
+Gui, 1:Add, Edit,			yp		x620	vstrEndoflineReplacement3 hidden w50 center, % chr(182)
+Gui, 1:Add, Button,			y105	x+5		vbtnSaveFile gButtonSaveFile w45 hidden, % L(lTab3Save)
+Gui, 1:Add, Button,			y137	x+5		vbtnCheckFile hidden w45 gButtonCheckFile, % L(lTab3Check)
 
 Gui, 1:Tab, 4
 Gui, 1:Add, Text,		y+10	x10		vlblCSVFileToExport w85 right, % L(lTab4Exportdatatofile)
@@ -450,6 +460,16 @@ Help(lTab1HelpMultiline1)
 return
 
 
+ButtonHelpFileEncoding1:
+Help(lTab1HelpFileEncoding)
+return
+
+
+ButtonHelpFileEncoding3:
+Help(lTab3HelpFileEncoding)
+return
+
+
 ButtonLoadFile:
 Gui, 1:+OwnDialogs
 Gui, 1:Submit, NoHide
@@ -486,6 +506,7 @@ strCurrentHeader := StrUnEscape(strFileHeaderEscaped)
 strCurrentFieldDelimiter := StrMakeRealFieldDelimiter(strFieldDelimiter1)
 strCurrentVisibleFieldDelimiter := strFieldDelimiter1
 strCurrentFieldEncapsulator := strFieldEncapsulator1
+strCurrentFileEncodingLoad := (InStr("Select encoding|ANSI", strFileEncoding1) ? "" : strFileEncoding1)
 
 FileGetSize, intFileSize, %strFileToLoad%, K
 intActualSize := intActualSize + intFileSize
@@ -493,7 +514,8 @@ intActualSize := intActualSize + intFileSize
 ; ObjCSV_CSV2Collection(strFilePath, ByRef strFieldNames [, blnHeader = 1, blnMultiline = 1, intProgressType = 0
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText := ""])
 obj := ObjCSV_CSV2Collection(strFileToLoad, strCurrentHeader, radGetHeader, blnMultiline1, intProgressType
-	, strCurrentFieldDelimiter, strCurrentFieldEncapsulator, strEndoflineReplacement1, L(lTab1ReadingCSVdata))
+	, strCurrentFieldDelimiter, strCurrentFieldEncapsulator, strEndoflineReplacement1, L(lTab1ReadingCSVdata)
+	, strCurrentFileEncodingLoad)
 if (ErrorLevel)
 {
 	if (ErrorLevel = 3)
@@ -855,12 +877,13 @@ if (radSaveMultiline)
 else
 	strEolReplacement := strEndoflineReplacement3
 strRealFieldDelimiter3 := StrMakeRealFieldDelimiter(strFieldDelimiter3)
+strCurrentFileEncodingSave := (InStr("Select encoding|ANSI", strFileEncoding3) ? "" : strFileEncoding3)
 ; ObjCSV_Collection2CSV(objCollection, strFilePath [, blnHeader = 0
 ;	, strFieldOrder = "", intProgressType = 0, blnOverwrite = 0
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText = ""])
 ObjCSV_Collection2CSV(obj, strFileToSave, radSaveWithHeader
 	, GetListViewHeader(strRealFieldDelimiter3, strFieldEncapsulator3), intProgressType, blnOverwrite
-	, strRealFieldDelimiter3, strFieldEncapsulator3, strEolReplacement, L(lTab3SavingCSV))
+	, strRealFieldDelimiter3, strFieldEncapsulator3, strEolReplacement, L(lTab3SavingCSV), strCurrentFileEncodingSave)
 if (ErrorLevel)
 	if (ErrorLevel = 1)
 		Oops(lExportSystemError, A_LastError)
@@ -1049,7 +1072,7 @@ Gui, 1:+OwnDialogs
 if (radFixed)
 {
 	InputBox, intNewDefaultWidth, % L(lTab4MultiFixedInputTitle, lAppName, lAppVersionLong)
-		, % L(lTab4MultiFixedInputPrompt), , , 120, , , , , %intDefaultWidth%
+		, % L(lTab4MultiFixedInputPrompt), , , 150, , , , , %intDefaultWidth%
 	if !ErrorLevel
 		if (intNewDefaultWidth > 0)
 			intDefaultWidth := intNewDefaultWidth
@@ -1075,6 +1098,8 @@ Gui, 1:Submit, NoHide
 blnOverwrite := CheckIfFileExistOverwrite(strFileToExport, radFixed)
 if (blnOverwrite < 0)
 	return
+
+strCurrentFileEncodingSave := (InStr("Select encoding|ANSI", strFileEncoding3) ? "" : strFileEncoding3)
 
 GoSub, RemoveSorting
 
@@ -1446,7 +1471,7 @@ Gui, 1:+OwnDialogs
 MsgBox, % (4+32+256), % L(lAppName), % L(lLvEventsFilterCaution)
 IfMsgBox, No
 	return
-InputBox, strFilter, % L(lLvEventsFilterInputTitle, lAppName), %lLvEventsFilterInput%, , , 120
+InputBox, strFilter, % L(lLvEventsFilterInputTitle, lAppName), %lLvEventsFilterInput%, , , 150
 if !StrLen(strFilter)
 	return
 intPrevNbRows := LV_GetCount()
@@ -1501,7 +1526,7 @@ if (intSelectedRows > 1)
 	InputBox, strSearch, % L((A_ThisLabel = "MenuSearch" ? lLvEventsSearchInputTitle : lLvEventsReplaceInputTitle), lAppName), % L(lLvEventsSearchInputSelected, intSelectedRows), , , 150
 else
 {
-	InputBox, strSearch, % L((A_ThisLabel = "MenuSearch" ? lLvEventsSearchInputTitle : lLvEventsReplaceInputTitle), lAppName), %lLvEventsSearchInput%, , , 120
+	InputBox, strSearch, % L((A_ThisLabel = "MenuSearch" ? lLvEventsSearchInputTitle : lLvEventsReplaceInputTitle), lAppName), %lLvEventsSearchInput%, , , 150
 	intSelectedRows := 0
 }
 if (A_ThisLabel = "MenuReplace")
@@ -1698,6 +1723,10 @@ ButtonCancel:
 2GuiEscape:
 Gui, 1:-Disabled
 Gui, 2:Destroy
+###_V(A_ThisLabel, strShowRecordLabel, intRowNumber, intLastRow)
+if (A_ThisLabel = "2GuiEscape")
+	and (strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceShowRecord")
+	intRowNumber := intLastRow ; ### ???
 WinActivate, ahk_id %intGui1WinID%
 return
 
@@ -1776,7 +1805,7 @@ else
 ; ObjCSV_Collection2Fixed(objCollection, strFilePath, strWidth [, blnHeader = 0, strFieldOrder = "", intProgressType = 0, blnOverwrite = 0
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText = ""])
 ObjCSV_Collection2Fixed(obj, strFileToExport, strFieldsWidth, radSaveWithHeader, strFieldsName, intProgressType, blnOverwrite
-	, strRealFieldDelimiter3, strFieldEncapsulator3, strEolReplacement, L(lExportSaving))
+	, strRealFieldDelimiter3, strFieldEncapsulator3, strEolReplacement, L(lExportSaving), strCurrentFileEncodingSave)
 if (ErrorLevel)
 	if (ErrorLevel = 1)
 		Oops(lExportSystemError, A_LastError)
@@ -1800,7 +1829,7 @@ obj := ObjCSV_ListView2Collection("1", "lvData", , , , intProgressType, L(lTab0R
 ; ObjCSV_Collection2HTML(objCollection, strFilePath, strTemplateFile [, strTemplateEncapsulator = ~
 ;	, intProgressType = 0, blnOverwrite = 0, strProgressText = ""])
 ObjCSV_Collection2HTML(obj, strFileToExport, strMultiPurpose, strTemplateDelimiter
-	, intProgressType, blnOverwrite, L(lExportSaving))
+	, intProgressType, blnOverwrite, L(lExportSaving), strCurrentFileEncodingSave)
 if (ErrorLevel)
 	if (ErrorLevel = 1)
 		Oops(lExportSystemError, A_LastError)
@@ -1824,7 +1853,7 @@ ExportXML:
 ;	, strEncapsulator = """", intProgressType = 0, strProgressText = ""])
 obj := ObjCSV_ListView2Collection("1", "lvData", , , , intProgressType, L(lTab0ReadingFromList))
 ; ObjCSV_Collection2XML(objCollection, strFilePath [, intProgressType = 0, blnOverwrite = 0, strProgressText = ""])
-ObjCSV_Collection2XML(obj, strFileToExport, intProgressType, blnOverwrite, L(lExportSaving))
+ObjCSV_Collection2XML(obj, strFileToExport, intProgressType, blnOverwrite, L(lExportSaving), strCurrentFileEncodingSave)
 if (ErrorLevel)
 	if (ErrorLevel = 1)
 		Oops(lExportSystemError, A_LastError)
@@ -1857,7 +1886,7 @@ if FileExist(strExpressTemplateTempFile)
 	; ObjCSV_Collection2HTML(objCollection, strFilePath, strTemplateFile [, strTemplateEncapsulator = ~
 	;	, intProgressType = 0, blnOverwrite = 0, strProgressText = ""])
 	ObjCSV_Collection2HTML(obj, strFileToExport, strExpressTemplateTempFile, strTemplateDelimiter
-		, intProgressType, blnOverwrite, L(lExportSaving))
+		, intProgressType, blnOverwrite, L(lExportSaving), strCurrentFileEncodingSave)
 	if (ErrorLevel)
 		if (ErrorLevel = 1)
 			Oops(lExportSystemError, A_LastError)
