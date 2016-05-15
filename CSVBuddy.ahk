@@ -251,7 +251,7 @@ Gui, 1:Tab
 Gui, 1:Add, ListView, 	x10 r24 w955 vlvData -ReadOnly NoSort gListViewEvents AltSubmit -LV0x10
 
 Gui, Add, StatusBar
-SB_SetParts(200)
+SB_SetParts(200, 300)
 SB_SetText(L(lSBEmpty), 1)
 if (A_IsCompiled)
 	SB_SetIcon(A_ScriptFullPath)
@@ -462,7 +462,8 @@ return
 
 ButtonHelpFileEncoding1:
 ButtonHelpFileEncoding3:
-Help(lTab1HelpFileEncoding, (A_ThisLabel = "ButtonHelpFileEncoding1" ? lTab1HelpFileEncodingLoad : lTab3HelpFileEncodingSave))
+Help(lTab1HelpFileEncoding . (A_ThisLabel = "ButtonHelpFileEncoding3" ? "`n`n" . lTab1HelpFileEncodingExport : "")
+	, (A_ThisLabel = "ButtonHelpFileEncoding1" ? lTab1HelpFileEncodingLoad : lTab3HelpFileEncodingSave))
 return
 
 
@@ -524,6 +525,7 @@ if (ErrorLevel)
 	}
 	Oops(strError)
 	SB_SetText(lSBEmpty, 1)
+	SB_SetText("", 3)
 	return
 }
 SB_SetText("", 2)
@@ -535,11 +537,13 @@ if (ErrorLevel)
 {
 	Oops(lTab1CSVfilenotloadedMax200fields)
 	SB_SetText(lSBEmpty, 1)
+	SB_SetText("", 3)
 	return
 }
 GuiControl, % (blnListGrid ? "+Grid" : "") . " Background" . strListBackgroundColor . " c" . strListTextColor, lvData
 
 SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"), 1)
+SB_SetText(lSBHelp, 3)
 Gosub, UpdateCurrentHeader
 if (!blnSkipHelpReadyToEdit)
 	Help(lTab1HelpReadyToEdit)
@@ -557,6 +561,7 @@ LV_Delete() ; delete all rows - better performance on large files when we delete
 loop, % LV_GetCount("Column")
 	LV_DeleteCol(1) ; delete all columns
 SB_SetText(L(lSBEmpty), 1)
+SB_SetText("", 3)
 intActualSize := 0
 return
 
@@ -1223,10 +1228,15 @@ return
 
 
 GuiContextMenu: ; Launched in response to a right-click or press of the Apps key.
-if (A_GuiControl <> "lvData") or (A_GuiY < 239)
-	; Display the menu only for clicks inside the ListView
-	; A_Gui < 239 to exclude the header row
+if (A_GuiControl <> "lvData")
+	; Right-click outside of the ListView
     return
+if (LV_GetCount("") and A_GuiY < 239)
+{
+	; Right-click in the ListView header row
+	Oops(lLvEventsContextInHeader)
+    return
+}
 intColNumber := 0 ; tell MenuFilter and MenuSearch that search is global
 Menu, ContextMenu, Add
 Menu, ContextMenu, DeleteAll ; to avoid ghost lines at the end when menu is re-created
@@ -1255,7 +1265,7 @@ else
 	Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterReload%
 	Menu, ContextMenu, Add
 	Menu, ContextMenu, Add, % ((lLvEventsSearchGlobal)), MenuSearch
-	Menu, ContextMenu, Add, % ((lLvEventsReplaceGlobal)), MenuReplace
+	; REMOVED in v1.3 Menu, ContextMenu, Add, % ((lLvEventsReplaceGlobal)), MenuReplace
 }
 ; Show the menu at the provided coordinates, A_GuiX and A_GuiY.  These should be used
 ; because they provide correct coordinates even if the user pressed the Apps key:
@@ -1457,9 +1467,12 @@ GuiControl, +Redraw, lvData ; redraw the ListView
 intNewNbRows := LV_GetCount()
 intActualSize := Round(intActualSize * intNewNbRows / intPrevNbRows)
 if (intNewNbRows)
-	SB_SetText(L(lSBRecordsSize, intNewNbRows, (intActualSize) ? intActualSize : " <1"))
+	SB_SetText(L(lSBRecordsSize, intNewNbRows, (intActualSize) ? intActualSize : " <1"), 1)
 else
+{
 	SB_SetText(L(lSBEmpty), 1)
+	SB_SetText("", 3)
+}
 return
 
 
@@ -1497,9 +1510,12 @@ intNewNbRows := LV_GetCount()
 LV_Modify(intNewNbRows, "Select Vis")
 intActualSize := Round(intActualSize * intNewNbRows / intPrevNbRows)
 if (intNewNbRows)
-	SB_SetText(L(lSBRecordsSize, intNewNbRows, (intActualSize) ? intActualSize : " <1"))
+	SB_SetText(L(lSBRecordsSize, intNewNbRows, (intActualSize) ? intActualSize : " <1"), 1)
 else
+{
 	SB_SetText(L(lSBEmpty), 1)
+	SB_SetText("", 3)
+}
 return
 
 
@@ -1692,7 +1708,7 @@ ButtonSaveRecordAddRow:
 Gui, 1:Default
 intRowNumber := LV_GetCount()
 intActualSize := Round(intActualSize + (intActualSize / intRowNumber))
-SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"))
+SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"), 1)
 gosub, ButtonSaveRecord
 return
 
@@ -1725,6 +1741,7 @@ if (A_ThisLabel = "2GuiEscape")
 	and (strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceShowRecord")
 	intRowNumber := intLastRow ; cancel search by skipping to last row
 WinActivate, ahk_id %intGui1WinID%
+LV_Modify(0, "-Select -Focus")
 return
 
 
