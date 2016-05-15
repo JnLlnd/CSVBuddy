@@ -8,7 +8,7 @@ This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 Version history
 ---------------
 
-2016-??-?? v1.3
+2016-??-?? v1.2.9 BETA
 
 2014-08-31 v1.2.3 (bug fix)
 - fix bug when saving or exporting file with a column sort indicator
@@ -461,12 +461,8 @@ return
 
 
 ButtonHelpFileEncoding1:
-Help(lTab1HelpFileEncoding)
-return
-
-
 ButtonHelpFileEncoding3:
-Help(lTab3HelpFileEncoding)
+Help(lTab1HelpFileEncoding, (A_ThisLabel = "ButtonHelpFileEncoding1" ? lTab1HelpFileEncodingLoad : lTab3HelpFileEncodingSave))
 return
 
 
@@ -506,7 +502,7 @@ strCurrentHeader := StrUnEscape(strFileHeaderEscaped)
 strCurrentFieldDelimiter := StrMakeRealFieldDelimiter(strFieldDelimiter1)
 strCurrentVisibleFieldDelimiter := strFieldDelimiter1
 strCurrentFieldEncapsulator := strFieldEncapsulator1
-strCurrentFileEncodingLoad := (InStr("Select encoding|ANSI", strFileEncoding1) ? "" : strFileEncoding1)
+strCurrentFileEncodingLoad := (InStr("Select encoding", strFileEncoding1) ? "" : strFileEncoding1)
 
 FileGetSize, intFileSize, %strFileToLoad%, K
 intActualSize := intActualSize + intFileSize
@@ -549,6 +545,8 @@ if (!blnSkipHelpReadyToEdit)
 	Help(lTab1HelpReadyToEdit)
 GuiControl, 1:, strFieldDelimiter3, %strCurrentVisibleFieldDelimiter%
 GuiControl, 1:, strFieldEncapsulator3, %strCurrentFieldEncapsulator%
+GuiControl, 1:ChooseString, strFileEncoding1, %strCurrentFileEncodingLoad%
+GuiControl, 1:ChooseString, strFileEncoding3, %strCurrentFileEncodingLoad%
 blnFilterActive := false
 obj := ; release object
 return
@@ -877,7 +875,7 @@ if (radSaveMultiline)
 else
 	strEolReplacement := strEndoflineReplacement3
 strRealFieldDelimiter3 := StrMakeRealFieldDelimiter(strFieldDelimiter3)
-strCurrentFileEncodingSave := (InStr("Select encoding|ANSI", strFileEncoding3) ? "" : strFileEncoding3)
+strCurrentFileEncodingSave := (InStr("Select encoding", strFileEncoding3) ? "" : strFileEncoding3)
 ; ObjCSV_Collection2CSV(objCollection, strFilePath [, blnHeader = 0
 ;	, strFieldOrder = "", intProgressType = 0, blnOverwrite = 0
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText = ""])
@@ -1099,7 +1097,7 @@ blnOverwrite := CheckIfFileExistOverwrite(strFileToExport, radFixed)
 if (blnOverwrite < 0)
 	return
 
-strCurrentFileEncodingSave := (InStr("Select encoding|ANSI", strFileEncoding3) ? "" : strFileEncoding3)
+strCurrentFileEncodingSave := (InStr("Select encoding", strFileEncoding3) ? "" : strFileEncoding3)
 
 GoSub, RemoveSorting
 
@@ -1677,7 +1675,7 @@ return
 
 ButtonStopSearch:
 Gui, 1:Default
-intRowNumber := intLastRow
+intRowNumber := intLastRow ; cancel search by skipping to last row
 gosub, ButtonCancel
 return
 
@@ -1723,10 +1721,9 @@ ButtonCancel:
 2GuiEscape:
 Gui, 1:-Disabled
 Gui, 2:Destroy
-###_V(A_ThisLabel, strShowRecordLabel, intRowNumber, intLastRow)
 if (A_ThisLabel = "2GuiEscape")
 	and (strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceShowRecord")
-	intRowNumber := intLastRow ; ### ???
+	intRowNumber := intLastRow ; cancel search by skipping to last row
 WinActivate, ahk_id %intGui1WinID%
 return
 
