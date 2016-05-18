@@ -1750,10 +1750,10 @@ return
 2GuiSize: ; Expand or shrink the ListView in response to the user's resizing of the window.
 if A_EventInfo = 1  ; The window has been minimized.  No action needed.
     return
-GuiControl, 2:Move, btnReplaceAll, % "X" . (A_GuiWidth - 230)
-GuiControl, 2:Move, btnStopSearch, % "X" . (A_GuiWidth - 150)
-GuiControl, 2:Move, btnSaveRecord, % "X" . (A_GuiWidth - 100)
-GuiControl, 2:Move, btnCancel, % "X" . (A_GuiWidth - 50)
+GuiControl, 2:Move, btnReplaceAll, % "x" . (A_GuiWidth - 235)
+GuiControl, 2:Move, btnStopSearch, % "x" . (A_GuiWidth - 155)
+GuiControl, 2:Move, btnSaveRecord, % "x" . (A_GuiWidth - 105)
+GuiControl, 2:Move, btnCancel, % "x" . (A_GuiWidth - 55)
 if intCol > 1 ; The window has been minimized.  No action needed.
     return
 intWidthSize := A_GuiWidth - 20
@@ -1770,28 +1770,30 @@ return
 
 
 ButtonZoom:
-StringReplace, strZoomField, A_GuiControl, strEdit ; strZoomField used in ZoomField and UnZoomButton
-###_V(A_ThisLabel, strZoomField)
-
+StringReplace, strZoomField, A_GuiControl, strEdit
 intGui2WinID := WinExist("A")
-Gui, 3:New, +Resize +Hwndstr2GuiHandle, %strGuiTitle%
+GuiControlGet, strZoomFieldContent, , %strZoomField%
+Gui, 3:New, +Resize -MinimizeBox, % L(lLvEventsZoomTitle, lAppName)
 Gui, 3:+Owner2 ; Make the edit window (Gui #2) the owner of the Zoom window (Gui #3).
-
-
-Gui, 3:Add, Text, y%intYLabel% x%intX% vstrLabel%A_Index%, %strColHeader%
-Gui, 3:Add, Edit, y%intYEdit% x%intX% w%intEditWidth% vstrEdit%A_Index% +HwndstrEditHandle, %strColData%
-
-
+Gui, 3:Add, Edit, x10 y5 w400 h300 vstrZoomedEdit, %strZoomFieldContent%
+Gui, 3:Add, Button, x10 y+20 vbtnZoomSave gButtonZoomSave, %lLvEventsSave%
+Gui, 3:Add, Button, x+10 yp vbtnZoomCancel gButtonZoomCancel, %lLvEventsCancel%
 Gui, 3:Show, AutoSize Center
 Gui, 2:+Disabled
-
 return
 
 
 
+ButtonZoomSave:
 ButtonZoomCancel:
 3GuiClose:
 3GuiEscape:
+if (A_ThisLabel = "ButtonZoomSave")
+{
+	Gui, 3:Submit, NoHide
+	strNewZoomFieldContent := strZoomedEdit
+	GuiControl, 2:, %strZoomField%, %strNewZoomFieldContent%
+}
 Gui, 2:-Disabled
 Gui, 3:Destroy
 WinActivate, ahk_id %intGui2WinID%
@@ -1803,8 +1805,9 @@ return
 3GuiSize: ; Expand or shrink the ListView in response to the user's resizing of the window.
 if A_EventInfo = 1  ; The window has been minimized.  No action needed.
     return
-GuiControl, 3:Move, btnReplaceAll, % "X" . (A_GuiWidth - 230)
-GuiControl, 3:Move, btnStopSearch, % "X" . (A_GuiWidth - 150)
+GuiControl, 3:Move, strZoomedEdit, % "x10 y5 w" . (A_GuiWidth - 15) . " h" . (A_GuiHeight - 45)
+GuiControl, 3:Move, btnZoomSave, % "x" . (A_GuiWidth - 105) . " y" . (A_GuiHeight - 30)
+GuiControl, 3:Move, btnZoomCancel, % "x" . (A_GuiWidth - 55) . " y" . (A_GuiHeight - 30)
 return
 
 
