@@ -1627,7 +1627,7 @@ NotMatchingRow(intRow, strFilter, intColNumber, ByRef intColFound, blnReplaceCas
 
 
 
-; --------------------- GUI1  --------------------------
+; --------------------- GUI1 --------------------------
 
 
 GuiSize: ; Expand or shrink the ListView in response to the user's resizing of the window.
@@ -1687,7 +1687,7 @@ return
 
 
 
-; --------------------- GUI2  --------------------------
+; --------------------- GUI2 --------------------------
 
 
 ButtonStopSearch:
@@ -1762,6 +1762,49 @@ Loop, %intNbFieldsOnScreen%
 	GuiControlGet, strFielfHwnd, 2:Hwnd, strEdit%A_Index%
 	GuiControl, 2:Move, strEdit%A_Index%, % "w" . A_GuiWidth - (GetNbLinesOfControl(strFielfHwnd) > 1 ? 40 : 20)
 }
+return
+
+
+
+; --------------------- GUI3 --------------------------
+
+
+ButtonZoom:
+StringReplace, strZoomField, A_GuiControl, strEdit ; strZoomField used in ZoomField and UnZoomButton
+###_V(A_ThisLabel, strZoomField)
+
+intGui2WinID := WinExist("A")
+Gui, 3:New, +Resize +Hwndstr2GuiHandle, %strGuiTitle%
+Gui, 3:+Owner2 ; Make the edit window (Gui #2) the owner of the Zoom window (Gui #3).
+
+
+Gui, 3:Add, Text, y%intYLabel% x%intX% vstrLabel%A_Index%, %strColHeader%
+Gui, 3:Add, Edit, y%intYEdit% x%intX% w%intEditWidth% vstrEdit%A_Index% +HwndstrEditHandle, %strColData%
+
+
+Gui, 3:Show, AutoSize Center
+Gui, 2:+Disabled
+
+return
+
+
+
+ButtonZoomCancel:
+3GuiClose:
+3GuiEscape:
+Gui, 2:-Disabled
+Gui, 3:Destroy
+WinActivate, ahk_id %intGui2WinID%
+strZoomField := ""
+return
+
+
+
+3GuiSize: ; Expand or shrink the ListView in response to the user's resizing of the window.
+if A_EventInfo = 1  ; The window has been minimized.  No action needed.
+    return
+GuiControl, 3:Move, btnReplaceAll, % "X" . (A_GuiWidth - 230)
+GuiControl, 3:Move, btnStopSearch, % "X" . (A_GuiWidth - 150)
 return
 
 
@@ -2145,19 +2188,6 @@ ShrinkEditControl(strThisEditHandle, intMaxRows, strGuiName)
 		Gui, %strGuiName%:Add, Button, x%intPosEditX% y%intPosEditY% w20 gButtonZoom vstrEdit%strThisEditHandle%, %lLvEventsZoomOut%
 	}
 }
-
-
-
-ButtonZoom:
-StringReplace, strZoomField, A_GuiControl, strEdit ; strZoomField used in ZoomField and UnZoomButton
-###_V(A_ThisLabel, strZoomField)
-return
-
-
-
-UnZoomButton:
-strZoomField := ""
-return
 
 
 
