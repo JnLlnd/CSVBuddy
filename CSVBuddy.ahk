@@ -1382,7 +1382,7 @@ else
 if (intRowNumber = 0)
 	intRowNumber := 1
 intGui1WinID := WinExist("A")
-Gui, 2:New, +Resize , %strGuiTitle%
+Gui, 2:New, +Resize +Hwndstr2GuiHandle, %strGuiTitle%
 Gui, 2:+Owner1 ; Make the main window (Gui #1) the owner of the EditRow window (Gui #2).
 Gui, 1:Default
 SysGet, intMonWork, MonitorWorkArea 
@@ -1392,6 +1392,7 @@ intMaxNbCol := Floor(intMonWorkRight / intColWidth)
 intX := 10
 intY := 5
 intCol := 1
+strZoomField := ""
 loop, % LV_GetCount("Column")
 {
 	if ((intY + 100) > intMonWorkBottom)
@@ -1758,7 +1759,8 @@ if intCol > 1 ; The window has been minimized.  No action needed.
 intWidthSize := A_GuiWidth - 20
 Loop, %intNbFieldsOnScreen%
 {
- 	GuiControl, 2:Move, strEdit%A_Index%, % "W" . intWidthSize
+	GuiControlGet, strFielfHwnd, 2:Hwnd, strEdit%A_Index%
+	GuiControl, 2:Move, strEdit%A_Index%, % "w" . A_GuiWidth - (GetNbLinesOfControl(strFielfHwnd) > 1 ? 40 : 20)
 }
 return
 
@@ -2125,23 +2127,37 @@ StrMakeEncodedFieldDelimiter(strConverted)
 
 
 
-ShrinkEditControl(strEditHandle, intMaxRows, strGuiName)
+ShrinkEditControl(strThisEditHandle, intMaxRows, strGuiName)
 {
-	EM_GETLINECOUNT = 0xBA
-	SendMessage, %EM_GETLINECOUNT%,,,, AHk_id %strEditHandle%
-	intNbRows := ErrorLevel
+	global ; allow dynamic variable name for Button + (using strEdit plus strThisEditHandle in the variable name)
+	
+	intNbRows := GetNbLinesOfControl(strThisEditHandle)
 	if (intNbRows > intMaxRows)
 	{
-		GuiControlGet, intPosEdit, %strGuiName%:Pos, %strEditHandle%
+		GuiControlGet, intPosEdit, %strGuiName%:Pos, %strThisEditHandle%
 		intEditMargin := 8 ; top & bottom margin of the Edit control (regardless of the nb of rows)
 		intOriginalHeight := intPosEditH
 		intHeightOneRow := Round((intOriginalHeight - intEditMargin) / intNbRows)
 		intNewHeight := (intHeightOneRow * intMaxRows) + intEditMargin
 		; MsgBox, % "intNbRows: " . intNbRows . "`nintOriginalHeight: " . intOriginalHeight 
 		;	. "`nintHeightOneRow: " . intHeightOneRow . "`nintNewHeight: " . intNewHeight
-		GuiControl, %strGuiName%:Move, %strEditHandle%, h%intNewHeight%
+		GuiControl, %strGuiName%:Move, %strThisEditHandle%, % "x" . intPosEditX + 20 . "h" . intNewHeight ; width - 20 set by 2GuiSize
+		Gui, %strGuiName%:Add, Button, x%intPosEditX% y%intPosEditY% w20 gButtonZoom vstrEdit%strThisEditHandle%, %lLvEventsZoomOut%
 	}
 }
+
+
+
+ButtonZoom:
+StringReplace, strZoomField, A_GuiControl, strEdit ; strZoomField used in ZoomField and UnZoomButton
+###_V(A_ThisLabel, strZoomField)
+return
+
+
+
+UnZoomButton:
+strZoomField := ""
+return
 
 
 
@@ -2321,5 +2337,14 @@ FirstVsSecondIs(strFirstVersion, strSecondVersion)
 		
 	return 0 ; equal
 }
+
+
+GetNbLinesOfControl(strThisEditHandle)
+{
+	EM_GETLINECOUNT = 0xBA
+	SendMessage, %EM_GETLINECOUNT%,,,, ahk_id %strThisEditHandle%
+	return ErrorLevel
+}
+
 
 
