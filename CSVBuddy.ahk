@@ -8,7 +8,20 @@ This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 Version history
 ---------------
 
-2016-??-?? v1.2.9 BETA
+2016-05-18 v1.2.9.1 BETA
+- when editing a record, zoom button to edit long strings in a large window
+- when there is not enough space on screen to edit all fields in a file, support editing the visible fields without loosing the content of the missing fields
+
+2016-05-15 v1.2.9 BETA
+- Select file encoding when loading, saving or exporting files
+- Automatic detection of loaded file encoding (this is not possible for files without byte order mark (BOM))
+- Encoding supported: ANSI (default), UTF-8 (Unicode 8-bit), UTF-16 (Unicode 16-bit), UTF-8-RAW (no BOM), UTF-16-RAW (no BOM) or custom codepage CPnnnn
+- Set custom codepage values in CSVBuddy.ini file
+- Other changes:
+  - deselect all rows after global search is cancelled
+  - add status bar right section to display hint about list menu
+  - add help message when right-clicking on column headers
+  - remove global search and replace (needing to be reworked)
 
 2014-08-31 v1.2.3 (bug fix)
 - fix bug when saving or exporting file with a column sort indicator
@@ -90,7 +103,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.3
+;@Ahk2Exe-SetVersion 1.2.9.1
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -1403,6 +1416,7 @@ loop, % LV_GetCount("Column")
 		{
 			intYLabel := intY
 			Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabelMissing, % L(lLvEventsFieldsMissing)
+			intLastFieldIn2Gui := A_Index - 1
 			break
 		}
 		intCol := intCol + 1
@@ -1719,7 +1733,8 @@ ButtonSaveRecord:
 Gui, 2:Submit
 Gui, 1:Default
 loop, % LV_GetCount("Column")
-	LV_Modify(intRowNumber, "Col" . A_Index, strEdit%A_Index%)
+	if (A_Index <= intLastFieldIn2Gui)
+		LV_Modify(intRowNumber, "Col" . A_Index, strEdit%A_Index%)
 Goto, 2GuiClose
 return
 
