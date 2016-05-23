@@ -1,5 +1,5 @@
 ﻿
-# CSV Buddy (v1.2.3) - Read me
+# CSV Buddy (v1.2.9.1 BETA) - Read me
 
 
 CSV Buddy helps you make your CSV files ready to be imported by a variety of software. You can load files with all sort of field delimiters (comma, tad, semi-colon, etc.) and encapsulators (double/single-quotes or any other character). Convert line breaks in data field making your file XL ready. Rename/reorder fields, add or edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Freeware.
@@ -18,6 +18,20 @@ First official release: 2013-11-30
 
 ## History
 
+
+### 2016-05-18 v1.3
+
+* Select file encoding when loading, saving or exporting files
+* Encoding supported: ANSI (default), UTF-8 (Unicode 8-bit), UTF-16 (Unicode 16-bit), UTF-8-RAW (no BOM), UTF-16-RAW (no BOM) or custom codepage CPnnnn
+* Set custom codepage values in CSVBuddy.ini file
+* Other changes
+* When editing a record, zoom button to edit long strings in a large window
+* When there is not enough space on screen to edit all fields in a file, support editing the visible fields without loosing the content of the missing fields
+* Automatic detection of loaded file encoding (this is not possible for files without byte order mark (BOM))
+* Deselect all rows after global search is cancelled
+* Add status bar right section to display hint about list menu
+* Add help message when right-clicking on column headers
+* Remove global search and replace (needing to be reworked)
 
 ### 2014-08-31 v1.2.3
 
