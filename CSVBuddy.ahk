@@ -5,8 +5,39 @@ Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
 This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
 
+Copyright 2013-2016 Jean Lalonde
+--------------------------------
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
 Version history
 ---------------
+
+2016-05-31 v1.3.1
+- Change licence to Apache 2.0 (see Copyright above)
+
+2016-05-23 v1.3
+- Select file encoding when loading, saving or exporting files
+- Automatic detection of loaded file encoding (this is not possible for files without byte order mark (BOM))
+- Encoding supported: ANSI (default), UTF-8 (Unicode 8-bit), UTF-16 (Unicode 16-bit), UTF-8-RAW (no BOM), UTF-16-RAW (no BOM) or custom codepage CPnnnn
+- Set custom codepage load and save values in CSVBuddy.ini file
+ 
+Other changes:
+- when editing a record, zoom button to edit long strings in a larger window
+- deselect all rows after global search is cancelled
+- add status bar right section to display hint about list menu
+- add help message when right-clicking on column headers
+- when there is not enough space on screen to edit all fields in a file, support editing the visible fields without loosing the content of the missing fields
+- remove global search and replace (needing to be reworked)
 
 2016-05-18 v1.2.9.1 BETA
 - when editing a record, zoom button to edit long strings in a large window
@@ -103,7 +134,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.3
+;@Ahk2Exe-SetVersion 1.3.1
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 

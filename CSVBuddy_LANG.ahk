@@ -1,5 +1,5 @@
 global lAppName := "CSV Buddy"
-global lAppVersion := "1.3" ; major.minor.fixes
+global lAppVersion := "1.3.1" ; major.minor.fixes
 global lAppVersionLong := "v" . lAppVersion
 global lDonatePrompt := "Are you happy with ~1~?`n`n~1~ is not only FREE of charge but also FREE of nasty advertising or adware that you never know if they carry spyware or malware.`n`n~2~ times so far, ~1~ has helped you in your work. How about supporting freeware now?"
 global lDonateThankyou := "Thank you for being fair and support freeware!"
@@ -190,7 +190,7 @@ global lTab4Selectexportfile := "Select export file"
 global lTab4XML := "XML"
 global lTab4XMLExportHelp := "XML Export Help"
 global lTab5Abouttext1 := "<a href=""http://code.jeanlalonde.ca/csvbuddy"">~1~ ~2~</a> (~3~-bits)"
-global lTab5Abouttext2 := "<a href=""http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html#copyright"">Copyright Jean Lalonde " . chr(169) . "2013-2016</a>`nSource: <a href=""https://github.com/JnLlnd/CSVBuddy"">GitHub</a>. Using AHK library: <a href=""https://www.github.com/JnLlnd/ObjCSV"">ObjCSV v0.5</a>`nUsing icon by: <a href=""http://www.visualpharm.com"">Visual Pharm</a>"
+global lTab5Abouttext2 := "<a href=""http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html#copyright"">Copyright Jean Lalonde " . chr(169) . "2013-2016</a>`nLicensed under the <a href=""http://www.apache.org/licenses/LICENSE-2.0"">Apache License</a>.`nUsing icon by: <a href=""http://www.visualpharm.com"">Visual Pharm</a>"
 global lTab5Abouttext3 := "Support on <a href=""http://code.jeanlalonde.ca/csvbuddy"">www.code.jeanlalonde.ca</a>"
 global lTab5ButtonRemind := "Remind me"
 global lTab5Check4Update := "Check for &update"

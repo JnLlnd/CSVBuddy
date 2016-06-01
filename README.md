@@ -1,5 +1,5 @@
 ﻿
-# CSV Buddy (v1.3) - Read me
+# CSV Buddy (v1.3.1) - Read me
 
 
 CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Unicode ready. Freeware.
@@ -18,6 +18,10 @@ First official release: 2013-11-30
 
 ## History
 
+
+### 2016-05-21 v1.3.1
+
+* Change licence to Apache 2.0
 
 ### 2016-05-18 v1.3
 
@@ -102,15 +106,12 @@ First official release: 2013-11-30
 ## <a name="copyright"></a>Copyright
 
 
-CSV Buddy - Copyright (C) 2013-2016  Jean Lalonde  
+Licensed under the Apache License, Version 2.0 (the "License");  
+you may not use this file except in compliance with the License. You may obtain a copy of the License at  
   
-This software is provided 'as-is', without any express or implied warranty.  In no event will the authors be held liable for any damages arising from the use of this software.  
+http://www.apache.org/licenses/LICENSE-2.0  
   
-Permission is granted to anyone to use this software for any purpose,  including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:  
-  
-1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.  
-2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.  
-3. This notice may not be removed or altered from any source distribution.  
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.  
   
 Jean Lalonde, <A HREF="mailto:ahk@jeanlalonde.ca">ahk@jeanlalonde.ca</A>
 
