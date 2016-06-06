@@ -24,6 +24,9 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
+H(3, "2016-06-06 v1.3.2")
+B("Fix bug introduced in v1.2.9.1 preventing from saving manual record edits in some circumstances")
+B("Automatic file encoding detection is now restricted to UTF-8 or UTF-16 encoded files (no BOM)")
 H(3, "2016-05-21 v1.3.1")
 B("Change licence to Apache 2.0")
 H(3, "2016-05-18 v1.3")

@@ -3,7 +3,7 @@
 CSV Buddy
 Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
-This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
+This script uses the library ObjCSV v0.5.1 (https://github.com/JnLlnd/ObjCSV)
 
 Copyright 2013-2016 Jean Lalonde
 --------------------------------
@@ -21,6 +21,10 @@ limitations under the License.
 
 Version history
 ---------------
+
+2016-06-06 v1.3.2
+- Fix bug introduced in v1.2.9.1 preventing from saving manual record edits in some circumstances
+- Automatic file encoding detection is now restricted to UTF-8 or UTF-16 encoded files (no BOM)
 
 2016-05-31 v1.3.1
 - Change licence to Apache 2.0 (see Copyright above)
@@ -134,7 +138,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.3.1
+;@Ahk2Exe-SetVersion 1.3.2
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -547,7 +551,7 @@ strCurrentHeader := StrUnEscape(strFileHeaderEscaped)
 strCurrentFieldDelimiter := StrMakeRealFieldDelimiter(strFieldDelimiter1)
 strCurrentVisibleFieldDelimiter := strFieldDelimiter1
 strCurrentFieldEncapsulator := strFieldEncapsulator1
-strCurrentFileEncodingLoad := (InStr("Select encoding", strFileEncoding1) ? "" : strFileEncoding1)
+strCurrentFileEncodingLoad := (InStr("Encoding", strFileEncoding1) ? "" : strFileEncoding1)
 
 FileGetSize, intFileSize, %strFileToLoad%, K
 intActualSize := intActualSize + intFileSize
@@ -1454,6 +1458,8 @@ loop, % LV_GetCount("Column")
 		intX := intX + intColWidth
 		intY := 5
 	}
+	else
+		intLastFieldIn2Gui := A_Index
 	intYLabel := intY
 	intYEdit := intY + 15
 	LV_GetText(strColHeader, 0, A_Index)
