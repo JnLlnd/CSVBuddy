@@ -1,5 +1,5 @@
 ﻿
-# CSV Buddy (v1.3.1) - Read me
+# CSV Buddy (v1.3.2) - Read me
 
 
 CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Unicode ready. Freeware.
@@ -18,6 +18,11 @@ First official release: 2013-11-30
 
 ## History
 
+
+### 2016-06-06 v1.3.2
+
+* Fix bug introduced in v1.2.9.1 preventing from saving manual record edits in some circumstances
+* Automatic file encoding detection is now restricted to UTF-8 or UTF-16 encoded files (no BOM)
 
 ### 2016-05-21 v1.3.1
 
@@ -103,13 +108,13 @@ First official release: 2013-11-30
 * First release of BETA version
 * History of ALPHA phase on [BitBucket](https://bitbucket.org/JnLlnd/csvbuddy/) (private repository)
 
-## <a name="copyright"></a>Copyright
+## <a name="copyright"></a>Copyright 2013-2016 Jean Lalonde
 
 
 Licensed under the Apache License, Version 2.0 (the "License");  
 you may not use this file except in compliance with the License. You may obtain a copy of the License at  
   
-http://www.apache.org/licenses/LICENSE-2.0  
+<A HREF="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</A>  
   
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.  
   
