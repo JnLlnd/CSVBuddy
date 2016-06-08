@@ -19,7 +19,7 @@ First official release: 2013-11-30
 ## History
 
 
-### 2016-06-06 v1.3.2
+### 2016-06-08 v1.3.2
 
 * Fix bug introduced in v1.2.9.1 preventing from saving manual record edits in some circumstances
 * Automatic file encoding detection is now restricted to UTF-8 or UTF-16 encoded files (no BOM)

@@ -22,7 +22,7 @@ limitations under the License.
 Version history
 ---------------
 
-2016-06-06 v1.3.2
+2016-06-08 v1.3.2
 - Fix bug introduced in v1.2.9.1 preventing from saving manual record edits in some circumstances
 - Automatic file encoding detection is now restricted to UTF-8 or UTF-16 encoded files (no BOM)
 - Read the new value DefaultFileEncoding= (under [global]) in CSVBuddy.ini to set the default file encoding (possible values "ANSI", "UTF-8", "UTF-16", "UTF-8-RAW", "UTF-16-RAW" or "CPnnn")
