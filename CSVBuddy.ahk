@@ -3,7 +3,7 @@
 CSV Buddy
 Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
-This script uses the library ObjCSV v0.4 (https://github.com/JnLlnd/ObjCSV)
+This script uses the library ObjCSV v0.5.1 (https://github.com/JnLlnd/ObjCSV)
 
 Copyright 2013-2016 Jean Lalonde
 --------------------------------
@@ -21,6 +21,11 @@ limitations under the License.
 
 Version history
 ---------------
+
+2016-06-06 v1.3.2
+- Fix bug introduced in v1.2.9.1 preventing from saving manual record edits in some circumstances
+- Automatic file encoding detection is now restricted to UTF-8 or UTF-16 encoded files (no BOM)
+- Read the new value DefaultFileEncoding= (under [global]) in CSVBuddy.ini to set the default file encoding (possible values "ANSI", "UTF-8", "UTF-16", "UTF-8-RAW", "UTF-16-RAW" or "CPnnn")
 
 2016-05-31 v1.3.1
 - Change licence to Apache 2.0 (see Copyright above)
@@ -134,7 +139,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.3.1
+;@Ahk2Exe-SetVersion 1.3.2
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -183,6 +188,11 @@ IniRead, blnDonator, %strIniFile%, Global, Donator, 0 ; Please, be fair. Don't c
 IniRead, strCodePageLoad, %strIniFile%, Global, CodePageLoad, 1252 ; default ANSI Latin 1, Western European (Windows)
 IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANSI Latin 1, Western European (Windows)
 
+IniRead, strDefaultFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
+if !StrLen(strDefaultFileEncoding)
+	strDefaultFileEncoding := "Detect"
+strDefaultFileEncoding := StrReplace(L(lFileEncodings, strCodePageLoad), strDefaultFileEncoding . "|", strDefaultFileEncoding . "||")
+
 intProgressType := -2 ; Status Bar, part 2
 
 
@@ -219,7 +229,7 @@ Gui, 1:Add, Checkbox,		yp		x+20	vblnMultiline1 gChangedMultiline1, % L(lTab1Mult
 Gui, 1:Add, Button,			yp		x+0		vbtnHelpMultiline1 gButtonHelpMultiline1, % L(lTab0QuestionMark)
 Gui, 1:Add, Text,			yp		x+5		vlblEndoflineReplacement1 hidden, % L(lTab1EOLreplacement)
 Gui, 1:Add, Edit,			yp		x+5		vstrEndoflineReplacement1 w30 center hidden
-Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding1 w85, % L(lFileEncodings, strCodePageLoad)
+Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding1 w85, %strDefaultFileEncoding%
 Gui, 1:Add, Button,			yp		x+7		vbtnHelpFileEncoding1 gButtonHelpFileEncoding1, % L(lTab0QuestionMark)
 Gui, 1:Add, Button,			yp		x+5		vbtnLoadFile gButtonLoadFile w45 hidden, % L(lTab1Load)
 
@@ -547,7 +557,7 @@ strCurrentHeader := StrUnEscape(strFileHeaderEscaped)
 strCurrentFieldDelimiter := StrMakeRealFieldDelimiter(strFieldDelimiter1)
 strCurrentVisibleFieldDelimiter := strFieldDelimiter1
 strCurrentFieldEncapsulator := strFieldEncapsulator1
-strCurrentFileEncodingLoad := (InStr("Select encoding", strFileEncoding1) ? "" : strFileEncoding1)
+strCurrentFileEncodingLoad := (strFileEncoding1 = "Detect" ? "" : strFileEncoding1)
 
 FileGetSize, intFileSize, %strFileToLoad%, K
 intActualSize := intActualSize + intFileSize
@@ -924,7 +934,7 @@ if (radSaveMultiline)
 else
 	strEolReplacement := strEndoflineReplacement3
 strRealFieldDelimiter3 := StrMakeRealFieldDelimiter(strFieldDelimiter3)
-strCurrentFileEncodingSave := (InStr("Select encoding", strFileEncoding3) ? "" : strFileEncoding3)
+strCurrentFileEncodingSave := (strFileEncoding3 = "Detect" ? "" : strFileEncoding3)
 ; ObjCSV_Collection2CSV(objCollection, strFilePath [, blnHeader = 0
 ;	, strFieldOrder = "", intProgressType = 0, blnOverwrite = 0
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText = ""])
@@ -1146,7 +1156,7 @@ blnOverwrite := CheckIfFileExistOverwrite(strFileToExport, radFixed)
 if (blnOverwrite < 0)
 	return
 
-strCurrentFileEncodingSave := (InStr("Select encoding", strFileEncoding3) ? "" : strFileEncoding3)
+strCurrentFileEncodingSave := (strFileEncoding3 = "Detect" ? "" : strFileEncoding3)
 
 GoSub, RemoveSorting
 
@@ -1454,6 +1464,8 @@ loop, % LV_GetCount("Column")
 		intX := intX + intColWidth
 		intY := 5
 	}
+	else
+		intLastFieldIn2Gui := A_Index
 	intYLabel := intY
 	intYEdit := intY + 15
 	LV_GetText(strColHeader, 0, A_Index)
