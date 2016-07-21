@@ -22,6 +22,9 @@ limitations under the License.
 Version history
 ---------------
 
+2016-07-21 v1.3.3
+- Fix minor bug and improve file encoding list
+
 2016-06-08 v1.3.2
 - Fix bug introduced in v1.2.9.1 preventing from saving manual record edits in some circumstances
 - Automatic file encoding detection is now restricted to UTF-8 or UTF-16 encoded files (no BOM)
@@ -139,7 +142,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.3.2
+;@Ahk2Exe-SetVersion 1.3.3
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
