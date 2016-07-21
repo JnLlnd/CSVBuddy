@@ -1409,7 +1409,7 @@ IsRowSelected(intRow)
 
 
 MenuAddRow:
-MenuEditRow:
+MenuEditRow_OLD:
 SearchShowRecord:
 ReplaceShowRecord:
 strShowRecordLabel := A_ThisLabel
@@ -2438,4 +2438,170 @@ GetNbLinesOfControl(strThisEditHandle)
 }
 
 
+
+/*
+MenuAddRow:
+MenuEditRow:
+SearchShowRecord:
+ReplaceShowRecord:
+strShowRecordLabel := A_ThisLabel
+Gui, 1:Submit, NoHide
+if (strShowRecordLabel = "MenuAddRow")
+{
+	LV_Modify(0, "-Select")
+	LV_Insert(0xFFFF, "Select Focus") ; add at the end of the list
+	intRowNumber := LV_GetNext()
+	LV_Modify(intRowNumber, "Vis")
+	strSaveRecordButton := "ButtonSaveRecordAddRow"
+	strCancelButton := "ButtonCancelAddRow"
+	strGuiTitle := L(lLvEventsAddrow, lAppName)
+	strCancelButtonLabel := lLvEventsCancel
+}
+else
+{
+	strSaveRecordButton := "ButtonSaveRecord"
+	strCancelButton := "ButtonCancel"
+	strCancelButtonLabel := (strShowRecordLabel = "MenuEditRow" ? lLvEventsCancel : lLvEventsNext)
+	strGuiTitle := L((strShowRecordLabel = "MenuEditRow" ? lLvEventsEditrow : lLvEventsSearchEditrow), lAppName, intRowNumber, LV_GetCount())
+}
+
+if (intRowNumber = 0)
+	intRowNumber := 1
+intGui1WinID := WinExist("A")
+Gui, 2:New, +Resize +Hwndstr2GuiHandle, %strGuiTitle%
+Gui, 2:+Owner1 ; Make the main window (Gui #1) the owner of the EditRow window (Gui #2).
+Gui, 1:Default
+SysGet, intMonWork, MonitorWorkArea 
+intColWidth := 380
+intEditWidth := intColWidth - 20
+intMaxNbCol := Floor(intMonWorkRight / intColWidth)
+intX := 10
+intY := 5
+intCol := 1
+strZoomField := ""
+loop, % LV_GetCount("Column")
+{
+	if ((intY + 100) > intMonWorkBottom)
+	{
+		if (intCol = 1)
+			Gosub, DisplayShowRecordsButtons
+		if (intCol = intMaxNbCol)
+		{
+			intYLabel := intY
+			Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabelMissing, % L(lLvEventsFieldsMissing)
+			intLastFieldIn2Gui := A_Index - 1
+			break
+		}
+		intCol := intCol + 1
+		intX := intX + intColWidth
+		intY := 5
+	}
+	else
+		intLastFieldIn2Gui := A_Index
+	intYLabel := intY
+	intYEdit := intY + 15
+	LV_GetText(strColHeader, 0, A_Index)
+	if (A_Index = intCurrentSortColumn)
+		strColHeader := SubStr(strColHeader, 3)
+	Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabel%A_Index%, %strColHeader%
+	LV_GetText(strColData, intRowNumber, A_Index)
+	if (strShowRecordLabel = "ReplaceShowRecord" and A_Index = intColNumber)
+	{
+		strPreviousCaseSense := A_StringCaseSense 
+		StringCaseSense, % (blnReplaceCaseSensitive ? "On" : "Off")
+		StringReplace, strColData, strColData, %strSearch%, %strReplace%, All
+		StringCaseSense, %strPreviousCaseSense%
+	}
+	Gui, 2:Add, Edit, y%intYEdit% x%intX% w%intEditWidth% vstrEdit%A_Index% +HwndstrEditHandle, %strColData%
+	ShrinkEditControl(strEditHandle, 2, "2")
+	GuiControlGet, intPosEdit, 2:Pos, %strEditHandle%
+	intY := intY + intPosEditH + 19
+	intNbFieldsOnScreen := A_Index ; incremented at each occurence of the loop
+}
+if (intCol = 1) ; duplicate of line above in the loop, but much simpler that way
+	Gosub, DisplayShowRecordsButtons
+
+if ((strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceShowRecord") and intColFound)
+{
+	GuiControl, 2:Focus, strEdit%intColFound%
+	Send, ^a
+}
+Gui, 2:Show, AutoSize Center
+Gui, 1:+Disabled
+return
+*/
+
+
+MenuEditRow:
+strShowRecordLabel := A_ThisLabel
+Gui, 1:Submit, NoHide
+if (strShowRecordLabel = "MenuAddRow")
+{
+	LV_Modify(0, "-Select")
+	LV_Insert(0xFFFF, "Select Focus") ; add at the end of the list
+	intRowNumber := LV_GetNext()
+	LV_Modify(intRowNumber, "Vis")
+	strSaveRecordButton := "ButtonSaveRecordAddRow"
+	strCancelButton := "ButtonCancelAddRow"
+	strGuiTitle := L(lLvEventsAddrow, lAppName)
+	strCancelButtonLabel := lLvEventsCancel
+}
+else
+{
+	strSaveRecordButton := "ButtonSaveRecord"
+	strCancelButton := "ButtonCancel"
+	strCancelButtonLabel := (strShowRecordLabel = "MenuEditRow" ? lLvEventsCancel : lLvEventsNext)
+	strGuiTitle := L((strShowRecordLabel = "MenuEditRow" ? lLvEventsEditrow : lLvEventsSearchEditrow), lAppName, intRowNumber, LV_GetCount())
+}
+if (intRowNumber = 0)
+	intRowNumber := 1
+intGui1WinID := WinExist("A")
+Gui, EditRow: New, +Resize +HwndstrEditRowGuiHandle, %strGuiTitle%
+Gui, EditRow:+Owner1 ; Make the main window (Gui #1) the owner of the EditRow window (Gui EditRow).
+Gui, EditRow:Add, ListView, x10 y50 r8 w480 vlvEditRow +ReadOnly NoSort gEditRowListViewEvents AltSubmit -LV0x10, %lLvEditRowColumnHeader%
+Gui, EditRow:Add, Edit, r16 vEditRowData
+
+loop, % LV_GetCount("Column")
+{
+	Gui, 1:Default
+	LV_GetText(strColHeader, 0, A_Index)
+	###_V("", A_Index, strColHeader)
+	if (A_Index = intCurrentSortColumn)
+		strColHeader := SubStr(strColHeader, 3)
+	Gui, EditRow:Default
+	LV_Add("", strColHeader, A_Index)
+
+	; Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabel%A_Index%, %strColHeader%
+	/*
+	LV_GetText(strColData, intRowNumber, A_Index)
+	if (strShowRecordLabel = "ReplaceShowRecord" and A_Index = intColNumber)
+	{
+		strPreviousCaseSense := A_StringCaseSense 
+		StringCaseSense, % (blnReplaceCaseSensitive ? "On" : "Off")
+		StringReplace, strColData, strColData, %strSearch%, %strReplace%, All
+		StringCaseSense, %strPreviousCaseSense%
+	}
+	Gui, 2:Add, Edit, y%intYEdit% x%intX% w%intEditWidth% vstrEdit%A_Index% +HwndstrEditHandle, %strColData%
+	ShrinkEditControl(strEditHandle, 2, "2")
+	GuiControlGet, intPosEdit, 2:Pos, %strEditHandle%
+	intY := intY + intPosEditH + 19
+	intNbFieldsOnScreen := A_Index ; incremented at each occurence of the loop
+	*/
+}
+LV_ModifyCol(1, "AutoHdr")
+LV_ModifyCol(2, "AutoHdr")
+Gui, EditRow:Show
+
+return
+
+
+EditRowListViewEvents:
+
+if (A_GuiEvent = "Normal")
+{
+	LV_GetText(strColData, A_EventInfo, 1)
+	###_V("", A_GuiEvent, A_EventInfo, strColData)
+}
+
+return
 

@@ -18,6 +18,7 @@ global lFuncIfFileExistMessage := "File exists:`n~1~`n`nDo you want to overwrite
 global lFuncIfFileExistMessageAppend := "File exists:`n~1~`n`nDo you want to overwrite this file?`n`nYes: The file will be overwritten.`nNo: Data will be added to the existing file."
 global lFuncIfFileExistTitle := "~1~ - File exists"
 global lFuncOopsTitle := "~1~ (~2~)"
+global lLvEditRowColumnHeader := "Field name|Data size"
 global lLvEventsAddrow := "~1~ - Add row"
 global lLvEventsAddrowMenu := "Add row"
 global lLvEventsCancel := "Cancel"
