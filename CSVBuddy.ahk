@@ -188,10 +188,11 @@ IniRead, blnDonator, %strIniFile%, Global, Donator, 0 ; Please, be fair. Don't c
 IniRead, strCodePageLoad, %strIniFile%, Global, CodePageLoad, 1252 ; default ANSI Latin 1, Western European (Windows)
 IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANSI Latin 1, Western European (Windows)
 
-IniRead, strDefaultFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
-if !StrLen(strDefaultFileEncoding)
-	strDefaultFileEncoding := "Detect"
-strDefaultFileEncoding := StrReplace(L(lFileEncodings, strCodePageLoad), strDefaultFileEncoding . "|", strDefaultFileEncoding . "||")
+IniRead, strIniFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
+if !StrLen(strIniFileEncoding)
+	strIniFileEncoding := lFileEncodingsDetect
+strDefaultFileEncoding := L(lFileEncodings, strCodePageLoad, lFileEncodingsDetect)
+StringReplace, strDefaultFileEncoding, strDefaultFileEncoding, %strIniFileEncoding%|, %strIniFileEncoding%||
 
 intProgressType := -2 ; Status Bar, part 2
 
@@ -264,7 +265,7 @@ Gui, 1:Add, Button,			y100	x450	vbtnHelpSaveHeader gButtonHelpSaveHeader, % L(lT
 Gui, 1:Add, Radio,			y100	x500	vradSaveMultiline gClickRadSaveMultiline checked, % L(lTab3Savemultiline)
 Gui, 1:Add, Radio,			y+10	x500	vradSaveSingleline gClickRadSaveSingleline, % L(lTab3Savesingleline)
 Gui, 1:Add, Button,			y100	x620	vbtnHelpMultiline gButtonHelpSaveMultiline, % L(lTab0QuestionMark)
-Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding3 w85, % L(lFileEncodings, strCodePageSave)
+Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding3 w85, % L(lFileEncodings, strCodePageSave, lFileEncodingsSelect)
 Gui, 1:Add, Button,			yp		x+7		vbtnHelpFileEncoding3 gButtonHelpFileEncoding3, % L(lTab0QuestionMark)
 Gui, 1:Add, Text,			y+25	x500	vlblEndoflineReplacement3 hidden, % L(lTab3Endoflinereplacement)
 Gui, 1:Add, Edit,			yp		x620	vstrEndoflineReplacement3 hidden w50 center, % chr(182)
@@ -557,7 +558,7 @@ strCurrentHeader := StrUnEscape(strFileHeaderEscaped)
 strCurrentFieldDelimiter := StrMakeRealFieldDelimiter(strFieldDelimiter1)
 strCurrentVisibleFieldDelimiter := strFieldDelimiter1
 strCurrentFieldEncapsulator := strFieldEncapsulator1
-strCurrentFileEncodingLoad := (strFileEncoding1 = "Detect" ? "" : strFileEncoding1)
+strCurrentFileEncodingLoad := (strFileEncoding1 = lFileEncodingsDetect ? "" : strFileEncoding1)
 
 FileGetSize, intFileSize, %strFileToLoad%, K
 intActualSize := intActualSize + intFileSize
@@ -604,7 +605,7 @@ if (!blnSkipHelpReadyToEdit)
 GuiControl, 1:, strFieldDelimiter3, %strCurrentVisibleFieldDelimiter%
 GuiControl, 1:, strFieldEncapsulator3, %strCurrentFieldEncapsulator%
 GuiControl, 1:ChooseString, strFileEncoding1, %strCurrentFileEncodingLoad%
-GuiControl, 1:ChooseString, strFileEncoding3, %strCurrentFileEncodingLoad%
+GuiControl, 1:ChooseString, strFileEncoding3, % (strCurrentFileEncodingLoad = "" ? lFileEncodingsSelect : strCurrentFileEncodingLoad)
 blnFilterActive := false
 obj := ; release object
 return
@@ -934,7 +935,7 @@ if (radSaveMultiline)
 else
 	strEolReplacement := strEndoflineReplacement3
 strRealFieldDelimiter3 := StrMakeRealFieldDelimiter(strFieldDelimiter3)
-strCurrentFileEncodingSave := (strFileEncoding3 = "Detect" ? "" : strFileEncoding3)
+strCurrentFileEncodingSave := (strFileEncoding3 = lFileEncodingsSelect ? "" : strFileEncoding3)
 ; ObjCSV_Collection2CSV(objCollection, strFilePath [, blnHeader = 0
 ;	, strFieldOrder = "", intProgressType = 0, blnOverwrite = 0
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText = ""])
@@ -1156,7 +1157,7 @@ blnOverwrite := CheckIfFileExistOverwrite(strFileToExport, radFixed)
 if (blnOverwrite < 0)
 	return
 
-strCurrentFileEncodingSave := (strFileEncoding3 = "Detect" ? "" : strFileEncoding3)
+strCurrentFileEncodingSave := (strFileEncoding3 = lFileEncodingsSelect ? "" : strFileEncoding3)
 
 GoSub, RemoveSorting
 
