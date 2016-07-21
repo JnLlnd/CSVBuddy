@@ -188,10 +188,11 @@ IniRead, blnDonator, %strIniFile%, Global, Donator, 0 ; Please, be fair. Don't c
 IniRead, strCodePageLoad, %strIniFile%, Global, CodePageLoad, 1252 ; default ANSI Latin 1, Western European (Windows)
 IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANSI Latin 1, Western European (Windows)
 
-IniRead, strDefaultFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
-if !StrLen(strDefaultFileEncoding)
-	strDefaultFileEncoding := lFileEncodingsDetect
-strDefaultFileEncoding := StrReplace(L(lFileEncodings, strCodePageLoad, lFileEncodingsDetect), strDefaultFileEncoding . "|", strDefaultFileEncoding . "||")
+IniRead, strIniFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
+if !StrLen(strIniFileEncoding)
+	strIniFileEncoding := lFileEncodingsDetect
+strDefaultFileEncoding := L(lFileEncodings, strCodePageLoad, lFileEncodingsDetect)
+StringReplace, strDefaultFileEncoding, strDefaultFileEncoding, %strIniFileEncoding%|, %strIniFileEncoding%||
 
 intProgressType := -2 ; Status Bar, part 2
 
@@ -557,7 +558,7 @@ strCurrentHeader := StrUnEscape(strFileHeaderEscaped)
 strCurrentFieldDelimiter := StrMakeRealFieldDelimiter(strFieldDelimiter1)
 strCurrentVisibleFieldDelimiter := strFieldDelimiter1
 strCurrentFieldEncapsulator := strFieldEncapsulator1
-strCurrentFileEncodingLoad := (strFileEncoding1 = "Detect" ? "" : strFileEncoding1)
+strCurrentFileEncodingLoad := (strFileEncoding1 = lFileEncodingsDetect ? "" : strFileEncoding1)
 
 FileGetSize, intFileSize, %strFileToLoad%, K
 intActualSize := intActualSize + intFileSize
@@ -604,7 +605,7 @@ if (!blnSkipHelpReadyToEdit)
 GuiControl, 1:, strFieldDelimiter3, %strCurrentVisibleFieldDelimiter%
 GuiControl, 1:, strFieldEncapsulator3, %strCurrentFieldEncapsulator%
 GuiControl, 1:ChooseString, strFileEncoding1, %strCurrentFileEncodingLoad%
-GuiControl, 1:ChooseString, strFileEncoding3, %strCurrentFileEncodingLoad%
+GuiControl, 1:ChooseString, strFileEncoding3, % (strCurrentFileEncodingLoad = "" ? lFileEncodingsSelect : strCurrentFileEncodingLoad)
 blnFilterActive := false
 obj := ; release object
 return
@@ -934,7 +935,7 @@ if (radSaveMultiline)
 else
 	strEolReplacement := strEndoflineReplacement3
 strRealFieldDelimiter3 := StrMakeRealFieldDelimiter(strFieldDelimiter3)
-strCurrentFileEncodingSave := (strFileEncoding3 = "Detect" ? "" : strFileEncoding3)
+strCurrentFileEncodingSave := (strFileEncoding3 = lFileEncodingsSelect ? "" : strFileEncoding3)
 ; ObjCSV_Collection2CSV(objCollection, strFilePath [, blnHeader = 0
 ;	, strFieldOrder = "", intProgressType = 0, blnOverwrite = 0
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText = ""])
@@ -1156,7 +1157,7 @@ blnOverwrite := CheckIfFileExistOverwrite(strFileToExport, radFixed)
 if (blnOverwrite < 0)
 	return
 
-strCurrentFileEncodingSave := (strFileEncoding3 = "Detect" ? "" : strFileEncoding3)
+strCurrentFileEncodingSave := (strFileEncoding3 = lFileEncodingsSelect ? "" : strFileEncoding3)
 
 GoSub, RemoveSorting
 
