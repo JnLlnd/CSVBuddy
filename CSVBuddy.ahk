@@ -190,8 +190,8 @@ IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANS
 
 IniRead, strDefaultFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
 if !StrLen(strDefaultFileEncoding)
-	strDefaultFileEncoding := "Detect"
-strDefaultFileEncoding := StrReplace(L(lFileEncodings, strCodePageLoad), strDefaultFileEncoding . "|", strDefaultFileEncoding . "||")
+	strDefaultFileEncoding := lFileEncodingsDetect
+strDefaultFileEncoding := StrReplace(L(lFileEncodings, strCodePageLoad, lFileEncodingsDetect), strDefaultFileEncoding . "|", strDefaultFileEncoding . "||")
 
 intProgressType := -2 ; Status Bar, part 2
 
@@ -264,7 +264,7 @@ Gui, 1:Add, Button,			y100	x450	vbtnHelpSaveHeader gButtonHelpSaveHeader, % L(lT
 Gui, 1:Add, Radio,			y100	x500	vradSaveMultiline gClickRadSaveMultiline checked, % L(lTab3Savemultiline)
 Gui, 1:Add, Radio,			y+10	x500	vradSaveSingleline gClickRadSaveSingleline, % L(lTab3Savesingleline)
 Gui, 1:Add, Button,			y100	x620	vbtnHelpMultiline gButtonHelpSaveMultiline, % L(lTab0QuestionMark)
-Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding3 w85, % L(lFileEncodings, strCodePageSave)
+Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding3 w85, % L(lFileEncodings, strCodePageSave, lFileEncodingsSelect)
 Gui, 1:Add, Button,			yp		x+7		vbtnHelpFileEncoding3 gButtonHelpFileEncoding3, % L(lTab0QuestionMark)
 Gui, 1:Add, Text,			y+25	x500	vlblEndoflineReplacement3 hidden, % L(lTab3Endoflinereplacement)
 Gui, 1:Add, Edit,			yp		x620	vstrEndoflineReplacement3 hidden w50 center, % chr(182)
