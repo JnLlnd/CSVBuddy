@@ -2560,20 +2560,32 @@ else
 if (intRowNumber = 0)
 	intRowNumber := 1
 intGui1WinID := WinExist("A")
-Gui, EditRow: New, +Resize +HwndstrEditRowGuiHandle, %strGuiTitle%
+Gui, EditRow: New, +Resize +HwndstrEditRowGuiHandle +MinSize240x240, %strGuiTitle%
 Gui, EditRow:+Owner1 ; Make the main window (Gui #1) the owner of the EditRow window (Gui EditRow).
-Gui, EditRow:Add, ListView, x10 y50 r8 w480 vlvEditRow +ReadOnly NoSort gEditRowListViewEvents AltSubmit -LV0x10, %lLvEditRowColumnHeader%
-Gui, EditRow:Add, Edit, r16 vEditRowData
+Gui, EditRow:Add, ListView, x10 y10 h162 w480 vlvEditRow +ReadOnly gEditRowListViewEvents AltSubmit -LV0x10 section, %lLvEditRowColumnHeader%
+GuiControlGet, intListViewEditRow, Pos, lvEditRow
+LV_ModifyCol(1, "Integer")
+LV_ModifyCol(4, "Integer")
+Gui, Font, w700
+Gui, EditRow:Add, Text, w480 vtxtRowColumnName, %lLvEditRowSelectField%
+Gui, Font, w400
+Gui, EditRow:Add, Edit, h162 w480 vtxtRowColumnData
+Gui, EditRow:Add, Button, vbtnEditRowSaveColumn gEditRowSaveColumn yp, %lLvEditRowSaveField%
+Gui, EditRow:Add, Button, vbtnEditRowSaveRecord gEditRowSaveRecord y%intListViewEditRowY%, %lLvEditRowSaveRecord%
 
-loop, % LV_GetCount("Column")
+Gui, 1:Default
+intNbColEditRow := LV_GetCount("Column")
+
+loop, %intNbColEditRow%
 {
 	Gui, 1:Default
 	LV_GetText(strColHeader, 0, A_Index)
-	###_V("", A_Index, strColHeader)
+	LV_GetText(strColData, intRowNumber, A_Index)
+	; ###_V("", intRowNumber, A_Index, strColHeader)
 	if (A_Index = intCurrentSortColumn)
 		strColHeader := SubStr(strColHeader, 3)
 	Gui, EditRow:Default
-	LV_Add("", strColHeader, A_Index)
+	LV_Add("", A_Index, strColHeader, strColData, StrLen(strColData))
 
 	; Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabel%A_Index%, %strColHeader%
 	/*
@@ -2594,18 +2606,73 @@ loop, % LV_GetCount("Column")
 }
 LV_ModifyCol(1, "AutoHdr")
 LV_ModifyCol(2, "AutoHdr")
+LV_ModifyCol(4, 40)
+; LV_ModifyCol(3, "AutoHdr")
 Gui, EditRow:Show
 
 return
 
 
 EditRowListViewEvents:
-
-if (A_GuiEvent = "Normal")
+Critical
+if (A_GuiEvent = "I") 
 {
-	LV_GetText(strColData, A_EventInfo, 1)
-	###_V("", A_GuiEvent, A_EventInfo, strColData)
+	if InStr(ErrorLevel, "SF", true)
+	{
+		intEditColumn := A_EventInfo
+		LV_GetText(strColName, intEditColumn, 2)
+		LV_GetText(strColData, intEditColumn, 3)
+		GuiControl, , txtRowColumnName, %strColName%
+		GuiControl, , txtRowColumnData, %strColData%
+	}
 }
-
+Critical, Off
 return
 
+
+EditRowSaveColumn:
+GuiControlGet, strColData, , txtRowColumnData
+LV_Modify(intEditColumn, "Col3", strColData)
+LV_Modify(intEditColumn, "Col3", StrLen(strColData))
+return
+
+
+EditRowSaveRecord:
+return
+
+
+EditRowGuiSize: ; Expand or shrink the ListView in response to the user's resizing of the window.
+if A_EventInfo = 1  ; The window has been minimized.  No action needed.
+    return
+; ###_V("", A_GuiWidth, A_GuiHeight)
+
+GuiControlGet, intSaveRecordButton, Pos, btnEditRowSaveRecord
+GuiControlGet, intSaveColumnButton, Pos, btnEditRowSaveColumn
+intMaxWidthButton := (intSaveRecordButtonW > intSaveColumnButtonW ? intSaveRecordButtonW : intSaveColumnButtonW)
+intEditControlsWidth := A_GuiWidth - intMaxWidthButton - 30
+intButtonsX := A_GuiWidth - intMaxWidthButton - 10
+
+intTextHeight := (A_GuiHeight - 50) / 2
+intColumnNameTextY := 10 + intTextHeight + 10
+intColumnDataTextY := 10 + intTextHeight + 10 + 20
+
+GuiControl, EditRow:Move, lvEditRow, w%intEditControlsWidth% h%intTextHeight%
+GuiControl, EditRow:Move, txtRowColumnName, w%intEditControlsWidth% y%intColumnNameTextY%
+GuiControl, EditRow:Move, txtRowColumnData, w%intEditControlsWidth% h%intTextHeight% y%intColumnDataTextY%
+GuiControl, EditRow:Move, btnEditRowSaveRecord, w%intMaxWidthButton% x%intButtonsX%
+GuiControl, EditRow:Move, btnEditRowSaveColumn, w%intMaxWidthButton% x%intButtonsX% y%intColumnDataTextY%
+
+SysGet, intScrollBarWidth, 2, 20
+LV_ModifyCol(3, intEditControlsWidth - GetLvColumnWidth(1) - GetLvColumnWidth(2) - GetLvColumnWidth(4) - intScrollBarWidth)
+; ###_V(A_ThisLabel, intDataColWidth1, intDataColWidth2, intDataColWidth3avant, intDataColWidth4, intDataColWidth, intEditControlsWidth, intEditControlsWidth - intDataColWidth, intDataColWidth3apres, intScrollBarWidth)
+; ###_V(A_ThisLabel, A_GuiHeight, intTextHeight, intColumnNameTextY, intColumnDataTextY)
+
+; ###_V(A_ThisLabel, intSaveRecordButtonW, intSaveColumnButtonW, A_GuiWidth, intMaxWidthButton, intEditControlsWidth)
+return
+
+
+GetLvColumnWidth(intCol)
+{
+	SendMessage, 4125, intCol - 1, 0, SysListView321  ; 4125 is LVM_GETCOLUMNWIDTH.
+	return ErrorLevel
+}
