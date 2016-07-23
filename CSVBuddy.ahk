@@ -175,6 +175,8 @@ IfNotExist, %strIniFile%
 			Startups=1
 			CodePageLoad=1252
 			CodePageSave=1252
+			SreenHeightCorrection=-100
+			SreenWidthCorrection=-100
 		)
 		, %strIniFile%
 
