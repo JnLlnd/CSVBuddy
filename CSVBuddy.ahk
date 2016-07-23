@@ -24,6 +24,7 @@ Version history
 
 2016-07-21 v1.3.3
 - Fix minor bug and improve file encoding list
+- Add values SreenHeightCorrection and SreenWidthCorrection in CSVBuddy.ini file (enter negative values in pixels to reduce the height or width of edit row dialog box)
 
 2016-06-08 v1.3.2
 - Fix bug introduced in v1.2.9.1 preventing from saving manual record edits in some circumstances
@@ -190,6 +191,8 @@ IniRead, intStartups, %strIniFile%, Global, Startups, 1
 IniRead, blnDonator, %strIniFile%, Global, Donator, 0 ; Please, be fair. Don't cheat with this.
 IniRead, strCodePageLoad, %strIniFile%, Global, CodePageLoad, 1252 ; default ANSI Latin 1, Western European (Windows)
 IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANSI Latin 1, Western European (Windows)
+IniRead, intSreenHeightCorrection, %strIniFile%, Global, SreenHeightCorrection, 0 ; negative number to redure the height of edit row dialog box
+IniRead, intSreenWidthCorrection, %strIniFile%, Global, SreenWidthCorrection, 0 ; negative number to redure the width of edit row dialog box
 
 IniRead, strIniFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
 if !StrLen(strIniFileEncoding)
@@ -1446,14 +1449,14 @@ Gui, 1:Default
 SysGet, intMonWork, MonitorWorkArea 
 intColWidth := 380
 intEditWidth := intColWidth - 20
-intMaxNbCol := Floor(intMonWorkRight / intColWidth)
+intMaxNbCol := Floor((intMonWorkRight + intSreenWidthCorrection) / intColWidth)
 intX := 10
 intY := 5
 intCol := 1
 strZoomField := ""
 loop, % LV_GetCount("Column")
 {
-	if ((intY + 100) > intMonWorkBottom)
+	if ((intY + 100) > (intMonWorkBottom + intSreenHeightCorrection))
 	{
 		if (intCol = 1)
 			Gosub, DisplayShowRecordsButtons
