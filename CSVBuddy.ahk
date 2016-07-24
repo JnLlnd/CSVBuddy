@@ -23,7 +23,7 @@ Version history
 ---------------
 
 2016-07-21 v1.3.3
-- Fix minor bug and improve file encoding list
+- If file encoding is not specified (leave encoding at "Detect") when loading a file, it is loaded as UTF-8 or UTF-16 if these formats are detected in file header or as ANSI for all other formats (and displayed as such in load and save encoding encoding lists); UTF-8-RAW and UTF-16-RAW formats must be selected in encoding list to load files in these formats
 - Add values SreenHeightCorrection and SreenWidthCorrection in CSVBuddy.ini file (enter negative values in pixels to reduce the height or width of edit row dialog box)
 
 2016-06-08 v1.3.2
