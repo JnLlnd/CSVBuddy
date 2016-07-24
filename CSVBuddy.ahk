@@ -23,7 +23,8 @@ Version history
 ---------------
 
 2016-07-21 v1.3.3
-- Fix minor bug and improve file encoding list
+- If file encoding is not specified (leave encoding at "Detect") when loading a file, it is loaded as UTF-8 or UTF-16 if these formats are detected in file header or as ANSI for all other formats (and displayed as such in load and save encoding encoding lists); UTF-8-RAW and UTF-16-RAW formats must be selected in encoding list to load files in these formats
+- Add values SreenHeightCorrection and SreenWidthCorrection in CSVBuddy.ini file (enter negative values in pixels to reduce the height or width of edit row dialog box)
 
 2016-06-08 v1.3.2
 - Fix bug introduced in v1.2.9.1 preventing from saving manual record edits in some circumstances
@@ -172,8 +173,11 @@ IfNotExist, %strIniFile%
 			SkipHelpReadyToEdit=0
 			SkipConfirmQuit=0
 			Startups=1
+			DefaultFileEncoding=
 			CodePageLoad=1252
 			CodePageSave=1252
+			SreenHeightCorrection=-100
+			SreenWidthCorrection=-100
 		)
 		, %strIniFile%
 
@@ -190,6 +194,8 @@ IniRead, intStartups, %strIniFile%, Global, Startups, 1
 IniRead, blnDonator, %strIniFile%, Global, Donator, 0 ; Please, be fair. Don't cheat with this.
 IniRead, strCodePageLoad, %strIniFile%, Global, CodePageLoad, 1252 ; default ANSI Latin 1, Western European (Windows)
 IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANSI Latin 1, Western European (Windows)
+IniRead, intSreenHeightCorrection, %strIniFile%, Global, SreenHeightCorrection, 0 ; negative number to redure the height of edit row dialog box
+IniRead, intSreenWidthCorrection, %strIniFile%, Global, SreenWidthCorrection, 0 ; negative number to redure the width of edit row dialog box
 
 IniRead, strIniFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
 if !StrLen(strIniFileEncoding)
@@ -571,6 +577,8 @@ intActualSize := intActualSize + intFileSize
 obj := ObjCSV_CSV2Collection(strFileToLoad, strCurrentHeader, radGetHeader, blnMultiline1, intProgressType
 	, strCurrentFieldDelimiter, strCurrentFieldEncapsulator, strEndoflineReplacement1, L(lTab1ReadingCSVdata)
 	, strCurrentFileEncodingLoad)
+if !StrLen(strCurrentFileEncodingLoad)
+	strCurrentFileEncodingLoad := "ANSI"
 if (ErrorLevel)
 {
 	if (ErrorLevel = 3)
@@ -608,7 +616,7 @@ if (!blnSkipHelpReadyToEdit)
 GuiControl, 1:, strFieldDelimiter3, %strCurrentVisibleFieldDelimiter%
 GuiControl, 1:, strFieldEncapsulator3, %strCurrentFieldEncapsulator%
 GuiControl, 1:ChooseString, strFileEncoding1, %strCurrentFileEncodingLoad%
-GuiControl, 1:ChooseString, strFileEncoding3, % (strCurrentFileEncodingLoad = "" ? lFileEncodingsSelect : strCurrentFileEncodingLoad)
+GuiControl, 1:ChooseString, strFileEncoding3, %strCurrentFileEncodingLoad%
 blnFilterActive := false
 obj := ; release object
 return
@@ -1446,14 +1454,14 @@ Gui, 1:Default
 SysGet, intMonWork, MonitorWorkArea 
 intColWidth := 380
 intEditWidth := intColWidth - 20
-intMaxNbCol := Floor(intMonWorkRight / intColWidth)
+intMaxNbCol := Floor((intMonWorkRight + intSreenWidthCorrection) / intColWidth)
 intX := 10
 intY := 5
 intCol := 1
 strZoomField := ""
 loop, % LV_GetCount("Column")
 {
-	if ((intY + 100) > intMonWorkBottom)
+	if ((intY + 100) > (intMonWorkBottom + intSreenHeightCorrection))
 	{
 		if (intCol = 1)
 			Gosub, DisplayShowRecordsButtons
