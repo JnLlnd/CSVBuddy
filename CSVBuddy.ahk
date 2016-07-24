@@ -173,6 +173,7 @@ IfNotExist, %strIniFile%
 			SkipHelpReadyToEdit=0
 			SkipConfirmQuit=0
 			Startups=1
+			DefaultFileEncoding=
 			CodePageLoad=1252
 			CodePageSave=1252
 			SreenHeightCorrection=-100
@@ -576,6 +577,8 @@ intActualSize := intActualSize + intFileSize
 obj := ObjCSV_CSV2Collection(strFileToLoad, strCurrentHeader, radGetHeader, blnMultiline1, intProgressType
 	, strCurrentFieldDelimiter, strCurrentFieldEncapsulator, strEndoflineReplacement1, L(lTab1ReadingCSVdata)
 	, strCurrentFileEncodingLoad)
+if !StrLen(strCurrentFileEncodingLoad)
+	strCurrentFileEncodingLoad := "ANSI"
 if (ErrorLevel)
 {
 	if (ErrorLevel = 3)
@@ -613,7 +616,7 @@ if (!blnSkipHelpReadyToEdit)
 GuiControl, 1:, strFieldDelimiter3, %strCurrentVisibleFieldDelimiter%
 GuiControl, 1:, strFieldEncapsulator3, %strCurrentFieldEncapsulator%
 GuiControl, 1:ChooseString, strFileEncoding1, %strCurrentFileEncodingLoad%
-GuiControl, 1:ChooseString, strFileEncoding3, % (strCurrentFileEncodingLoad = "" ? lFileEncodingsSelect : strCurrentFileEncodingLoad)
+GuiControl, 1:ChooseString, strFileEncoding3, %strCurrentFileEncodingLoad%
 blnFilterActive := false
 obj := ; release object
 return
