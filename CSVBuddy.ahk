@@ -1322,7 +1322,8 @@ else
 	Menu, ContextMenu, Add, % L(lLvEventsDeselectAll), MenuSelectNone
 	Menu, ContextMenu, Add, % L(lLvEventsReverseSelection), MenuSelectReverse
 	Menu, ContextMenu, Add
-	Menu, ContextMenu, Add, % L(lLvEventsEditrowMenu), MenuEditRecord
+	Menu, ContextMenu, Add, % L(lLvEditRecordMenu), MenuEditRecord
+	Menu, ContextMenu, Add, % L(lLvEventsEditrowMenu), MenuEditRow
 	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
 	Menu, ContextMenu, Add, % L(lLvEventsDeleteRowMenu), MenuDeleteRow
 	Menu, ContextMenu, Add
@@ -1421,7 +1422,7 @@ IsRowSelected(intRow)
 
 
 MenuAddRow:
-MenuEditRow_OLD:
+MenuEditRow:
 SearchShowRecord:
 ReplaceShowRecord:
 strShowRecordLabel := A_ThisLabel
@@ -1441,8 +1442,8 @@ else
 {
 	strSaveRecordButton := "ButtonSaveRecord"
 	strCancelButton := "ButtonCancel"
-	strCancelButtonLabel := (strShowRecordLabel = "MenuEditRecord" ? lLvEventsCancel : lLvEventsNext)
-	strGuiTitle := L((strShowRecordLabel = "MenuEditRecord" ? lLvEventsEditrow : lLvEventsSearchEditrow), lAppName, intRowNumber, LV_GetCount())
+	strCancelButtonLabel := (strShowRecordLabel = "MenuEditRow" ? lLvEventsCancel : lLvEventsNext)
+	strGuiTitle := L((strShowRecordLabel = "MenuEditRow" ? lLvEventsEditrow : lLvEventsSearchEditrow), lAppName, intRowNumber, LV_GetCount())
 }
 
 if (intRowNumber = 0)
@@ -1693,6 +1694,154 @@ NotMatchingRow(intRow, strFilter, intColNumber, ByRef intColFound, blnReplaceCas
 	return True
 }
 
+
+
+MenuEditRecord:
+blnRecordChanged := false
+Gui, 1:Submit, NoHide
+strGuiTitle := L(lLvEditRecordTitle, lAppName, intRowNumber, LV_GetCount())
+if (intRowNumber = 0)
+	intRowNumber := 1
+intGui1WinID := WinExist("A")
+Gui, EditRecord: New, +Resize +HwndstrEditRecordGuiHandle +MinSize240x240, %strGuiTitle%
+Gui, EditRecord:+Owner1 ; Make the main window (Gui #1) the owner of the EditRecord window (Gui EditRecord).
+Gui, EditRecord:Add, ListView, x10 y10 h162 w480 vlvEditRecord +ReadOnly gEditRecordListViewEvents AltSubmit -LV0x10, %lLvEditRecordColumnHeader%
+GuiControlGet, intListViewEditRecord, Pos, lvEditRecord
+LV_ModifyCol(1, "Integer")
+LV_ModifyCol(4, "Integer")
+Gui, Font, w700
+Gui, EditRecord:Add, Text, w480 vlblFieldName, %lLvEditRecordSelectField%
+Gui, Font, w400
+Gui, EditRecord:Add, Edit, h162 w480 vtxtFieldData
+Gui, EditRecord:Add, Button, vbtnSaveField gEditRecordSaveField x+10 yp section disabled, %lLvEditRecordSaveField%
+Gui, EditRecord:Add, Button, vbtnResetField gEditRecordResetField xp y+10 disabled, %lLvEditRecordReset%
+Gui, EditRecord:Add, Button, vbtnSaveRecord gEditRecordSaveRecord y%intListViewEditRecordY% xs, %lLvEditRecordSaveRecord%
+Gui, EditRecord:Add, Button, vbtnCancelRecord gEditRecordCancelRecord xp y+5, %lLvEditRecordCancel%
+
+Gui, 1:Default
+loop, % LV_GetCount("Column")
+{
+	Gui, 1:Default
+	LV_GetText(strColHeader, 0, A_Index)
+	LV_GetText(strColData, intRowNumber, A_Index)
+	if (A_Index = intCurrentSortColumn)
+		strColHeader := SubStr(strColHeader, 3)
+	Gui, EditRecord:Default
+	LV_Add("", A_Index, strColHeader, strColData, StrLen(strColData))
+}
+LV_ModifyCol(1, "AutoHdr")
+LV_ModifyCol(2, "AutoHdr")
+LV_ModifyCol(4, 40)
+Gui, EditRecord:Show
+
+return
+
+
+EditRecordListViewEvents:
+Critical
+if (A_GuiEvent = "I") 
+{
+	if InStr(ErrorLevel, "SF", true)
+	{
+		intEditField := A_EventInfo
+		LV_GetText(strFieldName, intEditField, 2)
+		LV_GetText(strFieldData, intEditField, 3)
+		GuiControl, , lblFieldName, %strFieldName%
+		GuiControl, , txtFieldData, %strFieldData%
+		GuiControl, Enable, btnSaveField
+		GuiControl, Enable, btnResetField
+	}
+}
+Critical, Off
+return
+
+
+EditRecordSaveField:
+if !(intEditField)
+	return
+GuiControlGet, strFieldData, , txtFieldData
+blnRecordChanged := true
+LV_Modify(intEditField, "Col3", strFieldData)
+LV_Modify(intEditField, "Col4", StrLen(strFieldData))
+LV_Modify(intEditField, "-Select")
+LV_Modify(intEditField + 1, "Select Focus Vis")
+return
+
+
+EditRecordResetField:
+GuiControl, , txtFieldData, %strFieldData%
+return
+
+
+EditRecordSaveRecord:
+Gui, 1:Default
+loop, % LV_GetCount("Column")
+{
+	Gui, EditRecord:Default
+	LV_GetText(strFieldData, A_Index, 3)
+	Gui, 1:Default
+	LV_Modify(intRowNumber, "Col" . A_Index, strFieldData)
+}
+blnRecordChanged := false
+gosub, EditRecordGuiClose
+return
+
+
+EditRecordCancelRecord:
+gosub, EditRecordCancel
+return
+
+
+EditRecordCancel:
+EditRecordGuiClose:
+EditRecordGuiEscape:
+if (blnRecordChanged)
+{
+	MsgBox, 52, %lAppName%, %lLvEditRecordChangedCancelAnyway%
+	IfMsgBox, No
+		return
+	IfMsgBox, Cancel
+		return
+}
+Gui, 1:-Disabled
+Gui, EditRecord:Destroy
+WinActivate, ahk_id %intGui1WinID%
+LV_Modify(0, "-Select -Focus")
+return
+
+
+EditRecordGuiSize: ; Expand or shrink the ListView in response to the user's resizing of the window.
+if A_EventInfo = 1  ; The window has been minimized.  No action needed.
+    return
+
+GuiControlGet, intSaveRecordButtonPos, Pos, btnSaveRecord
+GuiControlGet, intSaveColumnButtonPos, Pos, btnSaveField
+intMaxWidthButton := (intSaveRecordButtonPosW > intSaveColumnButtonPosW ? intSaveRecordButtonPosW : intSaveColumnButtonPosW)
+GuiControlGet, intCancelRowButtonPos, Pos, btnCancelRecord
+intMaxWidthButton := (intCancelRowButtonPosW > intMaxWidthButton ? intCancelRowButtonPosW : intMaxWidthButton)
+GuiControlGet, intResetColumnButton, Pos, btnResetField
+intMaxWidthButton := (intCancelRowButtonPosW > intMaxWidthButton ? intCancelRowButtonPosW : intMaxWidthButton)
+
+intMainControlsWidth := A_GuiWidth - intMaxWidthButton - 30
+intButtonsX := A_GuiWidth - intMaxWidthButton - 10
+
+intMainControlsHeight := Round((A_GuiHeight - 50) / 2)
+intFieldNameY := 10 + intMainControlsHeight + 10
+intFieldDataY := 10 + intMainControlsHeight + 10 + 20
+intFieldDataButton2Y := 10 + intMainControlsHeight + 10 + 20 + 28
+
+GuiControl, EditRecord:Move, lvEditRecord, w%intMainControlsWidth% h%intMainControlsHeight%
+GuiControl, EditRecord:Move, lblFieldName, w%intMainControlsWidth% y%intFieldNameY%
+GuiControl, EditRecord:Move, txtFieldData, w%intMainControlsWidth% h%intMainControlsHeight% y%intFieldDataY%
+GuiControl, EditRecord:Move, btnSaveRecord, w%intMaxWidthButton% x%intButtonsX%
+GuiControl, EditRecord:Move, btnCancelRecord, w%intMaxWidthButton% x%intButtonsX%
+GuiControl, EditRecord:Move, btnSaveField, w%intMaxWidthButton% x%intButtonsX% y%intFieldDataY%
+GuiControl, EditRecord:Move, btnResetField, w%intMaxWidthButton% x%intButtonsX% y%intFieldDataButton2Y%
+
+SysGet, intScrollBarWidth, 2, 20
+LV_ModifyCol(3, intMainControlsWidth - GetLvColumnWidth(1) - GetLvColumnWidth(2) - GetLvColumnWidth(4) - intScrollBarWidth)
+
+return
 
 
 
@@ -2449,247 +2598,6 @@ GetNbLinesOfControl(strThisEditHandle)
 	return ErrorLevel
 }
 
-
-
-/*
-MenuAddRow:
-MenuEditRow:
-SearchShowRecord:
-ReplaceShowRecord:
-strShowRecordLabel := A_ThisLabel
-Gui, 1:Submit, NoHide
-if (strShowRecordLabel = "MenuAddRow")
-{
-	LV_Modify(0, "-Select")
-	LV_Insert(0xFFFF, "Select Focus") ; add at the end of the list
-	intRowNumber := LV_GetNext()
-	LV_Modify(intRowNumber, "Vis")
-	strSaveRecordButton := "ButtonSaveRecordAddRow"
-	strCancelButton := "ButtonCancelAddRow"
-	strGuiTitle := L(lLvEventsAddrow, lAppName)
-	strCancelButtonLabel := lLvEventsCancel
-}
-else
-{
-	strSaveRecordButton := "ButtonSaveRecord"
-	strCancelButton := "ButtonCancel"
-	strCancelButtonLabel := (strShowRecordLabel = "MenuEditRow" ? lLvEventsCancel : lLvEventsNext)
-	strGuiTitle := L((strShowRecordLabel = "MenuEditRow" ? lLvEventsEditrow : lLvEventsSearchEditrow), lAppName, intRowNumber, LV_GetCount())
-}
-
-if (intRowNumber = 0)
-	intRowNumber := 1
-intGui1WinID := WinExist("A")
-Gui, 2:New, +Resize +Hwndstr2GuiHandle, %strGuiTitle%
-Gui, 2:+Owner1 ; Make the main window (Gui #1) the owner of the EditRow window (Gui #2).
-Gui, 1:Default
-SysGet, intMonWork, MonitorWorkArea 
-intColWidth := 380
-intEditWidth := intColWidth - 20
-intMaxNbCol := Floor(intMonWorkRight / intColWidth)
-intX := 10
-intY := 5
-intCol := 1
-strZoomField := ""
-loop, % LV_GetCount("Column")
-{
-	if ((intY + 100) > intMonWorkBottom)
-	{
-		if (intCol = 1)
-			Gosub, DisplayShowRecordsButtons
-		if (intCol = intMaxNbCol)
-		{
-			intYLabel := intY
-			Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabelMissing, % L(lLvEventsFieldsMissing)
-			intLastFieldIn2Gui := A_Index - 1
-			break
-		}
-		intCol := intCol + 1
-		intX := intX + intColWidth
-		intY := 5
-	}
-	else
-		intLastFieldIn2Gui := A_Index
-	intYLabel := intY
-	intYEdit := intY + 15
-	LV_GetText(strColHeader, 0, A_Index)
-	if (A_Index = intCurrentSortColumn)
-		strColHeader := SubStr(strColHeader, 3)
-	Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabel%A_Index%, %strColHeader%
-	LV_GetText(strColData, intRowNumber, A_Index)
-	if (strShowRecordLabel = "ReplaceShowRecord" and A_Index = intColNumber)
-	{
-		strPreviousCaseSense := A_StringCaseSense 
-		StringCaseSense, % (blnReplaceCaseSensitive ? "On" : "Off")
-		StringReplace, strColData, strColData, %strSearch%, %strReplace%, All
-		StringCaseSense, %strPreviousCaseSense%
-	}
-	Gui, 2:Add, Edit, y%intYEdit% x%intX% w%intEditWidth% vstrEdit%A_Index% +HwndstrEditHandle, %strColData%
-	ShrinkEditControl(strEditHandle, 2, "2")
-	GuiControlGet, intPosEdit, 2:Pos, %strEditHandle%
-	intY := intY + intPosEditH + 19
-	intNbFieldsOnScreen := A_Index ; incremented at each occurence of the loop
-}
-if (intCol = 1) ; duplicate of line above in the loop, but much simpler that way
-	Gosub, DisplayShowRecordsButtons
-
-if ((strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceShowRecord") and intColFound)
-{
-	GuiControl, 2:Focus, strEdit%intColFound%
-	Send, ^a
-}
-Gui, 2:Show, AutoSize Center
-Gui, 1:+Disabled
-return
-*/
-
-
-MenuEditRecord:
-blnRecordChanged := false
-Gui, 1:Submit, NoHide
-strGuiTitle := L((strShowRecordLabel = "MenuEditRecord" ? lLvEventsEditRecord : lLvEventsSearchEditRecord), lAppName, intRowNumber, LV_GetCount())
-if (intRowNumber = 0)
-	intRowNumber := 1
-intGui1WinID := WinExist("A")
-Gui, EditRecord: New, +Resize +HwndstrEditRecordGuiHandle +MinSize240x240, %strGuiTitle%
-Gui, EditRecord:+Owner1 ; Make the main window (Gui #1) the owner of the EditRecord window (Gui EditRecord).
-Gui, EditRecord:Add, ListView, x10 y10 h162 w480 vlvEditRecord +ReadOnly gEditRecordListViewEvents AltSubmit -LV0x10, %lLvEditRecordColumnHeader%
-GuiControlGet, intListViewEditRecord, Pos, lvEditRecord
-LV_ModifyCol(1, "Integer")
-LV_ModifyCol(4, "Integer")
-Gui, Font, w700
-Gui, EditRecord:Add, Text, w480 vlblFieldName, %lLvEditRecordSelectField%
-Gui, Font, w400
-Gui, EditRecord:Add, Edit, h162 w480 vtxtFieldData
-Gui, EditRecord:Add, Button, vbtnSaveField gEditRecordSaveField x+10 yp section disabled, %lLvEditRecordSaveField%
-Gui, EditRecord:Add, Button, vbtnResetField gEditRecordResetField xp y+10 disabled, %lLvEditRecordReset%
-Gui, EditRecord:Add, Button, vbtnSaveRecord gEditRecordSaveRecord y%intListViewEditRecordY% xs, %lLvEditRecordSaveRecord%
-Gui, EditRecord:Add, Button, vbtnCancelRecord gEditRecordCancelRecord xp y+5, %lLvEditRecordCancel%
-
-Gui, 1:Default
-loop, % LV_GetCount("Column")
-{
-	Gui, 1:Default
-	LV_GetText(strColHeader, 0, A_Index)
-	LV_GetText(strColData, intRowNumber, A_Index)
-	if (A_Index = intCurrentSortColumn)
-		strColHeader := SubStr(strColHeader, 3)
-	Gui, EditRecord:Default
-	LV_Add("", A_Index, strColHeader, strColData, StrLen(strColData))
-}
-LV_ModifyCol(1, "AutoHdr")
-LV_ModifyCol(2, "AutoHdr")
-LV_ModifyCol(4, 40)
-Gui, EditRecord:Show
-
-return
-
-
-EditRecordListViewEvents:
-Critical
-if (A_GuiEvent = "I") 
-{
-	if InStr(ErrorLevel, "SF", true)
-	{
-		intEditField := A_EventInfo
-		LV_GetText(strFieldName, intEditField, 2)
-		LV_GetText(strFieldData, intEditField, 3)
-		GuiControl, , lblFieldName, %strFieldName%
-		GuiControl, , txtFieldData, %strFieldData%
-		GuiControl, Enable, btnSaveField
-		GuiControl, Enable, btnResetField
-	}
-}
-Critical, Off
-return
-
-
-EditRecordSaveField:
-if !(intEditField)
-	return
-GuiControlGet, strFieldData, , txtFieldData
-blnRecordChanged := true
-LV_Modify(intEditField, "Col3", strFieldData)
-LV_Modify(intEditField, "Col4", StrLen(strFieldData))
-LV_Modify(intEditField, "-Select")
-LV_Modify(intEditField + 1, "Select Focus Vis")
-return
-
-
-EditRecordResetField:
-GuiControl, , txtFieldData, %strFieldData%
-return
-
-
-EditRecordSaveRecord:
-Gui, 1:Default
-loop, % LV_GetCount("Column")
-{
-	Gui, EditRecord:Default
-	LV_GetText(strFieldData, A_Index, 3)
-	Gui, 1:Default
-	LV_Modify(intRowNumber, "Col" . A_Index, strFieldData)
-}
-blnRecordChanged := false
-gosub, EditRecordGuiClose
-return
-
-
-EditRecordCancelRecord:
-gosub, EditRecordCancel
-return
-
-
-EditRecordCancel:
-EditRecordGuiClose:
-EditRecordGuiEscape:
-if (blnRecordChanged)
-{
-	MsgBox, 52, %lAppName%, %lLvEditRecordChangedCancelAnyway%
-	IfMsgBox, No
-		return
-	IfMsgBox, Cancel
-		return
-}
-Gui, 1:-Disabled
-Gui, EditRecord:Destroy
-WinActivate, ahk_id %intGui1WinID%
-LV_Modify(0, "-Select -Focus")
-return
-
-
-EditRecordGuiSize: ; Expand or shrink the ListView in response to the user's resizing of the window.
-if A_EventInfo = 1  ; The window has been minimized.  No action needed.
-    return
-
-GuiControlGet, intSaveRecordButtonPos, Pos, btnSaveRecord
-GuiControlGet, intSaveColumnButtonPos, Pos, btnSaveField
-intMaxWidthButton := (intSaveRecordButtonPosW > intSaveColumnButtonPosW ? intSaveRecordButtonPosW : intSaveColumnButtonPosW)
-GuiControlGet, intCancelRowButtonPos, Pos, btnCancelRecord
-intMaxWidthButton := (intCancelRowButtonPosW > intMaxWidthButton ? intCancelRowButtonPosW : intMaxWidthButton)
-GuiControlGet, intResetColumnButton, Pos, btnResetField
-intMaxWidthButton := (intCancelRowButtonPosW > intMaxWidthButton ? intCancelRowButtonPosW : intMaxWidthButton)
-
-intMainControlsWidth := A_GuiWidth - intMaxWidthButton - 30
-intButtonsX := A_GuiWidth - intMaxWidthButton - 10
-
-intMainControlsHeight := Round((A_GuiHeight - 50) / 2)
-intFieldNameY := 10 + intMainControlsHeight + 10
-intFieldDataY := 10 + intMainControlsHeight + 10 + 20
-intFieldDataButton2Y := 10 + intMainControlsHeight + 10 + 20 + 28
-
-GuiControl, EditRecord:Move, lvEditRecord, w%intMainControlsWidth% h%intMainControlsHeight%
-GuiControl, EditRecord:Move, lblFieldName, w%intMainControlsWidth% y%intFieldNameY%
-GuiControl, EditRecord:Move, txtFieldData, w%intMainControlsWidth% h%intMainControlsHeight% y%intFieldDataY%
-GuiControl, EditRecord:Move, btnSaveRecord, w%intMaxWidthButton% x%intButtonsX%
-GuiControl, EditRecord:Move, btnCancelRecord, w%intMaxWidthButton% x%intButtonsX%
-GuiControl, EditRecord:Move, btnSaveField, w%intMaxWidthButton% x%intButtonsX% y%intFieldDataY%
-GuiControl, EditRecord:Move, btnResetField, w%intMaxWidthButton% x%intButtonsX% y%intFieldDataButton2Y%
-
-SysGet, intScrollBarWidth, 2, 20
-LV_ModifyCol(3, intMainControlsWidth - GetLvColumnWidth(1) - GetLvColumnWidth(2) - GetLvColumnWidth(4) - intScrollBarWidth)
-
-return
 
 
 GetLvColumnWidth(intCol)
