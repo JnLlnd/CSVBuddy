@@ -178,6 +178,7 @@ IfNotExist, %strIniFile%
 			CodePageSave=1252
 			SreenHeightCorrection=-100
 			SreenWidthCorrection=-100
+			DefaultRecordEditor=2
 		)
 		, %strIniFile%
 
@@ -196,6 +197,8 @@ IniRead, strCodePageLoad, %strIniFile%, Global, CodePageLoad, 1252 ; default ANS
 IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANSI Latin 1, Western European (Windows)
 IniRead, intSreenHeightCorrection, %strIniFile%, Global, SreenHeightCorrection, 0 ; negative number to redure the height of edit row dialog box
 IniRead, intSreenWidthCorrection, %strIniFile%, Global, SreenWidthCorrection, 0 ; negative number to redure the width of edit row dialog box
+IniRead, intDefaultRecordEditor, %strIniFile%, Global, DefaultRecordEditor, 2 ; 1: full screen editor / 2: field by field editor
+IniRead, blnAlwaysEncapsulate, %strIniFile%, Global, AlwaysEncapsulate, 0
 
 IniRead, strIniFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
 if !StrLen(strIniFileEncoding)
@@ -300,6 +303,39 @@ Gui, 1:Add, Button,		y105	x+5		vbtnExportFile gButtonExportFile w45 hidden, % L(
 Gui, 1:Add, Button,		y137	x+5		vbtnCheckExportFile gButtonCheckExportFile w45 hidden, % L(lTab4Check)
 
 Gui, 1:Tab, 5
+Gui, 1:Add, Text, section y+10 x10 w125 right, Default record editor:
+Gui, 1:Add, Text, w125 right, Screen height correction:
+Gui, 1:Add, Text, w125 right, Screen width correction:
+Gui, 1:Add, Edit, ys x+5 section w30 center vintDefaultRecordEditor, %intDefaultRecordEditor%
+Gui, 1:Add, Edit, w30 center vintSreenHeightCorrection, %intSreenHeightCorrection%
+Gui, 1:Add, Edit, w30 center vintSreenWidthCorrection, %intSreenWidthCorrection%
+Gui, 1:Add, Text, ys x+5 section w75 right, Text editor:
+Gui, 1:Add, Text, w75 right, List bkg color:
+Gui, 1:Add, Text, w75 right, List text color:
+Gui, 1:Add, Edit, ys x+5 section w80 r1 vstrTextEditorExe, %strTextEditorExe%
+Gui, 1:Add, Edit, w80 vstrListBackgroundColor, %strListBackgroundColor%
+Gui, 1:Add, Edit, w80 vstrListTextColor, %strListTextColor%
+Gui, 1:Add, Text, ys x+5 section w110 right, List grid lines:
+Gui, 1:Add, Text, w110 right, Skip "Ready" prompt:
+Gui, 1:Add, Text, w110 right, Skip "Quit" prompt:
+Gui, 1:Add, Edit, ys x+5 section w20 vblnListGrid, %blnListGrid%
+Gui, 1:Add, Edit, w20 center vblnSkipHelpReadyToEdit, %blnSkipHelpReadyToEdit%
+Gui, 1:Add, Edit, w20 center vblnSkipConfirmQuit, %blnSkipConfirmQuit%
+Gui, 1:Add, Text, ys x+5 section w105 right, Load code page:
+Gui, 1:Add, Text, w105 right, Save code page:
+Gui, 1:Add, Text, w105 right, Default file encoding:
+Gui, 1:Add, Edit, ys x+5 section w85 center vintCodePageLoad, %intCodePageLoad%
+Gui, 1:Add, Edit, w85 center vintCodePageSave, %intCodePageSave%
+Gui, 1:Add, DropDownList, w85 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsSelect), lFileEncodingsSelect . "|", lFileEncodingsSelect . "||") 
+Gui, 1:Add, Text, ys x+5 section w125 right, Fixed width default:
+Gui, 1:Add, Text, w125 right, HTML template delimiter:
+Gui, 1:Add, Text, w125 right, Encapsulate all values:
+Gui, 1:Add, Edit, ys x+5 section w30 center vintDefaultWidth, %intDefaultWidth%
+Gui, 1:Add, Edit, w30 center vstrTemplateDelimiter, %strTemplateDelimiter%
+Gui, 1:Add, Edit, w30 center vblnAlwaysEncapsulate, %blnAlwaysEncapsulate%
+Gui, 1:Add, Button, ys x+25 w80 gSaveOptions, Save options
+
+Gui, 1:Tab, 6
 Gui, 1:Font, s10 w700, Verdana
 str32or64 := A_PtrSize  * 8
 Gui, 1:Add, Link,		y+10	x25		vlblAboutText1, % L(lTab5Abouttext1, lAppName, lAppVersionLong, str32or64)
@@ -952,7 +988,8 @@ strCurrentFileEncodingSave := (strFileEncoding3 = lFileEncodingsSelect ? "" : st
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText = ""])
 ObjCSV_Collection2CSV(obj, strFileToSave, radSaveWithHeader
 	, GetListViewHeader(strRealFieldDelimiter3, strFieldEncapsulator3), intProgressType, blnOverwrite
-	, strRealFieldDelimiter3, strFieldEncapsulator3, strEolReplacement, L(lTab3SavingCSV), strCurrentFileEncodingSave)
+	, strRealFieldDelimiter3, strFieldEncapsulator3, strEolReplacement, L(lTab3SavingCSV)
+	, strCurrentFileEncodingSave, blnAlwaysEncapsulate)
 if (ErrorLevel)
 	if (ErrorLevel = 1)
 		Oops(lExportSystemError, A_LastError)
@@ -1220,6 +1257,37 @@ return
 ; --------------------- TAB 5 --------------------------
 
 
+SaveOptions:
+Gui, 1:Submit, NoHide
+
+IniWrite, intDefaultRecordEditor, %strIniFile%, Global, DefaultRecordEditor
+
+/*
+intSreenHeightCorrection
+intSreenWidthCorrection
+strTextEditorExe
+strListBackgroundColor
+strListTextColor
+blnListGrid
+blnSkipHelpReadyToEdit
+blnSkipConfirmQuit
+intCodePageLoad
+intCodePageSave
+drpDefaultEileEncoding
+intDefaultWidth
+strTemplateDelimiter
+blnAlwaysEncapsulate
+*/
+
+; ### text to language file
+
+return
+
+
+
+; --------------------- TAB 6 --------------------------
+
+
 ButtonCheck4Update:
 blnButtonCheck4Update := True
 Gosub, Check4Update
@@ -1262,7 +1330,10 @@ if (A_GuiEvent = "ColClick")
 if (A_GuiEvent = "DoubleClick")
 {
 	intRowNumber := A_EventInfo
-	Gosub, MenuEditRecord
+	if (intDefaultRecordEditor = 2)
+		Gosub, MenuEditRecord
+	else
+		Gosub, MenuEditRow
 }
 SB_SetText(L(lLvEventsRecordsSelected, LV_GetCount("Selected")), 2)
 return
@@ -1490,7 +1561,7 @@ loop, % LV_GetCount("Column")
 	{
 		strPreviousCaseSense := A_StringCaseSense 
 		StringCaseSense, % (blnReplaceCaseSensitive ? "On" : "Off")
-		StringReplace, strColData, strColData, %strSearch%, %strReplace%, All
+		StringReplace, strColData, strColData, %strSearch%, %strReplaceString%, All
 		StringCaseSense, %strPreviousCaseSense%
 	}
 	Gui, 2:Add, Edit, y%intYEdit% x%intX% w%intEditWidth% vstrEdit%A_Index% +HwndstrEditHandle, %strColData%
@@ -1616,18 +1687,18 @@ else
 }
 if (A_ThisLabel = "MenuReplace")
 {
-	InputBox, strReplace, % L(lLvEventsReplaceInputTitle, lAppName), %lLvEventsReplaceInput%, , , 150
+	InputBox, strReplaceString, % L(lLvEventsReplaceInputTitle, lAppName), %lLvEventsReplaceInput%, , , 150
 	MsgBox, 35, % L(lLvEventsReplaceInputTitle, lAppName), %lLvEventsReplaceCaseSensitive%
 	IfMsgBox, Yes
 		blnReplaceCaseSensitive := True
 	IfMsgBox, No
 		blnReplaceCaseSensitive := False
 	IfMsgBox, Cancel
-		strReplace := ""
+		strReplaceString := ""
 }
 else
 	blnReplaceCaseSensitive := False ; required for NotMatchingRow
-if !StrLen(strSearch) or (A_ThisLabel = "MenuReplace" and !StrLen(strReplace))
+if !StrLen(strSearch) or (A_ThisLabel = "MenuReplace" and !StrLen(strReplaceString))
 	return
 intRowNumber := 0
 intLastRow := LV_GetCount()
@@ -1653,7 +1724,7 @@ Loop
 				LV_GetText(strCell, intRowNumber, intColNumber)
 				strPreviousCaseSense := A_StringCaseSense 
 				StringCaseSense, % (blnReplaceCaseSensitive ? "On" : "Off")
-				StringReplace, strCell, strCell, %strSearch%, %strReplace%, All
+				StringReplace, strCell, strCell, %strSearch%, %strReplaceString%, All
 				StringCaseSense, %strPreviousCaseSense%
 				LV_Modify(intRowNumber, "Col" . intColNumber, strCell)
 			}
