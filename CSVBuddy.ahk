@@ -164,21 +164,22 @@ IfNotExist, %strIniFile%
 	FileAppend,
 		(LTrim Join`r`n
 			[global]
+			DefaultRecordEditor=2
+			SreenHeightCorrection=-100
+			SreenWidthCorrection=-100
+			TextEditorExe=%strTextEditorExe%
 			ListBackgroundColor=%strListBackgroundColor%
 			ListTextColor=%strListTextColor%
 			ListGrid=%blnListGrid%
-			DefaultWidth=%intDefaultWidth%
-			TemplateDelimiter=%strTemplateDelimiter%
-			TextEditorExe=%strTextEditorExe%
 			SkipHelpReadyToEdit=0
 			SkipConfirmQuit=0
-			Startups=1
-			DefaultFileEncoding=
 			CodePageLoad=1252
 			CodePageSave=1252
-			SreenHeightCorrection=-100
-			SreenWidthCorrection=-100
-			DefaultRecordEditor=2
+			DefaultFileEncoding=ANSI
+			DefaultWidth=%intDefaultWidth%
+			TemplateDelimiter=%strTemplateDelimiter%
+			AlwaysEncapsulate=0
+			Startups=1
 		)
 		, %strIniFile%
 
@@ -195,11 +196,10 @@ IniRead, intStartups, %strIniFile%, Global, Startups, 1
 IniRead, blnDonator, %strIniFile%, Global, Donator, 0 ; Please, be fair. Don't cheat with this.
 IniRead, strCodePageLoad, %strIniFile%, Global, CodePageLoad, 1252 ; default ANSI Latin 1, Western European (Windows)
 IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANSI Latin 1, Western European (Windows)
-IniRead, intSreenHeightCorrection, %strIniFile%, Global, SreenHeightCorrection, 0 ; negative number to redure the height of edit row dialog box
-IniRead, intSreenWidthCorrection, %strIniFile%, Global, SreenWidthCorrection, 0 ; negative number to redure the width of edit row dialog box
+IniRead, intSreenHeightCorrection, %strIniFile%, Global, SreenHeightCorrection, -100 ; negative number to redure the height of edit row dialog box
+IniRead, intSreenWidthCorrection, %strIniFile%, Global, SreenWidthCorrection, -100 ; negative number to redure the width of edit row dialog box
 IniRead, intDefaultRecordEditor, %strIniFile%, Global, DefaultRecordEditor, 2 ; 1: full screen editor / 2: field by field editor
 IniRead, blnAlwaysEncapsulate, %strIniFile%, Global, AlwaysEncapsulate, 0
-
 IniRead, strIniFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
 if !StrLen(strIniFileEncoding)
 	strIniFileEncoding := lFileEncodingsDetect
@@ -318,15 +318,15 @@ Gui, 1:Add, Edit, w80 vstrListTextColor, %strListTextColor%
 Gui, 1:Add, Text, ys x+5 section w110 right, List grid lines:
 Gui, 1:Add, Text, w110 right, Skip "Ready" prompt:
 Gui, 1:Add, Text, w110 right, Skip "Quit" prompt:
-Gui, 1:Add, Edit, ys x+5 section w20 vblnListGrid, %blnListGrid%
+Gui, 1:Add, Edit, ys x+5 section w20 center vblnListGrid, %blnListGrid%
 Gui, 1:Add, Edit, w20 center vblnSkipHelpReadyToEdit, %blnSkipHelpReadyToEdit%
 Gui, 1:Add, Edit, w20 center vblnSkipConfirmQuit, %blnSkipConfirmQuit%
 Gui, 1:Add, Text, ys x+5 section w105 right, Load code page:
 Gui, 1:Add, Text, w105 right, Save code page:
 Gui, 1:Add, Text, w105 right, Default file encoding:
-Gui, 1:Add, Edit, ys x+5 section w85 center vintCodePageLoad, %intCodePageLoad%
-Gui, 1:Add, Edit, w85 center vintCodePageSave, %intCodePageSave%
-Gui, 1:Add, DropDownList, w85 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsSelect), lFileEncodingsSelect . "|", lFileEncodingsSelect . "||") 
+Gui, 1:Add, Edit, ys x+5 section w85 center vstrCodePageLoad, %strCodePageLoad%
+Gui, 1:Add, Edit, w85 center vstrCodePageSave, %strCodePageSave%
+Gui, 1:Add, DropDownList, w85 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsSelect), strIniFileEncoding . "|", strIniFileEncoding . "||") 
 Gui, 1:Add, Text, ys x+5 section w125 right, Fixed width default:
 Gui, 1:Add, Text, w125 right, HTML template delimiter:
 Gui, 1:Add, Text, w125 right, Encapsulate all values:
@@ -1261,23 +1261,20 @@ SaveOptions:
 Gui, 1:Submit, NoHide
 
 IniWrite, %intDefaultRecordEditor%, %strIniFile%, Global, DefaultRecordEditor
-
-/*
-intSreenHeightCorrection
-intSreenWidthCorrection
-strTextEditorExe
-strListBackgroundColor
-strListTextColor
-blnListGrid
-blnSkipHelpReadyToEdit
-blnSkipConfirmQuit
-intCodePageLoad
-intCodePageSave
-drpDefaultEileEncoding
-intDefaultWidth
-strTemplateDelimiter
-blnAlwaysEncapsulate
-*/
+IniWrite, %intSreenHeightCorrection%, %strIniFile%, Global, SreenHeightCorrection
+IniWrite, %intSreenWidthCorrection%, %strIniFile%, Global, SreenWidthCorrection
+IniWrite, %strTextEditorExe%, %strIniFile%, Global, TextEditorExe
+IniWrite, %strListBackgroundColor%, %strIniFile%, Global, ListBackgroundColor
+IniWrite, %strListTextColor%, %strIniFile%, Global, ListTextColor
+IniWrite, %blnListGrid%, %strIniFile%, Global, ListGrid
+IniWrite, %blnSkipHelpReadyToEdit%, %strIniFile%, Global, SkipHelpReadyToEdit
+IniWrite, %blnSkipConfirmQuit%, %strIniFile%, Global, SkipConfirmQuit
+IniWrite, %strCodePageLoad%, %strIniFile%, Global, CodePageLoad
+IniWrite, %strCodePageSave%, %strIniFile%, Global, CodePageSave
+IniWrite, %drpDefaultEileEncoding%, %strIniFile%, Global, DefaultFileEncoding
+IniWrite, %intDefaultWidth%, %strIniFile%, Global, DefaultWidth
+IniWrite, %strTemplateDelimiter%, %strIniFile%, Global, TemplateDelimiter
+IniWrite, %blnAlwaysEncapsulate%, %strIniFile%, Global, AlwaysEncapsulate
 
 ; ### text to language file
 
