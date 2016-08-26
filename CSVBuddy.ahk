@@ -152,6 +152,9 @@ SetWorkingDir, %A_ScriptDir%
 
 global intCurrentSortColumn
 
+global strAppVersion := "1.3.3" ; major.minor.fixes
+global strAppVersionLong := "v" . strAppVersion
+
 strListBackgroundColor := "D0D0D0"
 strListTextColor := "000000"
 blnListGrid := 1
@@ -339,7 +342,7 @@ Gui, 1:Add, Button, w80 gButtonOptionsHelp, %lTab6OptionsHelp%
 Gui, 1:Tab, 6
 Gui, 1:Font, s10 w700, Verdana
 str32or64 := A_PtrSize  * 8
-Gui, 1:Add, Link,		y+10	x25		vlblAboutText1, % L(lTab5Abouttext1, lAppName, lAppVersionLong, str32or64)
+Gui, 1:Add, Link,		y+10	x25		vlblAboutText1, % L(lTab5Abouttext1, lAppName, strAppVersionLong, str32or64)
 Gui, 1:Font, s9 w500, Arial
 Gui, 1:Add, Link,		y+20	x25		vlblAboutText2, % L(lTab5Abouttext2)
 Gui, 1:Add, Link,		yp		x+150	vlblAboutText3, % L(lTab5Abouttext3)
@@ -1178,7 +1181,7 @@ Gui, 1:Submit, NoHide
 Gui, 1:+OwnDialogs 
 if (radFixed)
 {
-	InputBox, intNewDefaultWidth, % L(lTab4MultiFixedInputTitle, lAppName, lAppVersionLong)
+	InputBox, intNewDefaultWidth, % L(lTab4MultiFixedInputTitle, lAppName, strAppVersionLong)
 		, % L(lTab4MultiFixedInputPrompt), , , 150, , , , , %intDefaultWidth%
 	if !ErrorLevel
 		if (intNewDefaultWidth > 0)
@@ -1817,18 +1820,13 @@ return
 EditRecordListViewEvents:
 Critical
 if (A_GuiEvent = "I") 
-{
 	if InStr(ErrorLevel, "S", true)
 		if (intEditField <> A_EventInfo)
 		{
-			###_V(A_ThisLabel . " TRUE", intEditField, A_EventInfo)
 			gosub, EditRecordCheckIfFieldChangedSave
 			intEditField := A_EventInfo
 			gosub, EditRecordLoadField
 		}
-		else
-			###_V(A_ThisLabel . " FALSE", intEditField, A_EventInfo)
-}
 Critical, Off
 return
 
@@ -1862,6 +1860,8 @@ if (intEditField < intNbColumns)
 	intEditField++ ; next
 	LV_Modify(intEditField, "Select Focus Vis")
 }
+else
+	MsgBox, , %lAppName%, %lLvEditRecordLastFieldSaved%
 gosub, EditRecordLoadField
 return
 
@@ -1880,7 +1880,6 @@ loop, % LV_GetCount("Column")
 {
 	Gui, EditRecord:Default
 	LV_GetText(strFieldData, A_Index, 3)
-	; ###_V(A_ThisLabel, intRowNumber, strFieldData, blnRecordChanged)
 	Gui, 1:Default
 	LV_Modify(intRowNumber, "Col" . A_Index, strFieldData)
 }
@@ -1901,7 +1900,6 @@ EditRecordCancel:
 EditRecordGuiClose:
 EditRecordGuiEscape:
 Gui, EditRecord:+OwnDialogs 
-###_V(A_ThisLabel, blnRecordChanged)
 if (blnRecordChanged)
 {
 	MsgBox, 52, %lAppName%, %lLvEditRecordChangedCancelAnyway%
@@ -1921,8 +1919,7 @@ return
 EditRecordCheckIfFieldChangedSave:
 Gui, EditRecord:+OwnDialogs 
 GuiControlGet, strFieldData, , txtFieldData
-###_V(A_ThisLabel, strFieldData, strFieldDataPrev)
-if (strFieldData <> strFieldDataPrev)
+if (strFieldData <> StrReplace(strFieldDataPrev, "`r")) ; trim CR from original string
 {
 	MsgBox, 52, %lAppName%, % L(lLvEditRecordFieldChangedSaveIt, strFieldName)
 	LV_Modify(A_EventInfo, "-Select")
@@ -2329,12 +2326,12 @@ if RegExMatch(strCurrentVersion, "(alpha|beta)")
 	or (FirstVsSecondIs(strLatestSkipped, strLatestVersion) >= 0 and (!blnButtonCheck4Update))
 	return
 
-if FirstVsSecondIs(strLatestVersion, lAppVersion) = 1
+if FirstVsSecondIs(strLatestVersion, strAppVersion) = 1
 {
 	Gui, 1:+OwnDialogs
 	SetTimer, ChangeButtonNames4Update, 50
 
-	MsgBox, 3, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdatePrompt, lAppName, lAppVersion, strLatestVersion), 30
+	MsgBox, 3, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdatePrompt, lAppName, strAppVersion, strLatestVersion), 30
 	IfMsgBox, Yes
 		Run, http://code.jeanlalonde.ca/csvbuddy/
 	IfMsgBox, No
@@ -2346,7 +2343,7 @@ if FirstVsSecondIs(strLatestVersion, lAppVersion) = 1
 }
 else if (blnButtonCheck4Update)
 {
-	MsgBox, 4, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdateYouHaveLatest, lAppVersion, lAppName)
+	MsgBox, 4, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdateYouHaveLatest, strAppVersion, lAppName)
 	IfMsgBox, Yes
 		Run, http://code.jeanlalonde.ca/csvbuddy/
 }
@@ -2650,7 +2647,7 @@ Help(strMessage, objVariables*)
 	Gui, 1:+OwnDialogs 
 	StringLeft, strTitle, strMessage, % InStr(strMessage, "$") - 1
 	StringReplace, strMessage, strMessage, %strTitle%$
-	MsgBox, 0, % L(lFuncHelpTitle, lAppName, lAppVersionLong, strTitle), % L(strMessage, objVariables*)
+	MsgBox, 0, % L(lFuncHelpTitle, lAppName, strAppVersionLong, strTitle), % L(strMessage, objVariables*)
 }
 
 
@@ -2658,7 +2655,7 @@ Help(strMessage, objVariables*)
 Oops(strMessage, objVariables*)
 {
 	Gui, 1:+OwnDialogs
-	MsgBox, 48, % L(lFuncOopsTitle, lAppName, lAppVersionLong), % L(strMessage, objVariables*)
+	MsgBox, 48, % L(lFuncOopsTitle, lAppName, strAppVersionLong), % L(strMessage, objVariables*)
 }
 
 
