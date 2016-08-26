@@ -98,6 +98,7 @@ H(2, lDocKeyboardHelp)
 W(lDocKeyboardHelpDetail)
 
 H(2, lDocAdvancedTopicsTitle)
+N("inioptions")
 H(3, lDocIniTitle)
 W(lDocIniHelp)
 H(3, lDocCommandLineTitle)
@@ -186,3 +187,11 @@ W(strMessage)
 {
 	strHtml := strHtml . strMessage . "`r`n"
 }
+
+
+N(strName)
+{
+	strHtml := strHtml . "<A NAME=""" . strName . """></A>" . "`r`n"
+}
+
+

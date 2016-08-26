@@ -303,37 +303,38 @@ Gui, 1:Add, Button,		y105	x+5		vbtnExportFile gButtonExportFile w45 hidden, % L(
 Gui, 1:Add, Button,		y137	x+5		vbtnCheckExportFile gButtonCheckExportFile w45 hidden, % L(lTab4Check)
 
 Gui, 1:Tab, 5
-Gui, 1:Add, Text, section y+10 x10 w125 right, Default record editor:
-Gui, 1:Add, Text, w125 right, Screen height correction:
-Gui, 1:Add, Text, w125 right, Screen width correction:
+Gui, 1:Add, Text, section y+10 x10 w125 right, %lTab6DefaultEditor%
+Gui, 1:Add, Text, w125 right, %lTab6ScreenHeightCorrection%
+Gui, 1:Add, Text, w125 right, %lTab6ScreenWidthCorrection%
 Gui, 1:Add, Edit, ys x+5 section w30 center vintDefaultRecordEditor, %intDefaultRecordEditor%
 Gui, 1:Add, Edit, w30 center vintSreenHeightCorrection, %intSreenHeightCorrection%
 Gui, 1:Add, Edit, w30 center vintSreenWidthCorrection, %intSreenWidthCorrection%
-Gui, 1:Add, Text, ys x+5 section w75 right, Text editor:
-Gui, 1:Add, Text, w75 right, List bkg color:
-Gui, 1:Add, Text, w75 right, List text color:
+Gui, 1:Add, Text, ys x+5 section w75 right, %lTab6TextEditor%
+Gui, 1:Add, Text, w75 right, %lTab6ListBkgColor%
+Gui, 1:Add, Text, w75 right, %lTab6ListTextColor%
 Gui, 1:Add, Edit, ys x+5 section w80 r1 vstrTextEditorExe, %strTextEditorExe%
 Gui, 1:Add, Edit, w80 vstrListBackgroundColor, %strListBackgroundColor%
 Gui, 1:Add, Edit, w80 vstrListTextColor, %strListTextColor%
-Gui, 1:Add, Text, ys x+5 section w110 right, List grid lines:
-Gui, 1:Add, Text, w110 right, Skip "Ready" prompt:
-Gui, 1:Add, Text, w110 right, Skip "Quit" prompt:
+Gui, 1:Add, Text, ys x+5 section w110 right, %lTab6ListGridLines%
+Gui, 1:Add, Text, w110 right, %lTab6SkipReadyPrompt%
+Gui, 1:Add, Text, w110 right, %lTab6SkipQuitPrompt%
 Gui, 1:Add, Edit, ys x+5 section w20 center vblnListGrid, %blnListGrid%
 Gui, 1:Add, Edit, w20 center vblnSkipHelpReadyToEdit, %blnSkipHelpReadyToEdit%
 Gui, 1:Add, Edit, w20 center vblnSkipConfirmQuit, %blnSkipConfirmQuit%
-Gui, 1:Add, Text, ys x+5 section w105 right, Load code page:
-Gui, 1:Add, Text, w105 right, Save code page:
-Gui, 1:Add, Text, w105 right, Default file encoding:
+Gui, 1:Add, Text, ys x+5 section w105 right, %lTab6LoadCodePage%
+Gui, 1:Add, Text, w105 right, %lTab6SaveCodePage%
+Gui, 1:Add, Text, w105 right, %lTab6DefaultFileEncoding%
 Gui, 1:Add, Edit, ys x+5 section w85 center vstrCodePageLoad, %strCodePageLoad%
 Gui, 1:Add, Edit, w85 center vstrCodePageSave, %strCodePageSave%
 Gui, 1:Add, DropDownList, w85 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsSelect), strIniFileEncoding . "|", strIniFileEncoding . "||") 
-Gui, 1:Add, Text, ys x+5 section w125 right, Fixed width default:
-Gui, 1:Add, Text, w125 right, HTML template delimiter:
-Gui, 1:Add, Text, w125 right, Encapsulate all values:
+Gui, 1:Add, Text, ys x+5 section w125 right, %lTab6FixedWidthDefault%
+Gui, 1:Add, Text, w125 right, %lTab6HTMLTemplateDelimiter%
+Gui, 1:Add, Text, w125 right, %lTab6EncapsulateAllValues%
 Gui, 1:Add, Edit, ys x+5 section w30 center vintDefaultWidth, %intDefaultWidth%
 Gui, 1:Add, Edit, w30 center vstrTemplateDelimiter, %strTemplateDelimiter%
 Gui, 1:Add, Edit, w30 center vblnAlwaysEncapsulate, %blnAlwaysEncapsulate%
-Gui, 1:Add, Button, ys x+25 w80 gSaveOptions, Save options
+Gui, 1:Add, Button, ys x+25 w80 gButtonSaveOptions, %lTab6SaveOptions%
+Gui, 1:Add, Button, w80 gButtonOptionsHelp, %lTab6OptionsHelp%
 
 Gui, 1:Tab, 6
 Gui, 1:Font, s10 w700, Verdana
@@ -1257,7 +1258,7 @@ return
 ; --------------------- TAB 5 --------------------------
 
 
-SaveOptions:
+ButtonSaveOptions:
 Gui, 1:Submit, NoHide
 
 IniWrite, %intDefaultRecordEditor%, %strIniFile%, Global, DefaultRecordEditor
@@ -1276,11 +1277,16 @@ IniWrite, %intDefaultWidth%, %strIniFile%, Global, DefaultWidth
 IniWrite, %strTemplateDelimiter%, %strIniFile%, Global, TemplateDelimiter
 IniWrite, %blnAlwaysEncapsulate%, %strIniFile%, Global, AlwaysEncapsulate
 
-; ### text to language file
+MsgBox, , % L(lAppName), % L(lTab6OptionsSaved, strIniFile)
 
 return
 
 
+ButtonOptionsHelp:
+
+Run, http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html#inioptions
+
+return
 
 ; --------------------- TAB 6 --------------------------
 
