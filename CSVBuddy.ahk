@@ -3,7 +3,7 @@
 CSV Buddy
 Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
-This script uses the library ObjCSV v0.5.1 (https://github.com/JnLlnd/ObjCSV)
+This script uses the library ObjCSV v0.5.5 (https://github.com/JnLlnd/ObjCSV)
 
 Copyright 2013-2016 Jean Lalonde
 --------------------------------
@@ -21,6 +21,15 @@ limitations under the License.
 
 Version history
 ---------------
+
+2016-07-28 v1.3.9 BETA
+- new Record editor dialog box with field-by-field edition
+- new "Options" tab to change setting values saved to the CSVBuddy.ini file
+- new option "Default record editor" for choice of 1) Full screen editor (legacy) or 2) Record editor with field-by-field edition (new)
+- new option "Encapsulate all values" to always enclose saved values with the encapsulator character
+- help button for Options
+- bug fix: now detect the end-of-line character(s) in fields where line-breaks have to be replaced by a replacement string (detected in this order: CRLF, LF or CR). The first end-of-lines character(s) found is used for remaining fields and records.
+- now using libreary ObjCSV v0.5.5
 
 2016-07-21 v1.3.3
 - If file encoding is not specified (leave encoding at "Detect") when loading a file, it is loaded as UTF-8 or UTF-16 if these formats are detected in file header or as ANSI for all other formats (and displayed as such in load and save encoding encoding lists); UTF-8-RAW and UTF-16-RAW formats must be selected in encoding list to load files in these formats
