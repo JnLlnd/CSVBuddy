@@ -25,7 +25,7 @@ Version history
 2016-07-28 v1.3.9 BETA
 - new Record editor dialog box with field-by-field edition
 - new "Options" tab to change setting values saved to the CSVBuddy.ini file
-- new option "Default record editor" for choice of 1) Full screen editor (legacy) or 2) Record editor with field-by-field edition (new)
+- new option "Record editor" for choice of 1) "Full screen Editor" (legacy) or 2) "Field-=by-field Editor" (new). Default is 2.
 - new option "Encapsulate all values" to always enclose saved values with the encapsulator character
 - help button for Options
 - bug fix: now detect the end-of-line character(s) in fields where line-breaks have to be replaced by a replacement string (detected in this order: CRLF, LF or CR). The first end-of-lines character(s) found is used for remaining fields and records.
@@ -176,7 +176,7 @@ IfNotExist, %strIniFile%
 	FileAppend,
 		(LTrim Join`r`n
 			[global]
-			DefaultRecordEditor=2
+			RecordEditor=2
 			SreenHeightCorrection=-100
 			SreenWidthCorrection=-100
 			TextEditorExe=%strTextEditorExe%
@@ -210,7 +210,7 @@ IniRead, strCodePageLoad, %strIniFile%, Global, CodePageLoad, 1252 ; default ANS
 IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANSI Latin 1, Western European (Windows)
 IniRead, intSreenHeightCorrection, %strIniFile%, Global, SreenHeightCorrection, -100 ; negative number to redure the height of edit row dialog box
 IniRead, intSreenWidthCorrection, %strIniFile%, Global, SreenWidthCorrection, -100 ; negative number to redure the width of edit row dialog box
-IniRead, intDefaultRecordEditor, %strIniFile%, Global, DefaultRecordEditor, 2 ; 1: full screen editor / 2: field by field editor
+IniRead, intRecordEditor, %strIniFile%, Global, RecordEditor, 2 ; 1: full screen editor / 2: field by field editor
 IniRead, blnAlwaysEncapsulate, %strIniFile%, Global, AlwaysEncapsulate, 0
 IniRead, strIniFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
 if !StrLen(strIniFileEncoding)
@@ -318,7 +318,7 @@ Gui, 1:Tab, 5
 Gui, 1:Add, Text, section y+10 x10 w125 right, %lTab6DefaultEditor%
 Gui, 1:Add, Text, w125 right, %lTab6ScreenHeightCorrection%
 Gui, 1:Add, Text, w125 right, %lTab6ScreenWidthCorrection%
-Gui, 1:Add, Edit, ys x+5 section w30 center vintDefaultRecordEditor, %intDefaultRecordEditor%
+Gui, 1:Add, Edit, ys x+5 section w30 center vintRecordEditor, %intRecordEditor%
 Gui, 1:Add, Edit, w30 center vintSreenHeightCorrection, %intSreenHeightCorrection%
 Gui, 1:Add, Edit, w30 center vintSreenWidthCorrection, %intSreenWidthCorrection%
 Gui, 1:Add, Text, ys x+5 section w75 right, %lTab6TextEditor%
@@ -1273,7 +1273,7 @@ return
 ButtonSaveOptions:
 Gui, 1:Submit, NoHide
 
-IniWrite, %intDefaultRecordEditor%, %strIniFile%, Global, DefaultRecordEditor
+IniWrite, %intRecordEditor%, %strIniFile%, Global, RecordEditor
 IniWrite, %intSreenHeightCorrection%, %strIniFile%, Global, SreenHeightCorrection
 IniWrite, %intSreenWidthCorrection%, %strIniFile%, Global, SreenWidthCorrection
 IniWrite, %strTextEditorExe%, %strIniFile%, Global, TextEditorExe
@@ -1345,10 +1345,10 @@ if (A_GuiEvent = "ColClick")
 if (A_GuiEvent = "DoubleClick")
 {
 	intRowNumber := A_EventInfo
-	if (intDefaultRecordEditor = 2)
-		Gosub, MenuEditRecord
-	else
+	if (intRecordEditor = 1)
 		Gosub, MenuEditRow
+	else
+		Gosub, MenuEditRecord
 }
 SB_SetText(L(lLvEventsRecordsSelected, LV_GetCount("Selected")), 2)
 return
@@ -1595,6 +1595,8 @@ if ((strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceSho
 }
 Gui, 2:Show, AutoSize Center
 Gui, 1:+Disabled
+if (intCol = intMaxNbCol)
+	Oops(lLvEventsFieldsMissingChangeEditor, lAppName, LV_GetCount("Column"))
 return
 
 
