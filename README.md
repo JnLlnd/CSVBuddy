@@ -1,5 +1,5 @@
 ﻿
-# CSV Buddy (v1.3.3) - Read me
+# CSV Buddy (v1.3.9) - Read me
 
 
 CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Unicode ready. Freeware.
@@ -18,6 +18,16 @@ First official release: 2013-11-30
 
 ## History
 
+
+### 2016-07-28 v1.3.9
+
+* New Record editor dialog box with field-by-field edition
+* New "Options" tab to change setting values saved to the CSVBuddy.ini file
+* New option "Record editor" for choice of 1) "Full screen Editor" (legacy) or 2) "Field-by-field Editor" (new). Default is 2.
+* New option "Encapsulate all values" to always enclose saved values with the encapsulator character
+* Help button for Options
+* Bug fix: now detect the end-of-line character(s) in fields where line-breaks have to be replaced by a replacement string (detected in this order: CRLF, LF or CR). The first end-of-lines character(s) found is used for remaining fields and records.
+* Now using libreary ObjCSV v0.5.5
 
 ### 2016-07-23 v1.3.3
 

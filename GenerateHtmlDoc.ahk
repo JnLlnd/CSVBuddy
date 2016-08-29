@@ -22,7 +22,7 @@ W("<link href=""csvbuddy-doc.css"" rel=""stylesheet"" type=""text/css"">")
 W("</head>")
 W("<body>")
 
-H(1, L("~1~ (~2~) - ~3~", lAppName, lAppVersionLong, lDocDocumentation))
+H(1, L("~1~ (~2~) - ~3~", lAppName,  "v" . lAppVersion, lDocDocumentation))
 
 P(lDocDesc450)
 

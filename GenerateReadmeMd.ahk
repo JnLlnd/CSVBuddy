@@ -14,7 +14,7 @@ By JnLlnd on AHK forum
 global strFile := A_ScriptDir . "\readme.md"
 global strMD := ""
 
-H(1, L("~1~ (~2~) - Read me", lAppName, lAppVersionLong))
+H(1, L("~1~ (~2~) - Read me", lAppName,  "v" . lAppVersion))
 P(lDocDesc450)
 P("Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org)`nBy JnLlnd on [AHK forum](http://www.ahkscript.org/boards/)`nFirst official release: 2013-11-30")
 
@@ -24,6 +24,14 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
+H(3, "2016-07-28 v1.3.9")
+B("New Record editor dialog box with field-by-field edition")
+B("New ""Options"" tab to change setting values saved to the CSVBuddy.ini file")
+B("New option ""Record editor"" for choice of 1) ""Full screen Editor"" (legacy) or 2) ""Field-by-field Editor"" (new). Default is 2.")
+B("New option ""Encapsulate all values"" to always enclose saved values with the encapsulator character")
+B("Help button for Options")
+B("Bug fix: now detect the end-of-line character(s) in fields where line-breaks have to be replaced by a replacement string (detected in this order: CRLF, LF or CR). The first end-of-lines character(s) found is used for remaining fields and records.")
+B("Now using libreary ObjCSV v0.5.5")
 H(3, "2016-07-23 v1.3.3")
 B("If file encoding is not specified (leave encoding at ""Detect"") when loading a file, it is loaded as UTF-8 or UTF-16 if these formats are detected in file header or as ANSI for all other formats (and displayed as such in load and save encoding encoding lists); UTF-8-RAW and UTF-16-RAW formats cannot be auto-detected and must be selected in encoding list to load files in these formats")
 B("Add values SreenHeightCorrection and SreenWidthCorrection in CSVBuddy.ini file (enter negative values in pixels to reduce the height or width of edit row dialog box)")
