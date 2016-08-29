@@ -25,7 +25,7 @@ Version history
 2016-07-28 v1.3.9 BETA
 - new Record editor dialog box with field-by-field edition
 - new "Options" tab to change setting values saved to the CSVBuddy.ini file
-- new option "Record editor" for choice of 1) "Full screen Editor" (legacy) or 2) "Field-=by-field Editor" (new). Default is 2.
+- new option "Record editor" for choice of 1) "Full screen Editor" (legacy) or 2) "Field-by-field Editor" (new). Default is 2.
 - new option "Encapsulate all values" to always enclose saved values with the encapsulator character
 - help button for Options
 - bug fix: now detect the end-of-line character(s) in fields where line-breaks have to be replaced by a replacement string (detected in this order: CRLF, LF or CR). The first end-of-lines character(s) found is used for remaining fields and records.
@@ -161,8 +161,7 @@ SetWorkingDir, %A_ScriptDir%
 
 global intCurrentSortColumn
 
-global strAppVersion := "1.3.3" ; major.minor.fixes
-global strAppVersionLong := "v" . strAppVersion
+global strAppVersionLong := "v" . lAppVersion
 
 strListBackgroundColor := "D0D0D0"
 strListTextColor := "000000"
@@ -2337,12 +2336,12 @@ if RegExMatch(strCurrentVersion, "(alpha|beta)")
 	or (FirstVsSecondIs(strLatestSkipped, strLatestVersion) >= 0 and (!blnButtonCheck4Update))
 	return
 
-if FirstVsSecondIs(strLatestVersion, strAppVersion) = 1
+if FirstVsSecondIs(strLatestVersion, lAppVersion) = 1
 {
 	Gui, 1:+OwnDialogs
 	SetTimer, ChangeButtonNames4Update, 50
 
-	MsgBox, 3, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdatePrompt, lAppName, strAppVersion, strLatestVersion), 30
+	MsgBox, 3, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdatePrompt, lAppName, lAppVersion, strLatestVersion), 30
 	IfMsgBox, Yes
 		Run, http://code.jeanlalonde.ca/csvbuddy/
 	IfMsgBox, No
@@ -2354,7 +2353,7 @@ if FirstVsSecondIs(strLatestVersion, strAppVersion) = 1
 }
 else if (blnButtonCheck4Update)
 {
-	MsgBox, 4, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdateYouHaveLatest, strAppVersion, lAppName)
+	MsgBox, 4, % l(lTab5UpdateTitle, lAppName), % l(lTab5UpdateYouHaveLatest, lAppVersion, lAppName)
 	IfMsgBox, Yes
 		Run, http://code.jeanlalonde.ca/csvbuddy/
 }
