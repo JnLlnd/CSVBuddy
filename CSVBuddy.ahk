@@ -22,7 +22,12 @@ limitations under the License.
 Version history
 ---------------
 
-2016-07-28 v1.3.9 BETA
+2016-08-?? v1.3.9.1 BETA
+- add ini value LastFileToLoadFolder in global section to remember the last folder where a file was loaded
+- fix bug when filter on a column, hit cancel now cancels the filtering
+- fix bug default load file encoding is now Detect if not encoding is saved to the ini file
+
+2016-08-28 v1.3.9 BETA
 - new Record editor dialog box with field-by-field edition
 - new "Options" tab to change setting values saved to the CSVBuddy.ini file
 - new option "Record editor" for choice of 1) "Full screen Editor" (legacy) or 2) "Field-by-field Editor" (new). Default is 2.
@@ -337,7 +342,7 @@ Gui, 1:Add, Text, w105 right, %lTab6SaveCodePage%
 Gui, 1:Add, Text, w105 right, %lTab6DefaultFileEncoding%
 Gui, 1:Add, Edit, ys x+5 section w85 center vstrCodePageLoad, %strCodePageLoad%
 Gui, 1:Add, Edit, w85 center vstrCodePageSave, %strCodePageSave%
-Gui, 1:Add, DropDownList, w85 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsSelect), strIniFileEncoding . "|", strIniFileEncoding . "||") 
+Gui, 1:Add, DropDownList, w85 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsDetect), strIniFileEncoding . "|", strIniFileEncoding . "||") 
 Gui, 1:Add, Text, ys x+5 section w125 right, %lTab6FixedWidthDefault%
 Gui, 1:Add, Text, w125 right, %lTab6HTMLTemplateDelimiter%
 Gui, 1:Add, Text, w125 right, %lTab6EncapsulateAllValues%
@@ -451,10 +456,13 @@ return
 
 ButtonSelectFileToLoad:
 Gui, 1:Submit, NoHide
-Gui, 1:+OwnDialogs 
-FileSelectFile, strInputFile, 3, %A_ScriptDir%, % L(lTab1SelectCSVFiletoload)
+Gui, 1:+OwnDialogs
+IniRead, strLastFileToLoadFolder, %strIniFile%, global, LastFileToLoadFolder, %A_ScriptDir%
+FileSelectFile, strInputFile, 2, %strLastFileToLoadFolder%, % L(lTab1SelectCSVFiletoload)
 if !(StrLen(strInputFile))
 	return
+SplitPath, strInputFile, , strLastFileToLoadFolder
+IniWrite, %strLastFileToLoadFolder%, %strIniFile%, global, LastFileToLoadFolder
 GuiControl, 1:, strFileToLoad, %strInputFile%
 if (radGetHeader) or !(StrLen(strFileHeaderEscaped))
 {
@@ -1641,7 +1649,7 @@ MsgBox, % (4+32+256), % L(lAppName), % L(lLvEventsFilterCaution)
 IfMsgBox, No
 	return
 InputBox, strFilter, % L(lLvEventsFilterInputTitle, lAppName), %lLvEventsFilterInput%, , , 150
-if !StrLen(strFilter)
+if (ErrorLevel or !StrLen(strFilter)) ; ErrorLevel = 1 when user hits Cancel
 	return
 intPrevNbRows := LV_GetCount()
 intProgressBatchSize := ProgressBatchSize(intPrevNbRows)
