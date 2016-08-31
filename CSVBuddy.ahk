@@ -205,8 +205,8 @@ IniRead, blnListGrid, %strIniFile%, global, ListGrid, %blnListGrid%
 IniRead, intDefaultWidth, %strIniFile%, global, DefaultWidth, %intDefaultWidth% ; used when export to fixed-width format
 IniRead, strTemplateDelimiter, %strIniFile%, global, TemplateDelimiter, %strTemplateDelimiter% ; Default ~ (tilde), used when export to HTML and Express formats
 IniRead, strTextEditorExe, %strIniFile%, global, TextEditorExe, %strTextEditorExe% ; Default notepad.exe
-IniRead, blnSkipHelpReadyToEdit, %strIniFile%, global, SkipHelpReadyToEdit ; Default 0
-IniRead, blnSkipConfirmQuit, %strIniFile%, global, SkipConfirmQuit ; Default 0
+IniRead, blnSkipHelpReadyToEdit, %strIniFile%, global, SkipHelpReadyToEdit, 0 ; Default 0
+IniRead, blnSkipConfirmQuit, %strIniFile%, global, SkipConfirmQuit, 0 ; Default 0
 IniRead, strLatestSkipped, %strIniFile%, global, LatestVersionSkipped, 0.0
 IniRead, intStartups, %strIniFile%, Global, Startups, 1
 IniRead, blnDonator, %strIniFile%, Global, Donator, 0 ; Please, be fair. Don't cheat with this.
@@ -238,7 +238,7 @@ Gui, 1:Font
 
 Gui, 1:Tab, 1
 Gui, 1:Add, Text,			y+10	x10		vlblCSVFileToLoad w85 right, % L(lTab1CSVFileToLoad)
-Gui, 1:Add, Edit,			yp		x100	vstrFileToLoad gChangedFileToLoad disabled
+Gui, 1:Add, Edit,			yp		x100	vstrFileToLoad gChangedFileToLoad ; disabled
 Gui, 1:Add, Button,			yp		x+5		vbtnHelpFileToLoad gButtonHelpFileToLoad, % L(lTab0QuestionMark)
 Gui, 1:Add, Button,			yp		x+5		vbtnSelectFileToLoad gButtonSelectFileToLoad w45 default, % L(lTab1Select)
 Gui, 1:Add, Text,			y+10	x10 	vlblHeader w85 right, % L(lTab1CSVFileHeader)
@@ -261,6 +261,7 @@ Gui, 1:Add, Edit,			yp		x+5		vstrEndoflineReplacement1 w30 center hidden
 Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding1 w85, %strDefaultFileEncoding%
 Gui, 1:Add, Button,			yp		x+7		vbtnHelpFileEncoding1 gButtonHelpFileEncoding1, % L(lTab0QuestionMark)
 Gui, 1:Add, Button,			yp		x+5		vbtnLoadFile gButtonLoadFile w45 hidden, % L(lTab1Load)
+Gui, 1:Add, Button,			yp		xp		vbtnCreateFile gButtonCreateFile w45 hidden, % L(lTab1Create)
 
 Gui, 1:Tab, 2
 Gui, 1:Add, Text,		y+10	x10		vlblRenameFields w85 right, % L(lTab2Renamefields)
@@ -464,11 +465,6 @@ if !(StrLen(strInputFile))
 SplitPath, strInputFile, , strLastFileToLoadFolder
 IniWrite, %strLastFileToLoadFolder%, %strIniFile%, global, LastFileToLoadFolder
 GuiControl, 1:, strFileToLoad, %strInputFile%
-if (radGetHeader) or !(StrLen(strFileHeaderEscaped))
-{
-	FileReadLine, strCurrentHeader, %strInputFile%, 1
-	GuiControl, 1:, strFileHeaderEscaped, % StrEscape(strCurrentHeader)
-}
 GuiControl, 1:+Default, btnLoadFile
 GuiControl, 1:Focus, btnLoadFile
 gosub, DetectDelimiters
@@ -482,11 +478,18 @@ if StrLen(strFileAttribute) and !InStr(strFileAttribute, "D")
 {
 	GuiControl, 1:Show, btnPreviewFile
 	GuiControl, 1:Show, btnLoadFile
+	GuiControl, 1:Hide, btnCreateFile
 	GuiControl, 1:, strFileToSave, % NewFileName(strFileToLoad)
 	GuiControl, 1:, strFileToExport, % NewFileName(strFileToLoad, "-EXPORT", "txt")
+	if (radGetHeader) or !(StrLen(strFileHeaderEscaped))
+	{
+		FileReadLine, strCurrentHeader, %strFileToLoad%, 1
+		GuiControl, 1:, strFileHeaderEscaped, % StrEscape(strCurrentHeader)
+	}
 }
 else
 {
+	GuiControl, 1:Show, btnCreateFile
 	GuiControl, 1:Hide, btnPreviewFile
 	GuiControl, 1:Hide, btnLoadFile
 	GuiControl, 1:, strFileToSave
@@ -588,6 +591,7 @@ return
 
 
 ButtonLoadFile:
+ButtonCreateFile:
 Gui, 1:+OwnDialogs
 Gui, 1:Submit, NoHide
 if !DelimitersOK(1)
@@ -1801,6 +1805,7 @@ intGui1WinID := WinExist("A")
 Gui, EditRecord: New, +Resize +HwndstrEditRecordGuiHandle +MinSize240x240, %strGuiTitle%
 Gui, EditRecord:+Owner1 ; Make the main window (Gui #1) the owner of the EditRecord window (Gui EditRecord).
 Gui, EditRecord:Add, ListView, x10 y10 h162 w480 vlvEditRecord +ReadOnly gEditRecordListViewEvents AltSubmit -LV0x10, %lLvEditRecordColumnHeader%
+GuiControl, % (blnListGrid ? "+Grid" : "") . " Background" . strListBackgroundColor . " c" . strListTextColor, lvEditRecord
 GuiControlGet, intListViewEditRecord, Pos, lvEditRecord
 LV_ModifyCol(1, "Integer")
 LV_ModifyCol(4, "Integer")
