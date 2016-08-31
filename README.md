@@ -1,5 +1,5 @@
 ﻿
-# CSV Buddy (v1.3.9) - Read me
+# CSV Buddy (v1.3.9.1) - Read me
 
 
 CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Unicode ready. Freeware.
@@ -18,6 +18,18 @@ First official release: 2013-11-30
 
 ## History
 
+
+### 2016-07-31 v1.3.9.1
+
+* Unlock the "CSV file to load" zone in first tab, allowing to type or paste a file name
+* Add a "Create" button on first tab to create a new file based on the "CSV file Header" data
+* Remember the last folder where a file was loaded and use it as default location when loading another file
+* Add items to context menu to add and edit rows with field-by-field editor
+* Fix bug when filter on a column, hitting the Cancel button now cancels the filtering
+* Fix bug default encoding in firts tab is now "Detect" if no default value is saved to the ini file
+* Apply grid setting and colors to list of field in field-by-field row editor
+* Fix bug reading values in ini file for "Skip Ready Prompt" and "Skip Quit Prompt"
+* Fix visual glitch with labels close to left part of tabs, labels were overlaping left vertical line
 
 ### 2016-07-28 v1.3.9
 
