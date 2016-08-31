@@ -22,10 +22,18 @@ limitations under the License.
 Version history
 ---------------
 
-2016-08-?? v1.3.9.1 BETA
-- add ini value LastFileToLoadFolder in global section to remember the last folder where a file was loaded
+2016-08-31 v1.3.9.1 BETA
+- unlock the "CSV file to load" zone allowing to type or paste a file name
+- display a "Create" button on first tab to create a new filebased on the Set header data
+- handle save and export file names generation when saving new file
+- remember the last folder where a file was loaded using value LastFileToLoadFolder in global section of ini file
+- add items to context menu to add and edit row with field-by-field editor
+- when adding a row, use the default row editor
 - fix bug when filter on a column, hit cancel now cancels the filtering
 - fix bug default load file encoding is now Detect if not encoding is saved to the ini file
+- fix bug apply listview grid and colors
+- fix bug reading ini values blnSkipHelpReadyToEdit and blnSkipConfirmQuit without default value creating ERROR values in Options
+- fix visual glitch with labels close to left part of tabs that were overlaping left vertical line
 
 2016-08-28 v1.3.9 BETA
 - new Record editor dialog box with field-by-field edition
@@ -237,11 +245,11 @@ Gui, 1:Add, Tab2, w950 r4 vtabCSVBuddy gChangedTabCSVBuddy, % L(lTab0List)
 Gui, 1:Font
 
 Gui, 1:Tab, 1
-Gui, 1:Add, Text,			y+10	x10		vlblCSVFileToLoad w85 right, % L(lTab1CSVFileToLoad)
+Gui, 1:Add, Text,			y+10	x11		vlblCSVFileToLoad w85 right, % L(lTab1CSVFileToLoad)
 Gui, 1:Add, Edit,			yp		x100	vstrFileToLoad gChangedFileToLoad ; disabled
 Gui, 1:Add, Button,			yp		x+5		vbtnHelpFileToLoad gButtonHelpFileToLoad, % L(lTab0QuestionMark)
 Gui, 1:Add, Button,			yp		x+5		vbtnSelectFileToLoad gButtonSelectFileToLoad w45 default, % L(lTab1Select)
-Gui, 1:Add, Text,			y+10	x10 	vlblHeader w85 right, % L(lTab1CSVFileHeader)
+Gui, 1:Add, Text,			y+10	x11 	vlblHeader w85 right, % L(lTab1CSVFileHeader)
 Gui, 1:Add, Edit,			yp		x100	vstrFileHeaderEscaped disabled
 Gui, 1:Add, Button,			yp		x+5		vbtnHelpHeader gButtonHelpHeader, % L(lTab0QuestionMark)
 Gui, 1:Add, Button,			yp		x+5		vbtnPreviewFile gButtonPreviewFile w45 hidden, % L(lTab1PreviewFile)
@@ -261,24 +269,24 @@ Gui, 1:Add, Edit,			yp		x+5		vstrEndoflineReplacement1 w30 center hidden
 Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding1 w85, %strDefaultFileEncoding%
 Gui, 1:Add, Button,			yp		x+7		vbtnHelpFileEncoding1 gButtonHelpFileEncoding1, % L(lTab0QuestionMark)
 Gui, 1:Add, Button,			yp		x+5		vbtnLoadFile gButtonLoadFile w45 hidden, % L(lTab1Load)
-Gui, 1:Add, Button,			yp		xp		vbtnCreateFile gButtonCreateFile w45 hidden, % L(lTab1Create)
+Gui, 1:Add, Button,			yp		xp		vbtnCreateFile gMenuCreateNewFile w45, % L(lTab1Create)
 
 Gui, 1:Tab, 2
-Gui, 1:Add, Text,		y+10	x10		vlblRenameFields w85 right, % L(lTab2Renamefields)
+Gui, 1:Add, Text,		y+10	x11		vlblRenameFields w85 right, % L(lTab2Renamefields)
 Gui, 1:Add, Edit,		yp		x100	vstrRenameEscaped
 Gui, 1:Add, Button,		yp		x+0		vbtnSetRename gButtonSetRename w50, % L(lTab2Rename)
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpRename gButtonHelpRename, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,		y+10	x10		vlblSelectFields w85 right, % L(lTab2Selectfields)
+Gui, 1:Add, Text,		y+10	x11		vlblSelectFields w85 right, % L(lTab2Selectfields)
 Gui, 1:Add, Edit,		yp		x100	vstrSelectEscaped
 Gui, 1:Add, Button,		yp		x+0		vbtnSetSelect gButtonSetSelect w50, % L(lTab2Select)
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpSelect gButtonHelpSelect, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,		y+10	x10		vlblOrderFields w85 right, % L(lTab2Orderfields)
+Gui, 1:Add, Text,		y+10	x11		vlblOrderFields w85 right, % L(lTab2Orderfields)
 Gui, 1:Add, Edit,		yp		x100	vstrOrderEscaped
 Gui, 1:Add, Button,		yp		x+0		vbtnSetOrder gButtonSetOrder w50, % L(lTab2Order)
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpOrder gButtonHelpOrder, % L(lTab0QuestionMark)
 
 Gui, 1:Tab, 3
-Gui, 1:Add, Text,			y+10	x10		vlblCSVFileToSave w85 right, % L(lTab3CSVfiletosave)
+Gui, 1:Add, Text,			y+10	x11		vlblCSVFileToSave w85 right, % L(lTab3CSVfiletosave)
 Gui, 1:Add, Edit,			yp		x100	vstrFileToSave gChangedFileToSave
 Gui, 1:Add, Button,			yp		x+5		vbtnHelpFileToSave gButtonHelpFileToSave, % L(lTab0QuestionMark)
 Gui, 1:Add, Button,			yp		x+5		vbtnSelectFileToSave gButtonSelectFileToSave w45 default, % L(lTab3Select)
@@ -302,25 +310,25 @@ Gui, 1:Add, Button,			y105	x+5		vbtnSaveFile gButtonSaveFile w45 hidden, % L(lTa
 Gui, 1:Add, Button,			y137	x+5		vbtnCheckFile hidden w45 gButtonCheckFile, % L(lTab3Check)
 
 Gui, 1:Tab, 4
-Gui, 1:Add, Text,		y+10	x10		vlblCSVFileToExport w85 right, % L(lTab4Exportdatatofile)
+Gui, 1:Add, Text,		y+10	x11		vlblCSVFileToExport w85 right, % L(lTab4Exportdatatofile)
 Gui, 1:Add, Edit,		yp		x100	vstrFileToExport gChangedFileToExport
 Gui, 1:Add, Button,		yp		x+5		vbtnHelpFileToExport gButtonHelpFileToExport, % L(lTab0QuestionMark)
 Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToExport gButtonSelectFileToExport w45 default, % L(lTab4Select)
-Gui, 1:Add, Text,		y+10	x10		vlblCSVExportFormat w85 right, % L(lTab4Exportformat)
+Gui, 1:Add, Text,		y+10	x11		vlblCSVExportFormat w85 right, % L(lTab4Exportformat)
 Gui, 1:Add, Radio,		yp		x100	vradFixed gClickRadFixed, % L(lTab4Fixedwidth)
 Gui, 1:Add, Radio,		yp		x+15	vradHTML gClickRadHTML, % L(lTab4HTML)
 Gui, 1:Add, Radio,		yp		x+15	vradXML gClickRadXML, % L(lTab4XML)
 Gui, 1:Add, Radio,		yp		x+15	vradExpress gClickRadExpress, % L(lTab4Express)
 Gui, 1:Add, Button,		yp		x+15	vbtnHelpExportFormat gButtonHelpExportFormat, % L(lTab0QuestionMark)
 Gui, 1:Add, Button,		yp		x+15	vbtnHelpExportMulti gButtonHelpExportMulti Hidden w125
-Gui, 1:Add, Text,		y+10	x10		vlblMultiPurpose w85 right hidden, Hidden Label:
+Gui, 1:Add, Text,		y+10	x11		vlblMultiPurpose w85 right hidden, Hidden Label:
 Gui, 1:Add, Edit,		yp		x100	vstrMultiPurpose hidden ; gChangedMultiPurpose unused
 Gui, 1:Add, Button,		yp		x+5		vbtnMultiPurpose gButtonMultiPurpose hidden w120
 Gui, 1:Add, Button,		y105	x+5		vbtnExportFile gButtonExportFile w45 hidden, % L(lTab4Export)
 Gui, 1:Add, Button,		y137	x+5		vbtnCheckExportFile gButtonCheckExportFile w45 hidden, % L(lTab4Check)
 
 Gui, 1:Tab, 5
-Gui, 1:Add, Text, section y+10 x10 w125 right, %lTab6DefaultEditor%
+Gui, 1:Add, Text, section y+10 x11 w125 right, %lTab6DefaultEditor%
 Gui, 1:Add, Text, w125 right, %lTab6ScreenHeightCorrection%
 Gui, 1:Add, Text, w125 right, %lTab6ScreenWidthCorrection%
 Gui, 1:Add, Edit, ys x+5 section w30 center vintRecordEditor, %intRecordEditor%
@@ -492,8 +500,8 @@ else
 	GuiControl, 1:Show, btnCreateFile
 	GuiControl, 1:Hide, btnPreviewFile
 	GuiControl, 1:Hide, btnLoadFile
-	GuiControl, 1:, strFileToSave
-	GuiControl, 1:, strFileToExport
+	GuiControl, 1:, strFileToSave, % NewFileName("")
+	GuiControl, 1:, strFileToExport, % NewFileName("", "-EXPORT", "txt")
 }
 return
 
@@ -591,7 +599,6 @@ return
 
 
 ButtonLoadFile:
-ButtonCreateFile:
 Gui, 1:+OwnDialogs
 Gui, 1:Submit, NoHide
 if !DelimitersOK(1)
@@ -1407,6 +1414,7 @@ if !LV_GetCount("Column")
 	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
 else if !LV_GetCount("")
 {
+	Menu, ContextMenu, Add, % L(lLvEventsAddrowField), MenuAddRecord
 	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
 	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
 	Menu, ContextMenu, Add, % ((lLvEventsFilterReload)), MenuFilterReload
@@ -1420,8 +1428,11 @@ else
 	Menu, ContextMenu, Add, % L(lLvEventsReverseSelection), MenuSelectReverse
 	Menu, ContextMenu, Add
 	Menu, ContextMenu, Add, % L(lLvEditRecordMenu), MenuEditRecord
+	Menu, ContextMenu, Add, % L(lLvEventsAddrowField), MenuAddRecord
+	Menu, ContextMenu, Add
 	Menu, ContextMenu, Add, % L(lLvEventsEditrowMenu), MenuEditRow
 	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
+	Menu, ContextMenu, Add
 	Menu, ContextMenu, Add, % L(lLvEventsDeleteRowMenu), MenuDeleteRow
 	Menu, ContextMenu, Add
 	Menu, ContextMenu, Add, % ((lLvEventsFilterGlobal)), MenuFilter
@@ -1472,7 +1483,10 @@ else
 		Oops(lTab1CSVfilenotcreatedMax200fields)
 	for intIndex, strFieldName in objHeader
 		LV_InsertCol(intIndex, "", Trim(strFieldName))
-	gosub, MenuAddRow
+	if (intRecordEditor = 1)
+		gosub, MenuAddRow
+	else
+		Gosub, MenuAddRecord
 	gosub, UpdateCurrentHeader
 	loop, % LV_GetCount("Column")
 		LV_ModifyCol(A_Index, "AutoHdr")
@@ -1795,9 +1809,17 @@ NotMatchingRow(intRow, strFilter, intColNumber, ByRef intColFound, blnReplaceCas
 
 
 
+MenuAddRecord:
 MenuEditRecord:
 blnRecordChanged := false
 Gui, 1:Submit, NoHide
+if (A_ThisLabel = "MenuAddRecord")
+{
+	LV_Modify(0, "-Select")
+	LV_Insert(0xFFFF, "Select Focus") ; add at the end of the list
+	intRowNumber := LV_GetNext()
+	LV_Modify(intRowNumber, "Vis")
+}
 strGuiTitle := L(lLvEditRecordTitle, lAppName, intRowNumber, LV_GetCount())
 if (intRowNumber = 0)
 	intRowNumber := 1
@@ -2585,7 +2607,11 @@ CheckIfFileExistOverwrite(strFileName, blnCanAppend)
 
 NewFileName(strExistingFile, strNote := "", strExtension := "")
 {
+	if !StrLen(strExistingFile)
+		strExistingFile := "NewFile.csv"
 	SplitPath, strExistingFile, , strOutDir, strOutExtension, strOutNameNoExt
+	if !StrLen(strOutDir)
+		strOutDir := A_WorkingDir
 	if !StrLen(strExtension)
 		strExtension := strOutExtension
 	strNewName := strOutDir . "\" . strOutNameNoExt . strNote . "." . strExtension
