@@ -22,9 +22,19 @@ limitations under the License.
 Version history
 ---------------
 
+2016-09-06 v2.0
+- New Record editor dialog box with field-by-field edition (support up to 200 fields per row)
+- new "Options" tab to change setting values saved to the CSVBuddy.ini file
+- new option "Record editor" for choice of 1) "Full screen Editor" (legacy) or 2) "Field-by-field Editor" (new), default is 2
+- new option "Encapsulate all values" to always enclose saved values with the encapsulator character
+- display a "Create" button on first tab to create a new file based on the Set header data
+- remember the last folder where a file was loaded
+- code signature with certificate from DigiCert
+- see history for v1.3.9 and v1.3.9.1 for details and bug fixes
+
 2016-08-31 v1.3.9.1 BETA
 - unlock the "CSV file to load" zone allowing to type or paste a file name
-- display a "Create" button on first tab to create a new filebased on the Set header data
+- display a "Create" button on first tab to create a new file based on the Set header data
 - handle save and export file names generation when saving new file
 - remember the last folder where a file was loaded using value LastFileToLoadFolder in global section of ini file
 - add items to context menu to add and edit row with field-by-field editor
@@ -42,7 +52,7 @@ Version history
 - new option "Encapsulate all values" to always enclose saved values with the encapsulator character
 - help button for Options
 - bug fix: now detect the end-of-line character(s) in fields where line-breaks have to be replaced by a replacement string (detected in this order: CRLF, LF or CR). The first end-of-lines character(s) found is used for remaining fields and records.
-- now using libreary ObjCSV v0.5.5
+- now using library ObjCSV v0.5.5
 
 2016-07-21 v1.3.3
 - If file encoding is not specified (leave encoding at "Detect") when loading a file, it is loaded as UTF-8 or UTF-16 if these formats are detected in file header or as ANSI for all other formats (and displayed as such in load and save encoding encoding lists); UTF-8-RAW and UTF-16-RAW formats must be selected in encoding list to load files in these formats
@@ -165,7 +175,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 1.3.3
+;@Ahk2Exe-SetVersion 2.0
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
