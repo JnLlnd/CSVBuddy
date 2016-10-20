@@ -24,6 +24,9 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
+H(3, "2016-10-20 v2.1")
+B("Stop trimming (removing spaces at the beginning or end) data value read from CSV file (but still trimming field names read from CSV file).")
+B("Now using library ObjCSV v0.5.6")
 H(3, "2016-09-06 v2.0")
 B("New Record editor dialog box with field-by-field edition (support up to 200 fields per row)")
 B("New ""Options"" tab to change setting values saved to the CSVBuddy.ini file")
