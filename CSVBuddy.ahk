@@ -3,7 +3,7 @@
 CSV Buddy
 Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
-This script uses the library ObjCSV v0.5.5 (https://github.com/JnLlnd/ObjCSV)
+This script uses the library ObjCSV v0.5.6 (https://github.com/JnLlnd/ObjCSV)
 
 Copyright 2013-2016 Jean Lalonde
 --------------------------------
@@ -22,8 +22,12 @@ limitations under the License.
 Version history
 ---------------
 
+2016-10-20 v2.1
+- stop trimming data value read from CSV file (but still trimming field names read from CSV file).
+- now using library ObjCSV v0.5.6
+
 2016-09-06 v2.0
-- New Record editor dialog box with field-by-field edition (support up to 200 fields per row)
+- new Record editor dialog box with field-by-field edition (support up to 200 fields per row)
 - new "Options" tab to change setting values saved to the CSVBuddy.ini file
 - new option "Record editor" for choice of 1) "Full screen Editor" (legacy) or 2) "Field-by-field Editor" (new), default is 2
 - new option "Encapsulate all values" to always enclose saved values with the encapsulator character
@@ -175,7 +179,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 2.0
+;@Ahk2Exe-SetVersion 2.1
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
