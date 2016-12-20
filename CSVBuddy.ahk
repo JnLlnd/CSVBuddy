@@ -3,7 +3,7 @@
 CSV Buddy
 Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
-This script uses the library ObjCSV v0.5.6 (https://github.com/JnLlnd/ObjCSV)
+This script uses the library ObjCSV v0.5.7 (https://github.com/JnLlnd/ObjCSV)
 
 Copyright 2013-2016 Jean Lalonde
 --------------------------------
@@ -21,6 +21,10 @@ limitations under the License.
 
 Version history
 ---------------
+
+2016-12-20 v2.1.1
+- fix bug when "Set header" is selected and "Custom header" is empty, columns with "C" field names generated are now sorted correctly
+- now using library ObjCSV v0.5.7
 
 2016-10-20 v2.1
 - stop trimming data value read from CSV file (but still trimming field names read from CSV file).
@@ -179,7 +183,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 2.1
+;@Ahk2Exe-SetVersion 2.1.1
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
