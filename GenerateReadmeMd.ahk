@@ -24,6 +24,9 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
+H(3, "2016-12-22 v2.1.2")
+B("Fix bug when creating header if ""Set header"" is selected and ""Custom header"" is empty.")
+B("Now using library ObjCSV v0.5.8")
 H(3, "2016-12-20 v2.1.1")
 B("Fix bug when ""Set header"" is selected and ""Custom header"" is empty, columns with ""C"" field names generated are now sorted correctly.")
 B("Now using library ObjCSV v0.5.7")
