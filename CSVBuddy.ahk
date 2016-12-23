@@ -22,6 +22,9 @@ limitations under the License.
 Version history
 ---------------
 
+2016-12-23 v2.1.3
+- fix bug preventing correct detection of current field delimiter when file is loaded (first delimiter detected in this order: tab, semicolon (;), comma (,), colon (:), pipe (|) or tilde (~)). 
+
 2016-12-22 v2.1.2
 - fix bug when creating header if "Set header" is selected and "Custom header" is empty
 - now using library ObjCSV v0.5.8
@@ -461,6 +464,7 @@ return
 
 
 DetectDelimiters:
+Sleep, -1 ; makes the script immediately check its message queue. This can be used to force any pending interruptions to occur at a specific place rather than somewhere more random.
 Gui, 1:Submit, NoHide
 strFileHeaderUnEscaped := StrUnEscape(strFileHeaderEscaped)
 strCandidates := "`t;,:|~" ; check tab, semi-colon, comma, colon, pipe and tilde

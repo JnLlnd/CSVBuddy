@@ -24,6 +24,8 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
+H(3, "2016-12-23 v2.1.3")
+B("Fix bug preventing correct detection of current field delimiter when file is loaded (first delimiter detected in this order: tab, semicolon (;), comma (,), colon (:), pipe (|) or tilde (~)).")
 H(3, "2016-12-22 v2.1.2")
 B("Fix bug when creating header if ""Set header"" is selected and ""Custom header"" is empty.")
 B("Now using library ObjCSV v0.5.8")
