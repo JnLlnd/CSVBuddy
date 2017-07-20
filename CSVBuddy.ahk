@@ -3,7 +3,7 @@
 CSV Buddy
 Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
-This script uses the library ObjCSV v0.5.8 (https://github.com/JnLlnd/ObjCSV)
+This script uses the library ObjCSV v0.5.9 (https://github.com/JnLlnd/ObjCSV)
 
 Copyright 2013-2016 Jean Lalonde
 --------------------------------
@@ -21,6 +21,10 @@ limitations under the License.
 
 Version history
 ---------------
+
+2017-07-20 v2.1.5
+- fix bug in library ObjCSV v0.5.8, when processing HTML or XML multi-line content, reversing earlier change done to support non-standard CSV files created by XL causing issue (stripping some "=") in encapsulated fields.
+- now using library ObjCSV v0.5.9
 
 2017-07-20 v2.1.4
 - fix bug: show the end-of-line replacement field when loading a file from the command-line (or by double-click a file in Explorer)
@@ -193,7 +197,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 2.1.4
+;@Ahk2Exe-SetVersion 2.1.5
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
