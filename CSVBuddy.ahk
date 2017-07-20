@@ -22,6 +22,9 @@ limitations under the License.
 Version history
 ---------------
 
+2017-07-20 v2.1.4
+- fix bug: show the end-of-line replacement field when loading a file from the command-line (or by double-click a file in Explorer)
+
 2016-12-23 v2.1.3
 - fix bug preventing correct detection of current field delimiter when file is loaded (first delimiter detected in this order: tab, semicolon (;), comma (,), colon (:), pipe (|) or tilde (~)). 
 
@@ -243,6 +246,8 @@ IniRead, blnSkipConfirmQuit, %strIniFile%, global, SkipConfirmQuit, 0 ; Default 
 IniRead, strLatestSkipped, %strIniFile%, global, LatestVersionSkipped, 0.0
 IniRead, intStartups, %strIniFile%, Global, Startups, 1
 IniRead, blnDonator, %strIniFile%, Global, Donator, 0 ; Please, be fair. Don't cheat with this.
+IniRead, blnDonor, %strIniFile%, Global, Donor, 0 ; Please, be fair. Don't cheat with this.
+blnDonor := (blnDonator or blnDonor)
 IniRead, strCodePageLoad, %strIniFile%, Global, CodePageLoad, 1252 ; default ANSI Latin 1, Western European (Windows)
 IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANSI Latin 1, Western European (Windows)
 IniRead, intSreenHeightCorrection, %strIniFile%, Global, SreenHeightCorrection, -100 ; negative number to redure the height of edit row dialog box
@@ -2383,7 +2388,7 @@ if GetKeyState("Shift") and GetKeyState("LWin")
 	IniWrite, 1, %strIniFile%, Global, Donator ; stop Freeware donation nagging
 	MsgBox, 64, %lAppName%, %lDonateThankyou%
 }
-else if Time2Donate(intStartups, blnDonator)
+else if Time2Donate(intStartups, blnDonor)
 {
 	MsgBox, 36, % l(lDonateTitle, intStartups, lAppName), % l(lDonatePrompt, lAppName, intStartups)
 	IfMsgBox, Yes
@@ -2431,7 +2436,7 @@ return
 
 
 
-Time2Donate(intStartups, blnDonator)
+Time2Donate(intStartups, blnDonor)
 {
 	if (intStartups > 200)
 		intDivisor := 50
@@ -2442,7 +2447,7 @@ Time2Donate(intStartups, blnDonator)
 	else
 		intDivisor := 20
 		
-	return !Mod(intStartups, intDivisor) and !(blnDonator)
+	return !Mod(intStartups, intDivisor) and !(blnDonor)
 }
 
 
@@ -2456,6 +2461,8 @@ if 0 > 0
 	{
 		GuiControl, 1:, strFileToLoad, %strParam%
 		GuiControl, 1:, blnMultiline1, 1 ; always process as multi-line for safety
+		GuiControl, 1:Show, lblEndoflineReplacement1
+		GuiControl, 1:Show, strEndoflineReplacement1
 		FileReadLine, strCurrentHeader, %strParam%, 1
 		GuiControl, 1:, strFileHeaderEscaped, % StrEscape(strCurrentHeader)
 		gosub, DetectDelimiters
