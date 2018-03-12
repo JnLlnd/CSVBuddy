@@ -24,6 +24,8 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
+H(3, "2017-12-10 v2.1.6")
+B("fix bug when changing the Fixed with default in Export tab.")
 H(3, "2017-07-20 v2.1.5")
 B("Fix bug when processing HTML or XML multi-line content, reversing earlier change done to support non-standard CSV files created by XL causing issue (stripping some ""="") in encapsulated fields.")
 H(3, "2017-07-20 v2.1.4")

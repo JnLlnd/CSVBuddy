@@ -22,6 +22,9 @@ limitations under the License.
 Version history
 ---------------
 
+2017-12-10 v2.1.6
+- fix bug when changing the Fixed with default in Export tab
+
 2017-07-20 v2.1.5
 - fix bug in library ObjCSV v0.5.8, when processing HTML or XML multi-line content, reversing earlier change done to support non-standard CSV files created by XL causing issue (stripping some "=") in encapsulated fields.
 - now using library ObjCSV v0.5.9
@@ -197,7 +200,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 2.1.5
+;@Ahk2Exe-SetVersion 2.1.6
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -1247,7 +1250,7 @@ if (radFixed)
 		, % L(lTab4MultiFixedInputPrompt), , , 150, , , , , %intDefaultWidth%
 	if !ErrorLevel
 		if (intNewDefaultWidth > 0)
-			intDefaultWidth := intNewDefaultWidth
+			GuiControl, , intDefaultWidth, %intNewDefaultWidth%
 		else
 			Oops(L(lTab4MultiFixedGreaterZero))
 	Gosub, ClickRadFixed
