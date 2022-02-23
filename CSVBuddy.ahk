@@ -239,6 +239,7 @@ IfNotExist, %strIniFile%
 			TemplateDelimiter=%strTemplateDelimiter%
 			AlwaysEncapsulate=0
 			Startups=1
+			ReuseDelimiters=[]
 		)
 		, %strIniFile%
 
@@ -261,6 +262,7 @@ IniRead, intSreenHeightCorrection, %strIniFile%, Global, SreenHeightCorrection, 
 IniRead, intSreenWidthCorrection, %strIniFile%, Global, SreenWidthCorrection, -100 ; negative number to redure the width of edit row dialog box
 IniRead, intRecordEditor, %strIniFile%, Global, RecordEditor, 2 ; 1: full screen editor / 2: field by field editor
 IniRead, blnAlwaysEncapsulate, %strIniFile%, Global, AlwaysEncapsulate, 0
+IniRead, strReuseDelimiters, %strIniFile%, Global, ReuseDelimiters, %A_Space%
 IniRead, strIniFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
 if !StrLen(strIniFileEncoding)
 	strIniFileEncoding := lFileEncodingsDetect
@@ -390,11 +392,13 @@ Gui, 1:Add, Edit, ys x+5 section w85 center vstrCodePageLoad, %strCodePageLoad%
 Gui, 1:Add, Edit, w85 center vstrCodePageSave, %strCodePageSave%
 Gui, 1:Add, DropDownList, w85 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsDetect), strIniFileEncoding . "|", strIniFileEncoding . "||") 
 Gui, 1:Add, Text, ys x+5 section w125 right, %lTab6FixedWidthDefault%
-Gui, 1:Add, Text, w125 right, %lTab6HTMLTemplateDelimiter%
-Gui, 1:Add, Text, w125 right, %lTab6EncapsulateAllValues%
-Gui, 1:Add, Edit, ys x+5 section w30 center vintDefaultWidth, %intDefaultWidth%
-Gui, 1:Add, Edit, w30 center vstrTemplateDelimiter, %strTemplateDelimiter%
-Gui, 1:Add, Edit, w30 center vblnAlwaysEncapsulate, %blnAlwaysEncapsulate%
+Gui, 1:Add, Text, w125 y+12 right, %lTab6HTMLTemplateDelimiter%
+Gui, 1:Add, Text, w125 y+12 right, %lTab6ReuseDelimiters%
+Gui, 1:Add, Text, w125 y+12 right, %lTab6EncapsulateAllValues%
+Gui, 1:Add, Edit, ys h20 x+5 section w30 center vintDefaultWidth, %intDefaultWidth%
+Gui, 1:Add, Edit, w30 h20 y+5 center vstrTemplateDelimiter, %strTemplateDelimiter%
+Gui, 1:Add, Edit, w30 h20 y+5 center vstrReuseDelimiters, %strReuseDelimiters%
+Gui, 1:Add, Edit, w30 h20 y+5 center vblnAlwaysEncapsulate, %blnAlwaysEncapsulate%
 Gui, 1:Add, Button, ys x+25 w80 gButtonSaveOptions, %lTab6SaveOptions%
 Gui, 1:Add, Button, w80 gButtonOptionsHelp, %lTab6OptionsHelp%
 
@@ -677,11 +681,11 @@ strCurrentFileEncodingLoad := (strFileEncoding1 = lFileEncodingsDetect ? "" : st
 FileGetSize, intFileSize, %strFileToLoad%, K
 intActualSize := intActualSize + intFileSize
 
-; ObjCSV_CSV2Collection(strFilePath, ByRef strFieldNames [, blnHeader = 1, blnMultiline = 1, intProgressType = 0
-;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText := ""])
+; ObjCSV_CSV2Collection(strFilePath, ByRef strFieldNames, blnHeader := 1, blnMultiline := 1, intProgressType := 0
+	; , strFieldDelimiter := ",", strEncapsulator := """", strEolReplacement := "", strProgressText := "", ByRef strFileEncoding := "", strReuseDelimiters := "")
 obj := ObjCSV_CSV2Collection(strFileToLoad, strCurrentHeader, radGetHeader, blnMultiline1, intProgressType
 	, strCurrentFieldDelimiter, strCurrentFieldEncapsulator, strEndoflineReplacement1, L(lTab1ReadingCSVdata)
-	, strCurrentFileEncodingLoad)
+	, strCurrentFileEncodingLoad, strReuseDelimiters)
 if !StrLen(strCurrentFileEncodingLoad)
 	strCurrentFileEncodingLoad := "ANSI"
 if (ErrorLevel)
@@ -808,22 +812,53 @@ if !StrLen(strSelectEscaped)
 }
 ; ObjCSV_ReturnDSVObjectArray(strCurrentDSVLine, strDelimiter = ",", strEncapsulator = """")
 objCurrentHeader := ObjCSV_ReturnDSVObjectArray(strCurrentHeader, strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
-objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strSelectEscaped), strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
+objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strSelectEscaped), strCurrentFieldDelimiter, strCurrentFieldEncapsulator, true, strReuseDelimiters)
 intPosPrevious := 0
+intReusedField := 0
+intReuseFieldPosition := 0
 for intKey, strVal in objNewHeader
 {
 	intPosThisOne := PositionInArray(strVal, objCurrentHeader)
-	if !(intPosThisOne)
+	if SubStr(strVal, 1, 1) = StrSplit(strReuseDelimiters)[1] ; this is a reuse field
+	{
+		strReuseFieldSpecs := strVal
+		intReuseFieldPosition := intKey
+		intPosThisOne := 0 ; this field is not as is in the current header
+		ObjCSV_BuildReuseField(strReuseDelimiters, strReuseFieldSpecs, [], [], strNewFieldName) ; return the new field name in strReuseFieldSpecs
+		###_O2("objCurrentHeader / objNewHeader", objCurrentHeader, objNewHeader)
+		objNewHeader[intKey] := strNewFieldName
+		###_O2("objCurrentHeader / objNewHeader", objCurrentHeader, objNewHeader)
+		LV_InsertCol(intKey, , objNewHeader[intKey])
+		intReusedField++
+	}
+	else if !(intPosThisOne)
 	{
 		Oops(lTab2SelectFieldMissing, strVal)
 		return
 	}
-	if (intPosThisOne <= intPosPrevious)
+	else if (intPosThisOne <= intPosPrevious)
 	{
 		Oops(lTab2SelectBadOrder)
 		return
 	}
 	intPosPrevious := intPosThisOne
+}
+if (intReusedField)
+{
+	GuiControl, Focus, lvData
+	Loop, % LV_GetCount()
+	{
+		objRow := Object()
+		intRow := A_Index
+		Loop, % LV_GetCount("Column")
+		{
+			LV_GetText(strCell, intRow, A_Index)
+			objRow[objNewHeader[A_Index]] := strCell
+		}
+		strReuseField := ObjCSV_BuildReuseField(strReuseDelimiters, strReuseFieldSpecs, objRow, objNewHeader, strNewFieldName)
+		LV_Modify(A_Index, "Col" . intReuseFieldPosition, strReuseField)
+	}
+	LV_ModifyCol()
 }
 intMaxCurrent := objCurrentHeader.MaxIndex()
 intMaxNew := objNewHeader.MaxIndex()
@@ -832,17 +867,25 @@ intIndexNew := 1
 intDeleted := 0
 Loop
 {
-	if (objCurrentHeader[intIndexCurrent] = objNewHeader[intIndexNew])
+	###_V("Loop", intReuseFieldPosition, intIndexCurrent, objCurrentHeader[intIndexCurrent], intIndexNew, objNewHeader[intIndexNew])
+	if (intReuseFieldPosition = A_Index)
+	{
+		; intIndexCurrent := intIndexCurrent + 1
+		intIndexNew := intIndexNew + 1
+	}
+	else if (objCurrentHeader[intIndexCurrent] = objNewHeader[intIndexNew])
 	{
 		intIndexCurrent := intIndexCurrent + 1
 		intIndexNew := intIndexNew + 1
 	}
 	else
 	{
+		###_V("Delete col", intIndexCurrent - intDeleted, intIndexCurrent, intDeleted)
 		LV_DeleteCol(intIndexCurrent - intDeleted)
 		intDeleted := intDeleted + 1
 		intIndexCurrent := intIndexCurrent + 1
 	}
+	; if (intIndexCurrent > (intMaxCurrent + intReusedField))
 	if (intIndexCurrent > intMaxCurrent)
 		break
 }
@@ -1343,6 +1386,7 @@ IniWrite, %strCodePageSave%, %strIniFile%, Global, CodePageSave
 IniWrite, %drpDefaultEileEncoding%, %strIniFile%, Global, DefaultFileEncoding
 IniWrite, %intDefaultWidth%, %strIniFile%, Global, DefaultWidth
 IniWrite, %strTemplateDelimiter%, %strIniFile%, Global, TemplateDelimiter
+IniWrite, %strReuseDelimiters%, %strIniFile%, Global, ReuseDelimiters
 IniWrite, %blnAlwaysEncapsulate%, %strIniFile%, Global, AlwaysEncapsulate
 
 MsgBox, , % L(lAppName), % L(lTab6OptionsSaved, strIniFile)
