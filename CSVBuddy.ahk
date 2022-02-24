@@ -5,7 +5,7 @@ Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
 By JnLlnd on AHK forum
 This script uses the library ObjCSV v0.5.9 (https://github.com/JnLlnd/ObjCSV)
 
-Copyright 2013-2016 Jean Lalonde
+Copyright 2013-2022 Jean Lalonde
 --------------------------------
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ limitations under the License.
 
 Version history
 ---------------
+
+2022-02-24 BETA v2.1.9.1
+- Reuse fields allowing, when loading a file or using the Select command, to create an new field based on the content of previous fields in each row; reuse specification are in three parts: list of fields to reuse, new field format and new field name (see instructions and example https://github.com/JnLlnd/CSVBuddy/issues/53); configurable reuse opening and closing delimiters in the "Options" tab; in this release, only one reuse field can be set when loading a file or selecting fields (multiple reuse is planned for a future beta release)
 
 2017-12-10 v2.1.6
 - fix bug when changing the Fixed with default in Export tab
@@ -200,7 +203,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 2.1.6
+;@Ahk2Exe-SetVersion 2.1.9.1
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -209,7 +212,7 @@ SetWorkingDir, %A_ScriptDir%
 
 global intCurrentSortColumn
 
-global strAppVersionLong := "v" . lAppVersion
+global strAppVersionLong := "v" . lAppVersion . " BETA"
 
 strListBackgroundColor := "D0D0D0"
 strListTextColor := "000000"
@@ -825,9 +828,7 @@ for intKey, strVal in objNewHeader
 		intReuseFieldPosition := intKey
 		intPosThisOne := 0 ; this field is not as is in the current header
 		ObjCSV_BuildReuseField(strReuseDelimiters, strReuseFieldSpecs, [], [], strNewFieldName) ; return the new field name in strReuseFieldSpecs
-		###_O2("objCurrentHeader / objNewHeader", objCurrentHeader, objNewHeader)
 		objNewHeader[intKey] := strNewFieldName
-		###_O2("objCurrentHeader / objNewHeader", objCurrentHeader, objNewHeader)
 		LV_InsertCol(intKey, , objNewHeader[intKey])
 		intReusedField++
 	}
@@ -867,7 +868,6 @@ intIndexNew := 1
 intDeleted := 0
 Loop
 {
-	###_V("Loop", intReuseFieldPosition, intIndexCurrent, objCurrentHeader[intIndexCurrent], intIndexNew, objNewHeader[intIndexNew])
 	if (intReuseFieldPosition = A_Index)
 	{
 		; intIndexCurrent := intIndexCurrent + 1
@@ -880,7 +880,6 @@ Loop
 	}
 	else
 	{
-		###_V("Delete col", intIndexCurrent - intDeleted, intIndexCurrent, intDeleted)
 		LV_DeleteCol(intIndexCurrent - intDeleted)
 		intDeleted := intDeleted + 1
 		intIndexCurrent := intIndexCurrent + 1
@@ -898,7 +897,7 @@ return
 
 ButtonHelpSelect:
 Gui, 1:Submit, NoHide
-Help(lTab2HelpSelect, strCurrentVisibleFieldDelimiter)
+Help(lTab2HelpSelect, StrSplit(strReuseDelimiters)[1], StrSplit(strReuseDelimiters)[2], strCurrentVisibleFieldDelimiter, strCurrentFieldEncapsulator)
 return
 
 
