@@ -5,7 +5,7 @@
 <link href="csvbuddy-doc.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-<H1>CSV Buddy (v2.1.6) - Documentation</H1>
+<H1>CSV Buddy (v2.1.9.1) - Documentation</H1>
 
 <P>CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Unicode ready. Freeware.</P>
 
@@ -13,9 +13,9 @@
 
 <H4>Installation</H4>
 
-<P><P>Absolutely free to download and use, for personal or commercial use.</P><OL><LI>Download <A HREF="http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy.zip">csvbuddy.zip</A></LI><LI>There is no software to install. Just extract the zip file content to the folder of your choice.</LI><LI>Run the .EXE file from this folder (choose the 32-bits or 64-bits version depending on your system). Make sure it will run with <EM>read/write</EM> access to this folder.</LI><LI>At your convenience, create a shortcut on your Desktop or your Start menu.</LI></OL><P>CSV Buddy can be freely distributed over the internet in an unchanged form.</P></P>
+<P><P>Absolutely free to download and use, for personal or commercial use. You can <A HREF="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8UWKXDR5ZQNJW" target="_blank">make a donation</A> if you wish.</P><OL><LI>Download <A HREF="http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy.zip">csvbuddy.zip</A></LI><LI>There is no software to install. Just extract the zip file content to the folder of your choice.</LI><LI>Run the .EXE file from this folder (choose the 32-bits or 64-bits version depending on your system). Make sure it will run with <EM>read/write</EM> access to this folder.</LI><LI>At your convenience, create a shortcut on your Desktop or your Start menu.</LI></OL><P>CSV Buddy can be freely distributed over the internet in an unchanged form.</P></P>
 
-<P><P>Three delimited test files are distributed with the program.</P><UL><LI>TEST-CountryCodes.csv<BR />A standard CSV file (CSV stands for comma-separated values). This file is comma-delimited with double-quotes encapsulators. Retrieve with default values.</LI><LI>TEST-TheBeatles-Tab.txt<BR />A standard Tab-delimited DSV file (DSV stands for delimiter-sepatated values). This file is Tab-delimited with double-quotes encapsulators. Tab delimiter is automatically detected by CSV Buddy. Retrieve with proposed values.</LI><LI>TEST-TheBeatles-Lyrics.txt<BR />A CSV file with line breaks inside lyrics field. Check "Multi-line fields" before loading (leave "EOL replacement" empty). This file is comma-delimited with double-quotes encapsulators.</LI><LI>TEST-TheBeatles-Tab-HTML-DEMO.html<BR />A template to test HTML export. Load the file "TEST-TheBeatles-Tab.txt" and, in the "Export" tab, click "HTML" export format and "Select HTML template" button.</UL></P>
+<P><P>Some delimited test files are distributed with the program.</P><UL><LI>TEST-CountryCodes.csv<BR />A standard CSV file (CSV stands for comma-separated values). This file is comma-delimited with double-quotes encapsulators. Retrieve with default values.</LI><LI>TEST-TheBeatles-Tab.txt<BR />A standard Tab-delimited DSV file (DSV stands for delimiter-sepatated values). This file is Tab-delimited with double-quotes encapsulators. Tab delimiter is automatically detected by CSV Buddy. Retrieve with proposed values.</LI><LI>TEST-TheBeatles-Lyrics.txt<BR />A CSV file with line breaks inside lyrics field. Check "Multi-line fields" before loading (leave "EOL replacement" empty). This file is comma-delimited with double-quotes encapsulators.</LI><LI>TEST-TheBeatles-Tab-HTML-DEMO.html<BR />A template to test HTML export. Load the file "TEST-TheBeatles-Tab.txt" and, in the "Export" tab, click "HTML" export format and "Select HTML template" button.</LI><LI>TEST-TheBeatles-Tab-WIKI-DEMO.txt<BR />A template to test Wiki table format. Load the file "TEST-TheBeatles-Tab.txt" and, in the "Export" tab, click "HTML" export format and "Select HTML template" button and choose this Wiki template.</LI><LI>TEST-Reuse-One-Simple.csv<BR />Simple CSV file with a reuse field. Simply load this file in the first tab. See the field "FN" created using the content of the fields "F1" and "F3".</LI></UL></P>
 
 <H4>Description</H4>
 
@@ -53,10 +53,11 @@ Supported file encodings: ANSI (default), UTF-8, UTF-16, UTF-8-RAW (no BOM), UTF
 &nbsp;&nbsp;&nbsp;&nbsp;- Right-click anywhere in the list view to select all rows, deselect all rows, reverse selection, add a new record, edit a record, delete selected rows, perform a global search or a global filtering<BR />
 - Click the Create button on first tab or right-click in an empty list to create a new file from scratch<BR />
 - Load a file from command-line parameter with automatically detected field delimiter<BR />
+- Reuse fields allowing, when loading a file, to create a new field based on the content of previous fields in each row (see "Reuse fields" below)<BR />
 <BR />
 2) Edit columns<BR />
 - Rename fields by entering a delimited string with the new field names<BR />
-- Select fields to keep in the list view by entering a delimited string with the names of these fields<BR />
+- Select fields to keep in the list view by entering a delimited string with the names of these fields; also use this command to create a new field based on the content of previous fields in each row (see "Reuse fields" below)<BR />
 - Order fields by entering a delimited string with the names of the fields in the desired order<BR />
 <BR />
 3) Save list view to CSV file<BR />
@@ -147,13 +148,27 @@ If text fields in your CSV file contain line breaks, select this checkbox to tur
 <BR />
 If you turn Multi-line ON, you have the additional option to choose a character (or string) that will be converted to line-breaks if found in the CSV file.</P>
 
+<H4>Reuse Fields</H4>
+
+<P>When loading a file, you can create a new field by reusing the content of previous fields in each row (requires v2.1.9.1 or more recent). Set configurable reuse opening and closing delimiters in the "Options" tab (by default "[]"). Choose characters that won't be used in other fields name.<BR />
+<BR />
+Insert reuse field specs in the CSV file header in two parts: 1) fields to reuse and format, 2) new field name "[[fields and format][name]]".<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;1) [fields and format]: format the new field reusing existing fields by enclosing their name between delimiters, example [Client: [LastName], [FirstName]]<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;2) [name]: name of the new field<BR />
+<BR />
+For example: inserting reuse specs in the header "LastName,FirstName,City,[[Client: [FirstName] [LastName] ([City])][Name and city]]" would add to your data a new field named "Name and city" with content "Lalonde,Jean,Montreal,Client: Jean Lalonde (Montreal)" or "Presley,Elvis,Memphis,Client: Elvis Presley (Memphis)".<BR />
+<BR />
+Requirements:<BR />
+- reused fields must appear in the fields list before they can be reused;<BR />
+- if the reuse specs include field delimiters, this whole field must be enclosed with field encapsulators.</P>
+
 <H4>Ready to edit</H4>
 
 <P>Your CSV file is loaded.<BR />
 <BR />
 You can sort rows by clicking on column headers. Choose sorting type: alphabetical, numeric integer or numeric float, ascending or descending.<BR />
 <BR />
-Clicking on a column header also allows you to search this column in all or selected rows, and to search and relpace with or without confirmation.<BR />
+Clicking on a column header also allows you to search this column in all or selected rows, and to search and replace with or without confirmation.<BR />
 <BR />
 Double-click on a row to edit a record.  Right-click anywhere in the list to select all rows, deselect all rows, reverse selection, edit a record, add a new record or delete selected rows. If you right-click in an empty list, you will be offered to create a new file.<BR />
 <BR />
@@ -180,6 +195,8 @@ To save the file, click on the tab "3) Save CSV File".</P>
 <H4>Select Fields</H4>
 
 <P>To remove fields (columns) from the list, enter the name of fields you want to keep, in the order they actually appear in the list. Each field must be separated by the field delimiter ( usually comma ). Click "Select" to process fields.<BR />
+<BR />
+To create a new field reusing previous fields, add reuse specs in the format "[[fields and format][new field name]]" using the open and close reuse delimiters ( [ ] , see "Options" tab); in [fields and format], enclose reused fields by enclosing their name between delimiters (example "[FirstName] [Name]"). If the reuse specs include the separator character ( usually comma ), the whole reuse specs must be enclosed by the encapsulator character ( usually double-quotes ).<BR />
 <BR />
 To save the file, click on the last tab "3) Save CSV File".</P>
 
@@ -361,7 +378,7 @@ Click the "Export" button to export data and the "Check" button to see the resul
 <A NAME="inioptions"></A>
 <H3>Options and ini file settings</H3>
 
-<p>These settings can be changed in "Options" tab or by editing the CSVBuddy.ini file located in the application's folder (label between parenthesis are the variable names to use in the ini file under the [global] section):</p><ul><li>Record editor (RecordEditor): 1 for "Full screen Editor" (legacy setting) or 2 for "Field-by-field Editor" (factory setting: 2)</li><li>Screen height correction and Screen width correction (SreenHeightCorrection and SreenWidthCorrection): number of pixels (negative values) to reduce the height or width of edit row dialog box if you choose the full screen editor (factory setting: -100 and -100)</li><li>strTextEditorExe (TextEditorExe): default text editor (factory setting: notepad.exe)</li><li>List background color (ListBackgroundColor): background color of the list zone (factory setting: D0D0D0 - grey)</li><li>List text color (ListTextColor): color of the text in list zone cells (factory setting: 000000 - black)</li><li>List grid lines (ListGrid): change to 0 to remove the lines around cells in list zone (factory setting: 1)</li><li>Skip "Ready" prompt (SkipHelpReadyToEdit): change to 1 to skip the <EM>Ready to edit</EM> message after each CSV load (factory setting: 0)</li><li>Skip "Quit" prompt (SkipConfirmQuit): change to 1 skip the quit confirm prompt (factory setting: 0)</li><li>Load code page and Save code page (CodePageLoad and CodePageSave): numeric identifier of fthe file encoding codepage (factory setting: 1252 and 1252)</li><li>Default file encoding (DefaultFileEncoding): set the default file encoding; possible values ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn (factory setting: ANSI)</li><li>Fixed width default (DefaultWidth): default width for fixed-width exports (factory setting: 16)</li><li>HTML template delimiter (TemplateDelimiter): default delimiter when exporting to HTML or Express formats (factory setting: ~)</li><li>Encapsulate all values (): change to 1 to always encapsulate values in exported file (factory setting: 0)</li></ul><p>Restart the applications after saving your changes to the .ini file.
+<p>These settings can be changed in "Options" tab or by editing the CSVBuddy.ini file located in the application's folder (label between parenthesis are the variable names to use in the ini file under the [global] section):</p><ul><li>Record editor (RecordEditor): 1 for "Full screen Editor" (legacy setting) or 2 for "Field-by-field Editor" (factory setting: 2)</li><li>Screen height correction and Screen width correction (SreenHeightCorrection and SreenWidthCorrection): number of pixels (negative values) to reduce the height or width of edit row dialog box if you choose the full screen editor (factory setting: -100 and -100)</li><li>strTextEditorExe (TextEditorExe): default text editor (factory setting: notepad.exe)</li><li>List background color (ListBackgroundColor): background color of the list zone (factory setting: D0D0D0 - grey)</li><li>List text color (ListTextColor): color of the text in list zone cells (factory setting: 000000 - black)</li><li>List grid lines (ListGrid): change to 0 to remove the lines around cells in list zone (factory setting: 1)</li><li>Skip "Ready" prompt (SkipHelpReadyToEdit): change to 1 to skip the <EM>Ready to edit</EM> message after each CSV load (factory setting: 0)</li><li>Skip "Quit" prompt (SkipConfirmQuit): change to 1 skip the quit confirm prompt (factory setting: 0)</li><li>Load code page and Save code page (CodePageLoad and CodePageSave): numeric identifier of fthe file encoding codepage (factory setting: 1252 and 1252)</li><li>Default file encoding (DefaultFileEncoding): set the default file encoding; possible values ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn (factory setting: ANSI)</li><li>Fixed width default (DefaultWidth): default width for fixed-width exports (factory setting: 16)</li><li>HTML template delimiter (TemplateDelimiter): default delimiter when exporting to HTML or Express formats (factory setting: ~)</li><li>Encapsulate all values (AlwaysEncapsulate): change to 1 to always encapsulate values in exported file (factory setting: 0)</li><li>Open and close reuse delimiters (ReuseDelimiters): characters used to delimit reuse specs; choose characters that won't be used in other fields name (factory setting: [])</li></ul><p>Restart the applications after saving your changes to the .ini file.
 <H3>Command-line parameter</H3>
 
 <p>To load a file from the command-line, add the CSV file name as the first command parameter, for example <em>c:\MyProgs\CSVBuddy.exe file2load.csv</em>. The file will be loaded with the automatically detected field delimiter and field encapsulator.</p>
