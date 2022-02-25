@@ -62,6 +62,7 @@ Help(lTab1HelpSetHeader)
 Help(L(lTab1HelpDelimiter1, lAppName))
 Help(L(lTab1HelpEncapsulator1, lAppName))
 Help(lTab1HelpMultiline1)
+Help(lDocReuseFields)
 Help(lTab1HelpReadyToEdit)
 
 H(3, lTab0Edit . " " . lDocTab)
@@ -69,7 +70,7 @@ H(3, lTab0Edit . " " . lDocTab)
 I("CSVBuddy-tab2.jpg")
 
 Help(L(lTab2HelpRename, "usually comma", "comma", "usually double-quotes"))
-Help(L(lTab2HelpSelect, "usually comma"))
+Help(L(lTab2HelpSelect, "[", "]", "usually comma", "usually double-quotes"))
 Help(L(lTab2HelpOrder, "usually comma"))
 
 H(3, lTab0Save . " " . lDocTab)
@@ -137,7 +138,7 @@ L(strMessage, objVariables*)
 	Loop
 	{
 		if InStr(strMessage, "~" . A_Index . "~")
-			StringReplace, strMessage, strMessage, ~%A_Index%~, % objVariables[A_Index]
+			StringReplace, strMessage, strMessage, ~%A_Index%~, % objVariables[A_Index], All
  		else
 			break
 	}
