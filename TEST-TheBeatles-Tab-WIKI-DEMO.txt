@@ -1,0 +1,7 @@
+{| class="wikitable" style="text-align:left;"
+|-
+! Item !! Title !! Album !! Genre
+~ROWS~|-
+| ~ROWNUMBER~ || ~str_Name~ || ~str_Album~ || ~str_Genre~
+~/ROWS~|-
+|}
