@@ -880,7 +880,7 @@ Loop
 	}
 	else
 	{
-		LV_DeleteCol(intIndexCurrent - intDeleted)
+		LV_DeleteCol(intIndexCurrent - intDeleted + intReusedField)
 		intDeleted := intDeleted + 1
 		intIndexCurrent := intIndexCurrent + 1
 	}
