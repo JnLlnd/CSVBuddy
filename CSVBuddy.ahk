@@ -23,7 +23,7 @@ Version history
 ---------------
 
 2022-02-24 BETA v2.1.9.1
-- Reuse fields allowing, when loading a file or using the Select command, to create an new field based on the content of previous fields in each row; reuse specification are in three parts: list of fields to reuse, new field format and new field name (see instructions and example https://github.com/JnLlnd/CSVBuddy/issues/53); configurable reuse opening and closing delimiters in the "Options" tab; in this release, only one reuse field can be set when loading a file or selecting fields (multiple reuse is planned for a future beta release)
+- Reuse fields allowing, when loading a file or using the Select command, to create an new field based on the content of previous fields in each row; see reuse specifications and examplea at https://github.com/JnLlnd/CSVBuddy/issues/53 ; configurable reuse opening and closing delimiters in the "Options" tab; in this release, reuse fields are not supported in Export and only one reuse field can be set when loading a file or selecting fields (export and multiple reuse are planned for future beta releases)
 
 2017-12-10 v2.1.6
 - fix bug when changing the Fixed with default in Export tab

@@ -24,8 +24,10 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
+H(3, "2022-02-25 v2.1.9.1")
+B("Reuse fields allowing, when loading a file or using the Select command, to create an new field based on the content of previous fields in each row; see reuse specifications and examples at https://github.com/JnLlnd/CSVBuddy/issues/53 `; configurable reuse opening and closing delimiters in the ""Options"" tab; in this release, reuse fields are not supported in Export and only one reuse field can be set when loading a file or selecting fields (export and multiple reuse are planned for future beta releases).")
 H(3, "2017-12-10 v2.1.6")
-B("fix bug when changing the Fixed with default in Export tab.")
+B("Fix bug when changing the Fixed with default in Export tab.")
 H(3, "2017-07-20 v2.1.5")
 B("Fix bug when processing HTML or XML multi-line content, reversing earlier change done to support non-standard CSV files created by XL causing issue (stripping some ""="") in encapsulated fields.")
 H(3, "2017-07-20 v2.1.4")
