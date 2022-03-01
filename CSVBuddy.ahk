@@ -1565,6 +1565,7 @@ else
 		Oops(lTab1CSVfilenotcreatedMax200fields)
 	for intIndex, strFieldName in objHeader
 		LV_InsertCol(intIndex, "", Trim(strFieldName))
+	LV_ModifyCol()
 	if (intRecordEditor = 1)
 		gosub, MenuAddRow
 	else
@@ -1906,7 +1907,7 @@ strGuiTitle := L(lLvEditRecordTitle, lAppName, intRowNumber, LV_GetCount())
 if (intRowNumber = 0)
 	intRowNumber := 1
 intGui1WinID := WinExist("A")
-Gui, EditRecord: New, +Resize +HwndstrEditRecordGuiHandle +MinSize240x240, %strGuiTitle%
+Gui, EditRecord:New, +Resize +HwndstrEditRecordGuiHandle +MinSize240x240, %strGuiTitle%
 Gui, EditRecord:+Owner1 ; Make the main window (Gui #1) the owner of the EditRecord window (Gui EditRecord).
 Gui, EditRecord:Add, ListView, x10 y10 h162 w480 vlvEditRecord +ReadOnly gEditRecordListViewEvents AltSubmit -LV0x10, %lLvEditRecordColumnHeader%
 GuiControl, % (blnListGrid ? "+Grid" : "") . " Background" . strListBackgroundColor . " c" . strListTextColor, lvEditRecord
