@@ -818,20 +818,20 @@ if !StrLen(strSelectEscaped)
 objCurrentHeader := ObjCSV_ReturnDSVObjectArray(strCurrentHeader, strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
 objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strSelectEscaped), strCurrentFieldDelimiter, strCurrentFieldEncapsulator, true, strReuseDelimiters)
 intPosPrevious := 0
-intReusedField := 0
-intReuseFieldPosition := 0
+intReusedFields := 0
+objReuseSpecs := Object()
+objReusePositions := Object()
 for intKey, strVal in objNewHeader
 {
 	intPosThisOne := PositionInArray(strVal, objCurrentHeader)
 	if SubStr(strVal, 1, 1) = StrSplit(strReuseDelimiters)[1] ; this is a reuse field
 	{
-		strReuseFieldSpecs := strVal
-		intReuseFieldPosition := intKey
-		intPosThisOne := 0 ; this field is not as is in the current header
-		ObjCSV_BuildReuseField(strReuseDelimiters, strReuseFieldSpecs, [], [], strNewFieldName) ; return the new field name in strReuseFieldSpecs
+		ObjCSV_BuildReuseField(strReuseDelimiters, strVal, [], [], strNewFieldName) ; return the new field name in strReuseFieldSpecs
+		objReuseSpecs[strNewFieldName] := strVal
+		objReusePositions[strNewFieldName] := intKey
 		objNewHeader[intKey] := strNewFieldName
 		LV_InsertCol(intKey, , objNewHeader[intKey])
-		intReusedField++
+		intReusedFields++
 	}
 	else if !(intPosThisOne)
 	{
@@ -845,8 +845,9 @@ for intKey, strVal in objNewHeader
 	}
 	intPosPrevious := intPosThisOne
 }
-if (intReusedField)
+if (intReusedFields)
 {
+	intReusedFields := 0
 	GuiControl, Focus, lvData
 	Loop, % LV_GetCount()
 	{
@@ -857,8 +858,12 @@ if (intReusedField)
 			LV_GetText(strCell, intRow, A_Index)
 			objRow[objNewHeader[A_Index]] := strCell
 		}
-		strReuseField := ObjCSV_BuildReuseField(strReuseDelimiters, strReuseFieldSpecs, objRow, objNewHeader, strNewFieldName)
-		LV_Modify(A_Index, "Col" . intReuseFieldPosition, strReuseField)
+		for strNewFieldName, strSpecs in objReuseSpecs
+		{
+			strReuseField := ObjCSV_BuildReuseField(strReuseDelimiters, strSpecs, objRow, objNewHeader, strNewFieldName)
+			objRow[strNewFieldName] := strReuseField
+			LV_Modify(intRow, "Col" . objReusePositions[strNewFieldName], strReuseField)
+		}
 	}
 	LV_ModifyCol()
 }
@@ -869,10 +874,10 @@ intIndexNew := 1
 intDeleted := 0
 Loop
 {
-	if (intReuseFieldPosition = A_Index)
+	if (objReusePositions[objNewHeader[A_Index]] = A_Index)
 	{
-		; intIndexCurrent := intIndexCurrent + 1
 		intIndexNew := intIndexNew + 1
+		intReusedFields++
 	}
 	else if (objCurrentHeader[intIndexCurrent] = objNewHeader[intIndexNew])
 	{
@@ -881,11 +886,10 @@ Loop
 	}
 	else
 	{
-		LV_DeleteCol(intIndexCurrent - intDeleted + intReusedField)
+		LV_DeleteCol(intIndexCurrent - intDeleted + intReusedFields)
 		intDeleted := intDeleted + 1
 		intIndexCurrent := intIndexCurrent + 1
 	}
-	; if (intIndexCurrent > (intMaxCurrent + intReusedField))
 	if (intIndexCurrent > intMaxCurrent)
 		break
 }
