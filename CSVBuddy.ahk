@@ -22,6 +22,12 @@ limitations under the License.
 Version history
 ---------------
 
+2022-03-02 BETA v2.1.9.2
+- support multiple reuse in select command
+- known limitation: when adding reuse fields, all existing fields must be present in the Select list (abort select command if required)
+- update the text of Select help button
+- use the correct CSV Buddy icon in the executable files
+
 2022-02-24 BETA v2.1.9.1
 - Reuse fields allowing, when loading a file or using the Select command, to create an new field based on the content of previous fields in each row; see reuse specifications and examples at https://github.com/JnLlnd/CSVBuddy/issues/53 ; configurable reuse opening and closing delimiters in the "Options" tab; in this release, only one reuse field can be set when loading a file or selecting fields (multiple reuses is planned for future beta releases)
 
@@ -203,7 +209,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 2.1.9.1
+;@Ahk2Exe-SetVersion 2.1.9.2
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 

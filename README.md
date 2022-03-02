@@ -1,5 +1,5 @@
 ﻿
-# CSV Buddy (v2.1.9.1) - Read me
+# CSV Buddy (v2.1.9.2) - Read me
 
 
 CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Unicode ready. Freeware.
@@ -19,9 +19,17 @@ First official release: 2013-11-30
 ## History
 
 
+### 2022-03-01 v2.1.9.2
+
+* Support multiple reuse in select command
+* Known limitation: when adding reuse fields, all existing fields must be present in the Select list (abort select command if required)
+
 ### 2022-02-25 v2.1.9.1
 
-* Reuse fields allowing, when loading a file or using the Select command, to create an new field based on the content of previous fields in each row; see reuse specifications and examples at https://github.com/JnLlnd/CSVBuddy/issues/53 ; configurable reuse opening and closing delimiters in the "Options" tab; in this release, reuse fields are not supported in Export and only one reuse field can be set when loading a file or selecting fields (export and multiple reuse are planned for future beta releases).
+* Reuse fields allowing, when loading a file or using the Select command, to create an new field based on the content of previous fields in each row
+* See reuse specifications and examples at https://github.com/JnLlnd/CSVBuddy/issues/53
+* Configurable reuse opening and closing delimiters in the "Options" tab
+* In this release, reuse fields are not supported in Export and only one reuse field can be set when loading a file or selecting fields (multiple reuse are planned for future beta releases).
 
 ### 2017-12-10 v2.1.6
 
