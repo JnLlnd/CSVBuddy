@@ -816,16 +816,28 @@ if !StrLen(strSelectEscaped)
 }
 ; ObjCSV_ReturnDSVObjectArray(strCurrentDSVLine, strDelimiter = ",", strEncapsulator = """")
 objCurrentHeader := ObjCSV_ReturnDSVObjectArray(strCurrentHeader, strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
+objCurrentHeaderPositionByName := Object()
+for intPositionInArray, strFieldName in objCurrentHeader
+	objCurrentHeaderPositionByName[strFieldName] := intPositionInArray
 objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strSelectEscaped), strCurrentFieldDelimiter, strCurrentFieldEncapsulator, true, strReuseDelimiters)
+objNewHeaderPositionByName := Object()
+for intPositionInArray, strFieldName in objNewHeader
+	objNewHeaderPositionByName[strFieldName] := intPositionInArray
 intPosPrevious := 0
 intReusedFields := 0
 objReuseSpecs := Object()
 objReusePositions := Object()
 for intKey, strVal in objNewHeader
 {
-	intPosThisOne := PositionInArray(strVal, objCurrentHeader)
 	if SubStr(strVal, 1, 1) = StrSplit(strReuseDelimiters)[1] ; this is a reuse field
 	{
+		; check that all fields in objNewHeader are present in objCurrentHeader
+		for intPositionInArray, strFieldName in objCurrentHeader
+			if !objNewHeaderPositionByName.HasKey(strFieldName)
+			{
+				Oops(lTab2SelectFieldMissingInReuse, strFieldName)
+				return
+			}
 		ObjCSV_BuildReuseField(strReuseDelimiters, strVal, [], [], strNewFieldName) ; return the new field name in strReuseFieldSpecs
 		objReuseSpecs[strNewFieldName] := strVal
 		objReusePositions[strNewFieldName] := intKey
@@ -833,17 +845,17 @@ for intKey, strVal in objNewHeader
 		LV_InsertCol(intKey, , objNewHeader[intKey])
 		intReusedFields++
 	}
-	else if !(intPosThisOne)
+	else if !objCurrentHeaderPositionByName.HasKey(strVal)
 	{
 		Oops(lTab2SelectFieldMissing, strVal)
 		return
 	}
-	else if (intPosThisOne <= intPosPrevious)
+	else if (objCurrentHeaderPositionByName[strVal] <= intPosPrevious)
 	{
 		Oops(lTab2SelectBadOrder)
 		return
 	}
-	intPosPrevious := intPosThisOne
+	intPosPrevious := objCurrentHeaderPositionByName[strVal]
 }
 if (intReusedFields)
 {
@@ -925,15 +937,16 @@ if !LV_GetCount()
 }
 ; ObjCSV_ReturnDSVObjectArray(strCurrentDSVLine, strDelimiter = ",", strEncapsulator = """")
 objCurrentHeader := ObjCSV_ReturnDSVObjectArray(strCurrentHeader, strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
+objCurrentHeaderPositionByName := Object()
+for intPositionInArray, strFieldName in objCurrentHeader
+	objCurrentHeaderPositionByName[strFieldName] := intPositionInArray
 objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strOrderEscaped), strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
 for intKey, strVal in objNewHeader
-{
-	if !PositionInArray(strVal, objCurrentHeader)
+	if !objCurrentHeaderPositionByName.HasKey(strVal)
 	{
 		Oops(lTab2OrderFieldMissing, strVal)
 		return
 	}
-}
 LV_Modify(0, "-Select") ; Make sure all rows will be transfered to objNewCollection
 ; ObjCSV_ListView2Collection([strGuiID = "", strListViewID = "", strFieldOrder = "", strFieldDelimiter = ","
 ;	, strEncapsulator = """", intProgressType = 0, strProgressText = ""])
@@ -2766,16 +2779,6 @@ NewDelimiterOrEncapsulatorOK(strChecked)
 		If InStr(objCurrentHeader[A_Index], strChecked)
 			return false
 	return true
-}
-
-
-
-PositionInArray(strChecked, objArray)
-{
-	Loop, % objArray.MaxIndex()
-		If (objArray[A_Index] = strChecked)
-			return A_Index
-	return 0
 }
 
 
