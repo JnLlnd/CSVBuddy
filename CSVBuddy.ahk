@@ -26,6 +26,7 @@ Version history
 - support multiple reuse in select command
 - known limitation: when adding reuse fields, all existing fields must be present in the Select list (abort select command if required)
 - update the text of Select help button
+- fix bug when reuse field was inserted in the header (or Select command) before other fields, content of the field after the reuse field was not loaded
 - use the correct CSV Buddy icon in the executable files
 
 2022-02-24 BETA v2.1.9.1
