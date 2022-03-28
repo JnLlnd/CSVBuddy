@@ -22,6 +22,9 @@ limitations under the License.
 Version history
 ---------------
 
+2022-03-28 BETA v2.1.9.3
+- #####
+
 2022-03-02 BETA v2.1.9.2
 - support multiple reuse in select command
 - known limitation: when adding reuse fields, all existing fields must be present in the Select list (abort select command if required)
@@ -703,6 +706,8 @@ if (ErrorLevel)
 {
 	if (ErrorLevel = 3)
 		strError := L(lTab1CSVfilenotloadedNoUnusedRepl)
+	else if (ErrorLevel = 4) ; reuse field syntax invalid
+		strError := L(lTab2ReuseInvalid, strCurrentHeader)
 	else
 	{
 		strError := L(lTab1CSVfilenotloadedTooLarge, intActualSize)
@@ -845,7 +850,15 @@ for intKey, strVal in objNewHeader
 				Oops(lTab2SelectFieldMissingInReuse, strFieldName)
 				return
 			}
-		ObjCSV_BuildReuseField(strReuseDelimiters, strVal, [], [], strNewFieldName) ; return the new field name in strReuseFieldSpecs
+		if ObjCSV_ReuseSpecsError(strReuseDelimiters, strVal)
+			strNewFieldName := ""
+		else
+			ObjCSV_BuildReuseField(strReuseDelimiters, strVal, [], [], 0, strNewFieldName) ; return the new field name in strNewFieldName
+		if !StrLen(strNewFieldName)
+		{
+			Oops(lTab2ReuseInvalid, strVal)
+			return
+		}
 		objReuseSpecs[strNewFieldName] := strVal
 		objReusePositions[strNewFieldName] := intKey
 		objNewHeader[intKey] := strNewFieldName
@@ -879,7 +892,7 @@ if (intReusedFields)
 		}
 		for strNewFieldName, strSpecs in objReuseSpecs
 		{
-			strReuseField := ObjCSV_BuildReuseField(strReuseDelimiters, strSpecs, objRow, objNewHeader, strNewFieldName)
+			strReuseField := ObjCSV_BuildReuseField(strReuseDelimiters, strSpecs, objRow, objNewHeader, intRow, strNewFieldName)
 			objRow[strNewFieldName] := strReuseField
 			LV_Modify(intRow, "Col" . objReusePositions[strNewFieldName], strReuseField)
 		}
