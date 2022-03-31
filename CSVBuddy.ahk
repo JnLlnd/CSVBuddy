@@ -220,9 +220,15 @@ SetWorkingDir, %A_ScriptDir%
 
 ; --------------------- GLOBAL AND DEFAULT VALUES --------------------------
 
-global intCurrentSortColumn
 
 global strAppVersionLong := "v" . lAppVersion . " BETA"
+global intCurrentSortColumn
+global strFontNameLabels := "Microsoft Sans Serif"
+global strFontSizeLabels := 11
+global strFontNameEdit := "Courier New"
+global strFontSizeEdit := 10
+global strFontNameList := "Microsoft Sans Serif"
+global strFontSizeList := 10
 
 strListBackgroundColor := "D0D0D0"
 strListTextColor := "000000"
@@ -237,6 +243,12 @@ IfNotExist, %strIniFile%
 	FileAppend,
 		(LTrim Join`r`n
 			[global]
+			FontNameLabels=%strFontNameLabels%
+			FontSizeLabels=%strFontSizeLabels%
+			FontNameEdit=%strFontNameEdit%
+			FontSizeEdit=%strFontSizeEdit%
+			FontNameList=%strFontNameList%
+			FontSizeList=%strFontSizeList%
 			RecordEditor=2
 			SreenHeightCorrection=-100
 			SreenWidthCorrection=-100
@@ -257,6 +269,12 @@ IfNotExist, %strIniFile%
 		)
 		, %strIniFile%
 
+IniRead, strFontNameLabels, %strIniFile%, global, FontNameLabels, %strFontNameLabels%
+IniRead, strFontSizeLabels, %strIniFile%, global, FontSizeLabels, %strFontSizeLabels%
+IniRead, strFontNameEdit, %strIniFile%, global, FontNameEdit, %strFontNameEdit%
+IniRead, strFontSizeEdit, %strIniFile%, global, FontSizeEdit, %strFontSizeEdit%
+IniRead, strFontNameList, %strIniFile%, global, FontNameList, %strFontNameList%
+IniRead, strFontSizeList, %strIniFile%, global, FontSizeList, %strFontSizeList%
 IniRead, strListBackgroundColor, %strIniFile%, global, ListBackgroundColor, %strListBackgroundColor%
 IniRead, strListTextColor, %strIniFile%, global, ListTextColor, %strListTextColor%
 IniRead, blnListGrid, %strIniFile%, global, ListGrid, %blnListGrid%
@@ -288,148 +306,318 @@ intProgressType := -2 ; Status Bar, part 2
 
 ; --------------------- GUI1 --------------------------
 
-Gui, 1:New, +Resize, % L(lAppName)
-
-Gui, 1:Font, s12 w700, Verdana
-Gui, 1:Add, Text, x10, % L(lAppName)
+Gui, 1:New, +Resize, % L(lAppName . " " . strAppVersionLong)
 
 Gui, 1:Font, s10 w700, Verdana
-Gui, 1:Add, Tab2, w950 r4 vtabCSVBuddy gChangedTabCSVBuddy, % L(lTab0List)
+Gui, 1:Add, Tab3, vtabCSVBuddy gChangedTabCSVBuddy, % L(lTab0List)
 Gui, 1:Font
 
+intButtonH := GetEditHeight()
+strZoomChar := Chr(0x2315) ; Unicode chars: https://www.fileformat.info/info/unicode/category/So/list.htm
+
+; global positions
+intCol1X := 20 ; left margin inside tab
+intButtonSingleCharW := GetWidestControl("Button", lTab0QuestionMark, strZoomChar)
+intEditSingleCharW := GetWidestControl("Edit", "W") ; use W largest char
+intEditSmallW := GetWidestControl("Edit", "WW")
+intDropDownEncoding := GetWidestControl("Text", "UTF-16-RAW") + 20 ; 20 for dropdown arrow
+intSpaceBewtween := 10
+intTabMargin := 25
+
+; tab 1a positions
+intTab1aCol1W := GetWidestControl("Text", lTab1CSVFileToLoad, lTab1CSVFileHeader)
+intTab1aCol2X := intCol1X + intTab1aCol1W + intSpaceBewtween
+intTab1aCol4W := GetWidestControl("Button", lTab1Select, lTab1PreviewFile, lTab1Load, lTab1Create)
+; values x to substract from gui width
+intTab1aCol4X := intTab1aCol4W + intSpaceBewtween + intTabMargin
+intTab1aCol3X := intTab1aCol4X + intButtonSingleCharW + intSpaceBewtween
+intTab1aEditW := intTab1aCol2X + intTab1aCol3X
+
 Gui, 1:Tab, 1
-Gui, 1:Add, Text,			y+10	x11		vlblCSVFileToLoad w85 right, % L(lTab1CSVFileToLoad)
-Gui, 1:Add, Edit,			yp		x100	vstrFileToLoad gChangedFileToLoad ; disabled
-Gui, 1:Add, Button,			yp		x+5		vbtnHelpFileToLoad gButtonHelpFileToLoad, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,			yp		x+5		vbtnSelectFileToLoad gButtonSelectFileToLoad w45 default, % L(lTab1Select)
-Gui, 1:Add, Text,			y+10	x11 	vlblHeader w85 right, % L(lTab1CSVFileHeader)
-Gui, 1:Add, Edit,			yp		x100	vstrFileHeaderEscaped disabled
-Gui, 1:Add, Button,			yp		x+5		vbtnHelpHeader gButtonHelpHeader, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,			yp		x+5		vbtnPreviewFile gButtonPreviewFile w45 hidden, % L(lTab1PreviewFile)
-Gui, 1:Add, Radio,			y+10	x20		vradGetHeader gClickRadGetHeader checked, % L(lTab1Getheaderfromfile)
-Gui, 1:Add, Radio,			yp		x+5		vradSetHeader gClickRadSetHeader, % L(lTab1Setheader)
-Gui, 1:Add, Button,			yp		x+0		vbtnHelpSetHeader gButtonHelpSetHeader, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,			xp		x+20	vlblFieldDelimiter1, % L(lTab1Fielddelimiter)
-Gui, 1:Add, Edit,			yp		x+5		vstrFieldDelimiter1 w20 limit1 center, `, ; gChangedFieldDelimiter1 unused
-Gui, 1:Add, Button,			yp		x+5		vbtnHelpFieldDelimiter1 gButtonHelpFieldDelimiter1, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,			yp		x+20	vlblFieldEncapsulator1, % L(lTab1Fieldencapsulator)
-Gui, 1:Add, Edit,			yp		x+5		vstrFieldEncapsulator1 w20 limit1 center, `" ; gChangedFieldEncapsulator1 unused
-Gui, 1:Add, Button,			yp		x+5		vbtnHelpEncapsulator1 gButtonHelpEncapsulator1, % L(lTab0QuestionMark)
-Gui, 1:Add, Checkbox,		yp		x+20	vblnMultiline1 gChangedMultiline1, % L(lTab1Multilinefields)
-Gui, 1:Add, Button,			yp		x+0		vbtnHelpMultiline1 gButtonHelpMultiline1, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,			yp		x+5		vlblEndoflineReplacement1 hidden, % L(lTab1EOLreplacement)
-Gui, 1:Add, Edit,			yp		x+5		vstrEndoflineReplacement1 w30 center hidden
-Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding1 w85, %strDefaultFileEncoding%
-Gui, 1:Add, Button,			yp		x+7		vbtnHelpFileEncoding1 gButtonHelpFileEncoding1, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,			yp		x+5		vbtnLoadFile gButtonLoadFile w45 hidden, % L(lTab1Load)
-Gui, 1:Add, Button,			yp		xp		vbtnCreateFile gMenuCreateNewFile w45, % L(lTab1Create)
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab1aCol1W% vlblCSVFileToLoad right, % L(lTab1CSVFileToLoad)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab1aCol2X% vstrFileToLoad gChangedFileToLoad ; disabled
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpFileToLoad gButtonHelpFileToLoad, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+5 w%intTab1aCol4W% h%intButtonH% vbtnSelectFileToLoad gButtonSelectFileToLoad default, % L(lTab1Select)
+
+Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab1aCol1W% vlblHeader right, % L(lTab1CSVFileHeader)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab1aCol2X% w%intTab1aCol1W% vstrFileHeaderEscaped disabled
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpHeader gButtonHelpHeader, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+5 w%intTab1aCol4W% h%intButtonH% vbtnPreviewFile gButtonPreviewFile hidden, % L(lTab1PreviewFile)
+
+; tab 1b positions
+intTab1bCol1W := GetWidestControl("Radio", lTab1Getheaderfromfile, lTab1Setheader)
+intTab1bCol2X := intCol1X + intTab1bCol1W
+intTab1bCol3W := GetWidestControl("Text", lTab1Fielddelimiter, lTab1Fieldencapsulator)
+intTab1bCol3X := intTab1bCol2X + intButtonSingleCharW + (2 * intSpaceBewtween)
+intTab1bCol4X := intTab1bCol3X + intTab1bCol3W + intEditSingleCharW + intSpaceBewtween + intButtonSingleCharW + (2 * intSpaceBewtween)
+intTab1bCol5aW := GetWidestControl("Checkbox", lTab1Multilinefields)
+intTab1bCol5bW := GetWidestControl("Text", lTab1EOLreplacement)
+intTab1bCol5W := (intTab1bCol5aW > intTab1bCol5bW ? intTab1bCol5aW : intTab1bCol5bW)
+intTab1bCol5X := intTab1bCol4X + intTab1bCol5W + intSpaceBewtween
+intTab1bCol6X := intTab1bCol5X + intEditSmallW + (1 * intSpaceBewtween)
+intTab1bCol7X := intTab1bCol6X + intDropDownEncoding + intSpaceBewtween
+
+Gui, 1:Add, Radio, y+20 x%intCol1X% vradGetHeader gClickRadGetHeader checked section, % L(lTab1Getheaderfromfile)
+Gui, 1:Add, Radio, y+10 x%intCol1X% vradSetHeader gClickRadSetHeader, % L(lTab1Setheader)
+Gui, 1:Add, Button, ys x%intTab1bCol2X% h%intButtonH% vbtnHelpSetHeader gButtonHelpSetHeader, % L(lTab0QuestionMark)
+Gui, 1:Add, Text, ys x%intTab1bCol3X% w%intTab1bCol3W% right vlblFieldDelimiter1, % L(lTab1Fielddelimiter)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x+5 w%intEditSingleCharW% vstrFieldDelimiter1 limit1 center, `, ; gChangedFieldDelimiter1 unused
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 %intButtonSingleCharW% h%intButtonH% vbtnHelpFieldDelimiter1 gButtonHelpFieldDelimiter1, % L(lTab0QuestionMark)
+Gui, 1:Add, Text, y+5 x%intTab1bCol3X% w%intTab1bCol3W% right vlblFieldEncapsulator1, % L(lTab1Fieldencapsulator)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x+5 w%intEditSingleCharW% vstrFieldEncapsulator1 limit1 center, `" ; gChangedFieldEncapsulator1 unused
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 %intButtonSingleCharW% h%intButtonH% vbtnHelpEncapsulator1 gButtonHelpEncapsulator1, % L(lTab0QuestionMark)
+Gui, 1:Add, Checkbox, ys x%intTab1bCol4X% w%intTab1bCol5W% vblnMultiline1 gChangedMultiline1, % L(lTab1Multilinefields)
+Gui, 1:Add, Button, yp x%intTab1bCol5X% h%intButtonH% vbtnHelpMultiline1 gButtonHelpMultiline1, % L(lTab0QuestionMark)
+Gui, 1:Add, Text, y+10 x%intTab1bCol4X% w%intTab1bCol5W% vlblEndoflineReplacement1 hidden, % L(lTab1EOLreplacement)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab1bCol5X% w%intEditSmallW% vstrEndoflineReplacement1 center hidden
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, DropDownList, ys x%intTab1bCol6X% w%intDropDownEncoding% vstrFileEncoding1, %strDefaultFileEncoding%
+Gui, 1:Add, Button, yp x%intTab1bCol7X% w%intButtonSingleCharW% h%intButtonH% vbtnHelpFileEncoding1 gButtonHelpFileEncoding1, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+5 w%intTab1aCol4W% h%intButtonH% vbtnLoadFile gButtonLoadFile hidden, % L(lTab1Load)
+Gui, 1:Add, Button, yp xp w%intTab1aCol4W% h%intButtonH% vbtnCreateFile gMenuCreateNewFile, % L(lTab1Create)
+
+; tab 2 positions
+intTab2Col1W := GetWidestControl("Text", lTab2Renamefields, lTab2Selectfields, lTab2Orderfields)
+intTab2Col2X := intCol1X + intTab2Col1W + intSpaceBewtween
+intTab2Col5W := GetWidestControl("Button", lTab2Rename, lTab2Select, lTab2Order)
+; values x to substract from gui width
+intTab2Col5X := intTab2Col5W + intSpaceBewtween + intTabMargin
+intTab2Col4X := intTab2Col5X + intButtonSingleCharW + intSpaceBewtween
+intTab2Col3X := intTab2Col4X + intButtonSingleCharW + intSpaceBewtween
+intTab2EditW := intTab2Col2X + intTab2Col3X
 
 Gui, 1:Tab, 2
-Gui, 1:Add, Text,		y+10	x11		vlblRenameFields w85 right, % L(lTab2Renamefields)
-Gui, 1:Add, Edit,		yp		x100	vstrRenameEscaped
-Gui, 1:Add, Button,		yp		x+0		vbtnSetRename gButtonSetRename w50, % L(lTab2Rename)
-Gui, 1:Add, Button,		yp		x+5		vbtnHelpRename gButtonHelpRename, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,		y+10	x11		vlblSelectFields w85 right, % L(lTab2Selectfields)
-Gui, 1:Add, Edit,		yp		x100	vstrSelectEscaped
-Gui, 1:Add, Button,		yp		x+0		vbtnSetSelect gButtonSetSelect w50, % L(lTab2Select)
-Gui, 1:Add, Button,		yp		x+5		vbtnHelpSelect gButtonHelpSelect, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,		y+10	x11		vlblOrderFields w85 right, % L(lTab2Orderfields)
-Gui, 1:Add, Edit,		yp		x100	vstrOrderEscaped
-Gui, 1:Add, Button,		yp		x+0		vbtnSetOrder gButtonSetOrder w50, % L(lTab2Order)
-Gui, 1:Add, Button,		yp		x+5		vbtnHelpOrder gButtonHelpOrder, % L(lTab0QuestionMark)
+Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblRenameFields right, % L(lTab2Renamefields)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrRenameEscaped
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnZoomRename gButtonZoomRename, %strZoomChar%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpRename gButtonHelpRename, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetRename gButtonSetRename, % L(lTab2Rename)
+Gui, 1:Add, Text, y+20 x%intCol1X% w%intTab2Col1W% vlblSelectFields right, % L(lTab2Selectfields)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrSelectEscaped
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnZoomSelect gButtonZoomSelect, %strZoomChar%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpSelect gButtonHelpSelect, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetSelect gButtonSetSelect, % L(lTab2Select)
+Gui, 1:Add, Text, y+20 x%intCol1X% w%intTab2Col1W% vlblOrderFields right, % L(lTab2Orderfields)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrOrderEscaped
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnZoomOrder gButtonZoomOrder, %strZoomChar%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpOrder gButtonHelpOrder, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetOrder gButtonSetOrder, % L(lTab2Order)
+
+; tab 3a positions
+intTab3aCol1W := GetWidestControl("Text", lTab3CSVfiletosave)
+intTab3aCol2X := intCol1X + intTab3aCol1W + intSpaceBewtween
+intTab3aCol4W := GetWidestControl("Button", lTab3Select, lTab3Save, lTab3Check)
+; values x to substract from gui width
+intTab3aCol4X := intTab3aCol4W + intSpaceBewtween + intTabMargin
+intTab3aCol3X := intTab3aCol4X + intButtonSingleCharW + intSpaceBewtween
+intTab3aEditW := intTab3aCol2X + intTab3aCol3X
 
 Gui, 1:Tab, 3
-Gui, 1:Add, Text,			y+10	x11		vlblCSVFileToSave w85 right, % L(lTab3CSVfiletosave)
-Gui, 1:Add, Edit,			yp		x100	vstrFileToSave gChangedFileToSave
-Gui, 1:Add, Button,			yp		x+5		vbtnHelpFileToSave gButtonHelpFileToSave, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,			yp		x+5		vbtnSelectFileToSave gButtonSelectFileToSave w45 default, % L(lTab3Select)
-Gui, 1:Add, Text,			y+10	x100	vlblFieldDelimiter3, % L(lTab3Fielddelimiter)
-Gui, 1:Add, Edit,			yp		x200	vstrFieldDelimiter3 gChangedFieldDelimiter3 w20 limit1 center, `, 
-Gui, 1:Add, Button,			yp		x+5		vbtnHelpFieldDelimiter3 gButtonHelpFieldDelimiter3, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,			y+10	x100	vlblFieldEncapsulator3, % L(lTab3Fieldencapsulator)
-Gui, 1:Add, Edit,			yp		x200	vstrFieldEncapsulator3 gChangedFieldEncapsulator3 w20 limit1 center, `"
-Gui, 1:Add, Button,			yp		x+5		vbtnHelpEncapsulator3 gButtonHelpEncapsulator3, % L(lTab0QuestionMark)
-Gui, 1:Add, Radio,			y100	x300	vradSaveWithHeader checked, % L(lTab3Savewithheader)
-Gui, 1:Add, Radio,			y+10	x300	vradSaveNoHeader, % L(lTab3Savewithoutheader)
-Gui, 1:Add, Button,			y100	x450	vbtnHelpSaveHeader gButtonHelpSaveHeader, % L(lTab0QuestionMark)
-Gui, 1:Add, Radio,			y100	x500	vradSaveMultiline gClickRadSaveMultiline checked, % L(lTab3Savemultiline)
-Gui, 1:Add, Radio,			y+10	x500	vradSaveSingleline gClickRadSaveSingleline, % L(lTab3Savesingleline)
-Gui, 1:Add, Button,			y100	x620	vbtnHelpMultiline gButtonHelpSaveMultiline, % L(lTab0QuestionMark)
-Gui, 1:Add, DropDownList,	yp		x+20	vstrFileEncoding3 w85, % L(lFileEncodings, strCodePageSave, lFileEncodingsSelect)
-Gui, 1:Add, Button,			yp		x+7		vbtnHelpFileEncoding3 gButtonHelpFileEncoding3, % L(lTab0QuestionMark)
-Gui, 1:Add, Text,			y+25	x500	vlblEndoflineReplacement3 hidden, % L(lTab3Endoflinereplacement)
-Gui, 1:Add, Edit,			yp		x620	vstrEndoflineReplacement3 hidden w50 center, % chr(182)
-Gui, 1:Add, Button,			y105	x+5		vbtnSaveFile gButtonSaveFile w45 hidden, % L(lTab3Save)
-Gui, 1:Add, Button,			y137	x+5		vbtnCheckFile hidden w45 gButtonCheckFile, % L(lTab3Check)
+Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab3aCol1W% vlblCSVFileToSave right, % L(lTab3CSVfiletosave)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab3aCol2X% vstrFileToSave gChangedFileToSave
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 h%intButtonH% w%intButtonSingleCharW% vbtnHelpFileToSave gButtonHelpFileToSave, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+5 w%intTab3aCol4W% h%intButtonH% w%intTab3aCol4W% vbtnSelectFileToSave gButtonSelectFileToSave default, % L(lTab3Select)
+
+; tab 3b positions
+intTab3bCol1W := GetWidestControl("Text", lTab3Fielddelimiter, lTab3Fieldencapsulator)
+intTab3bCol2X := intCol1X + intTab3bCol1W + intSpaceBewtween
+intTab3bCol3X := intTab3bCol2X + intEditSingleCharW + intSpaceBewtween
+intTab3bCol4X := intTab3bCol3X + intButtonSingleCharW + (2 * intSpaceBewtween)
+intTab3bCol4W := GetWidestControl("Radio", lTab3Savewithheader, lTab3Savewithoutheader)
+intTab3bCol5X := intTab3bCol4X + intTab3bCol4W
+intTab3bCol6X := intTab3bCol5X + intButtonSingleCharW + (2 * intSpaceBewtween)
+intTab3bCol6aW := GetWidestControl("Radio", lTab3Savemultiline, lTab3Savesingleline)
+intTab3bCol6bW := GetWidestControl("Text", lTab3Endoflinereplacement)
+intTab3bCol6W := (intTab3bCol6aW > intTab3bCol6bW ? intTab3bCol6aW : intTab3bCol6bW)
+intTab3bCol7X := intTab3bCol6X + intTab3bCol6W
+intTab3bCol8X := intTab3bCol7X + intEditSmallW + intSpaceBewtween
+
+Gui, 1:Add, Text, y+20 x%intCol1X% w%intTab3bCol1W% section vlblFieldDelimiter3, % L(lTab3Fielddelimiter)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab3bCol2X% w%intEditSingleCharW% vstrFieldDelimiter3 gChangedFieldDelimiter3 limit1 center, `, 
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x%intTab3bCol3X% h%intButtonH% w%intButtonSingleCharW% vbtnHelpFieldDelimiter3 gButtonHelpFieldDelimiter3, % L(lTab0QuestionMark)
+Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab3bCol1W% vlblFieldEncapsulator3, % L(lTab3Fieldencapsulator)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab3bCol2X% w%intEditSingleCharW% vstrFieldEncapsulator3 gChangedFieldEncapsulator3 limit1 center, `"
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x%intTab3bCol3X% h%intButtonH% w%intButtonSingleCharW% vbtnHelpEncapsulator3 gButtonHelpEncapsulator3, % L(lTab0QuestionMark)
+Gui, 1:Add, Radio, ys x%intTab3bCol4X% w%intTab3bCol4W% vradSaveWithHeader checked, % L(lTab3Savewithheader)
+Gui, 1:Add, Radio, y+10 x%intTab3bCol4X% w%intTab3bCol4W% vradSaveNoHeader, % L(lTab3Savewithoutheader)
+Gui, 1:Add, Button, ys x%intTab3bCol5X% h%intButtonH% w%intButtonSingleCharW% vbtnHelpSaveHeader gButtonHelpSaveHeader, % L(lTab0QuestionMark)
+Gui, 1:Add, Radio, ys x%intTab3bCol6X% w%intTab3bCol6W% vradSaveMultiline gClickRadSaveMultiline checked, % L(lTab3Savemultiline)
+Gui, 1:Add, Radio, y+10 x%intTab3bCol6X% w%intTab3bCol6W% vradSaveSingleline gClickRadSaveSingleline, % L(lTab3Savesingleline)
+Gui, 1:Add, Text, y+10 x%intTab3bCol6X% w%intTab3bCol6W% vlblEndoflineReplacement3 hidden, % L(lTab3Endoflinereplacement)
+GuiControlGet, aaEolReplacementPos, 1:Pos, lblEndoflineReplacement3
+intEolReplacementY := aaEolReplacementPosY
+Gui, 1:Add, Button, ys x%intTab3bCol7X% w%intButtonSingleCharW% h%intButtonH% vbtnHelpMultiline gButtonHelpSaveMultiline, % L(lTab0QuestionMark)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, y%intEolReplacementY% x%intTab3bCol7X% w%intEditSmallW% vstrEndoflineReplacement3 hidden center, % chr(182)
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, DropDownList, ys x%intTab3bCol8X% w%intDropDownEncoding% vstrFileEncoding3, % L(lFileEncodings, strCodePageSave, lFileEncodingsSelect)
+Gui, 1:Add, Button, yp x+7 h%intButtonH% w%intButtonSingleCharW% vbtnHelpFileEncoding3 gButtonHelpFileEncoding3, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, ys x+5 w%intTab3aCol4W% h%intButtonH% vbtnSaveFile gButtonSaveFile hidden, % L(lTab3Save)
+Gui, 1:Add, Button, y+10 x+5 w%intTab3aCol4W% h%intButtonH% vbtnCheckFile hidden gButtonCheckFile, % L(lTab3Check)
+
+; tab 4a positions
+intTab4aCol1W := GetWidestControl("Text", lTab4Exportdatatofile, lTab4Exportformat, lTab4Fieldswidth, lTab4HTMLtemplate, lTab4Expresstemplate)
+intTab4aCol2X := intCol1X + intTab4aCol1W + intSpaceBewtween
+intTab4aCol4W := GetWidestControl("Button", lTab3Select, lTab4Export, lTab4Check)
+; values x to substract from gui width
+intTab4aCol4X := intTab4aCol4W + intSpaceBewtween + intTabMargin
+intTab4aCol3X := intTab4aCol4X + intButtonSingleCharW + intSpaceBewtween
+intTab4aEditW := intTab4aCol2X + intTab4aCol3X
 
 Gui, 1:Tab, 4
-Gui, 1:Add, Text,		y+10	x11		vlblCSVFileToExport w85 right, % L(lTab4Exportdatatofile)
-Gui, 1:Add, Edit,		yp		x100	vstrFileToExport gChangedFileToExport
-Gui, 1:Add, Button,		yp		x+5		vbtnHelpFileToExport gButtonHelpFileToExport, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,		yp		x+5		vbtnSelectFileToExport gButtonSelectFileToExport w45 default, % L(lTab4Select)
-Gui, 1:Add, Text,		y+10	x11		vlblCSVExportFormat w85 right, % L(lTab4Exportformat)
-Gui, 1:Add, Radio,		yp		x100	vradFixed gClickRadFixed, % L(lTab4Fixedwidth)
-Gui, 1:Add, Radio,		yp		x+15	vradHTML gClickRadHTML, % L(lTab4HTML)
-Gui, 1:Add, Radio,		yp		x+15	vradXML gClickRadXML, % L(lTab4XML)
-Gui, 1:Add, Radio,		yp		x+15	vradExpress gClickRadExpress, % L(lTab4Express)
-Gui, 1:Add, Button,		yp		x+15	vbtnHelpExportFormat gButtonHelpExportFormat, % L(lTab0QuestionMark)
-Gui, 1:Add, Button,		yp		x+15	vbtnHelpExportMulti gButtonHelpExportMulti Hidden w125
-Gui, 1:Add, Text,		y+10	x11		vlblMultiPurpose w85 right hidden, Hidden Label:
-Gui, 1:Add, Edit,		yp		x100	vstrMultiPurpose hidden ; gChangedMultiPurpose unused
-Gui, 1:Add, Button,		yp		x+5		vbtnMultiPurpose gButtonMultiPurpose hidden w120
-Gui, 1:Add, Button,		y105	x+5		vbtnExportFile gButtonExportFile w45 hidden, % L(lTab4Export)
-Gui, 1:Add, Button,		y137	x+5		vbtnCheckExportFile gButtonCheckExportFile w45 hidden, % L(lTab4Check)
+Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab4aCol1W% vlblCSVFileToExport right, % L(lTab4Exportdatatofile)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab4aCol2X% vstrFileToExport gChangedFileToExport
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 h%intButtonH% vbtnHelpFileToExport gButtonHelpFileToExport, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+5 h%intButtonH% w%intTab4aCol4W% vbtnSelectFileToExport gButtonSelectFileToExport default, % L(lTab4Select)
+
+; tab 4b positions
+intHelpExportMultiW := GetWidestControl("Button", lTab4FixedwidthExportHelp, lTab4HTMLExportHelp, lTab4XMLExportHelp, lTab4ExpressExportHelp)
+intBtnMultiPurposeW := GetWidestControl("Button", lTab4Changedefaultwidth, lTab4SelectHTMLtemplate)
+; values x to substract from gui width
+intTab4bCol3X := intTab4aCol3X + intBtnMultiPurposeW + (2* intSpaceBewtween)
+intTab4bEditW := intTab4aCol2X + intTab4bCol3X
+
+Gui, 1:Add, Text, y+20 x%intCol1X% w%intTab4aCol1W% vlblCSVExportFormat right, % L(lTab4Exportformat)
+Gui, 1:Add, Radio, yp x%intTab4aCol2X% vradFixed gClickRadFixed, % L(lTab4Fixedwidth)
+Gui, 1:Add, Radio, yp x+15 vradHTML gClickRadHTML, % L(lTab4HTML)
+Gui, 1:Add, Radio, yp x+15 vradXML gClickRadXML, % L(lTab4XML)
+Gui, 1:Add, Radio, yp x+15 vradExpress gClickRadExpress, % L(lTab4Express)
+Gui, 1:Add, Button, yp x+15 h%intButtonH% w%intButtonSingleCharW% vbtnHelpExportFormat gButtonHelpExportFormat, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+15 w%intHelpExportMultiW% h%intButtonH% vbtnHelpExportMulti gButtonHelpExportMulti Hidden
+Gui, 1:Add, Button, yp x+5 w%intTab4aCol4W% h%intButtonH% vbtnExportFile gButtonExportFile hidden, % L(lTab4Export)
+Gui, 1:Add, Text, y+20 x%intCol1X% w%intTab4aCol1W% vlblMultiPurpose right hidden, Hidden Label:
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab4aCol2X% vstrMultiPurpose hidden ; gChangedMultiPurpose unused
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 w%intBtnMultiPurposeW% h%intButtonH% vbtnMultiPurpose gButtonMultiPurpose hidden
+Gui, 1:Add, Button, yp x+5 w%intTab3aCol4W% h%intButtonH% vbtnCheckExportFile gButtonCheckExportFile hidden, % L(lTab4Check)
 
 Gui, 1:Tab, 5
-Gui, 1:Add, Text, section y+10 x11 w125 right, %lTab6DefaultEditor%
-Gui, 1:Add, Text, w125 right, %lTab6ScreenHeightCorrection%
-Gui, 1:Add, Text, w125 right, %lTab6ScreenWidthCorrection%
-Gui, 1:Add, Edit, ys x+5 section w30 center vintRecordEditor, %intRecordEditor%
-Gui, 1:Add, Edit, w30 center vintSreenHeightCorrection, %intSreenHeightCorrection%
-Gui, 1:Add, Edit, w30 center vintSreenWidthCorrection, %intSreenWidthCorrection%
-Gui, 1:Add, Text, ys x+5 section w75 right, %lTab6TextEditor%
-Gui, 1:Add, Text, w75 right, %lTab6ListBkgColor%
-Gui, 1:Add, Text, w75 right, %lTab6ListTextColor%
-Gui, 1:Add, Edit, ys x+5 section w80 r1 vstrTextEditorExe, %strTextEditorExe%
-Gui, 1:Add, Edit, w80 vstrListBackgroundColor, %strListBackgroundColor%
-Gui, 1:Add, Edit, w80 vstrListTextColor, %strListTextColor%
-Gui, 1:Add, Text, ys x+5 section w110 right, %lTab6ListGridLines%
-Gui, 1:Add, Text, w110 right, %lTab6SkipReadyPrompt%
-Gui, 1:Add, Text, w110 right, %lTab6SkipQuitPrompt%
-Gui, 1:Add, Edit, ys x+5 section w20 center vblnListGrid, %blnListGrid%
-Gui, 1:Add, Edit, w20 center vblnSkipHelpReadyToEdit, %blnSkipHelpReadyToEdit%
-Gui, 1:Add, Edit, w20 center vblnSkipConfirmQuit, %blnSkipConfirmQuit%
-Gui, 1:Add, Text, ys x+5 section w105 right, %lTab6LoadCodePage%
-Gui, 1:Add, Text, w105 right, %lTab6SaveCodePage%
-Gui, 1:Add, Text, w105 right, %lTab6DefaultFileEncoding%
-Gui, 1:Add, Edit, ys x+5 section w85 center vstrCodePageLoad, %strCodePageLoad%
-Gui, 1:Add, Edit, w85 center vstrCodePageSave, %strCodePageSave%
-Gui, 1:Add, DropDownList, w85 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsDetect), strIniFileEncoding . "|", strIniFileEncoding . "||") 
-Gui, 1:Add, Text, ys x+5 section w125 right, %lTab6FixedWidthDefault%
-Gui, 1:Add, Text, w125 y+12 right, %lTab6HTMLTemplateDelimiter%
-Gui, 1:Add, Text, w125 y+12 right, %lTab6ReuseDelimiters%
-Gui, 1:Add, Text, w125 y+12 right, %lTab6EncapsulateAllValues%
-Gui, 1:Add, Edit, ys h20 x+5 section w30 center vintDefaultWidth, %intDefaultWidth%
-Gui, 1:Add, Edit, w30 h20 y+5 center vstrTemplateDelimiter, %strTemplateDelimiter%
-Gui, 1:Add, Edit, w30 h20 y+5 center vstrReuseDelimiters, %strReuseDelimiters%
-Gui, 1:Add, Edit, w30 h20 y+5 center vblnAlwaysEncapsulate, %blnAlwaysEncapsulate%
+strFontSizeLabelsBackup := strFontSizeLabels
+strFontSizeEditBackup := strFontSizeEdit
+strFontSizeLabels := 8 ; for GetWidestControl
+strFontSizeEdit := 8 ; for GetWidestControl
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+intOptionsW := GetWidestControl("Text", lTab6LabelsFont, lTab6EditFont, lTab6ListFont, lTab6ListBkgColor, lTab6ListTextColor)
+
+Gui, 1:Add, Text, y+10 x%intCol1X% w%intOptionsW% right section, %lTab6LabelsFont%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6EditFont%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6ListFont%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6ListBkgColor%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6ListTextColor%
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, ys x+5 w80 r1 section vstrFontNameLabels, %strFontNameLabels%
+Gui, 1:Add, Edit, w80 r1 vstrFontNameEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, w80 r1 vstrFontNameList, %strFontNameList%
+Gui, 1:Add, Edit, w80 r1 vstrListBackgroundColor, %strListBackgroundColor%
+Gui, 1:Add, Edit, w80 r1 vstrListTextColor, %strListTextColor%
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+
+intOptionsW := GetWidestControl("Text", lTab6LabelsFontSize, lTab6EditFontSize, lTab6ListFontSize, lTab6ListGridLines)
+Gui, 1:Add, Text, ys x+10 w%intOptionsW% right section, %lTab6LabelsFontSize%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6EditFontSize%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6ListFontSize%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6ListGridLines%
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, ys x+5 w30 r1 section center vstrFontSizeLabels, %strFontSizeLabelsBackup%
+Gui, 1:Add, Edit, w30 r1 center vstrFontSizeEdit, %strFontSizeEditBackup%
+Gui, 1:Add, Edit, w30 r1 center vstrFontSizeList, %strFontSizeList%
+Gui, 1:Add, Edit, w30 r1 center vblnListGrid, %blnListGrid%
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+
+intOptionsW := GetWidestControl("Text", lTab6TextEditor, lTab6DefaultEditor, lTab6DefaultFileEncoding)
+Gui, 1:Add, Text, ys x+10 w%intOptionsW% right section, %lTab6TextEditor%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6DefaultEditor%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6DefaultFileEncoding%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6LoadCodePage%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6SaveCodePage%
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, ys x+5 w80 r1 vstrTextEditorExe, %strTextEditorExe%
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+drpRecordEditor := (intRecordEditor = 1 ? "Field-by-field" : "Full screen")
+Gui, 1:Add, DropDownList, w80 vdrpRecordEditor, % StrReplace(L(lTab6RecordEditors), drpRecordEditor . "|", drpRecordEditor . "||") 
+Gui, 1:Add, DropDownList, w80 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsDetect), strIniFileEncoding . "|", strIniFileEncoding . "||") 
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, w80 r1 center vstrCodePageLoad, %strCodePageLoad%
+Gui, 1:Add, Edit, w80 r1 center vstrCodePageSave, %strCodePageSave%
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+
+intOptionsW := GetWidestControl("Checkbox", lTab6EncapsulateAllValues, lTab6SkipReadyPrompt, lTab6SkipQuitPrompt)
+Gui, 1:Add, Checkbox, ys x+10 w%intOptionsW% right section vblnAlwaysEncapsulate, %lTab6EncapsulateAllValues%
+GuiControl, 1:, blnAlwaysEncapsulate, %blnAlwaysEncapsulate%
+Gui, 1:Add, Checkbox, y+15 w%intOptionsW% right vblnSkipHelpReadyToEdit, %lTab6SkipReadyPrompt%
+GuiControl, 1:, blnSkipHelpReadyToEdit, %blnSkipHelpReadyToEdit%
+Gui, 1:Add, Checkbox, y+15 w%intOptionsW% right vblnSkipConfirmQuit, %lTab6SkipQuitPrompt%
+GuiControl, 1:, blnSkipConfirmQuit, %blnSkipConfirmQuit%
+intOptionsW := GetWidestControl("Text", lTab6ScreenHeightCorrection, lTab6ScreenWidthCorrection)
+Gui, 1:Add, Text, y+15 w%intOptionsW% right, %lTab6ScreenHeightCorrection%
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x+5 w35 r1 center vintSreenHeightCorrection, %intSreenHeightCorrection%
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Text, xs w%intOptionsW% right, %lTab6ScreenWidthCorrection%
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x+5 w35 r1 center vintSreenWidthCorrection, %intSreenWidthCorrection%
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+
+intOptionsW := GetWidestControl("Text", lTab6FixedWidthDefault, lTab6HTMLTemplateDelimiter, lTab6ReuseDelimiters)
+Gui, 1:Add, Text, ys x+10 w%intOptionsW%  section, %lTab6FixedWidthDefault%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6HTMLTemplateDelimiter%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6ReuseDelimiters%
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, ys x+5 w30 r1 center vintDefaultWidth, %intDefaultWidth%
+Gui, 1:Add, Edit, w30 r1 center vstrTemplateDelimiter, %strTemplateDelimiter%
+Gui, 1:Add, Edit, w30 r1 center vstrReuseDelimiters, %strReuseDelimiters%
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+
 Gui, 1:Add, Button, ys x+25 w80 gButtonSaveOptions, %lTab6SaveOptions%
 Gui, 1:Add, Button, w80 gButtonOptionsHelp, %lTab6OptionsHelp%
 
 Gui, 1:Tab, 6
-Gui, 1:Font, s10 w700, Verdana
-str32or64 := A_PtrSize  * 8
-Gui, 1:Add, Link,		y+10	x25		vlblAboutText1, % L(lTab5Abouttext1, lAppName, strAppVersionLong, str32or64)
-Gui, 1:Font, s9 w500, Arial
-Gui, 1:Add, Link,		y+20	x25		vlblAboutText2, % L(lTab5Abouttext2)
-Gui, 1:Add, Link,		yp		x+150	vlblAboutText3, % L(lTab5Abouttext3)
+Gui, 1:Font, s12 w700, Verdana
+str32or64 := A_PtrSize * 8
+Gui, 1:Add, Text, y+10 x25 vlblAboutText1, % L(lTab5Abouttext1, lAppName, strAppVersionLong, str32or64)
 Gui, 1:Font
-Gui, 1:Add, Button,						vbtnCheck4Update gButtonCheck4Update, % L(lTab5Check4Update)
-Gui, 1:Add, Button,		yp		x+20		vbtnDonate gButtonDonate, % L(lTab5Donate)
+Gui, 1:Font, s12
+Gui, 1:Add, Link, y+20 x25 vlblAboutText2, % L(lTab5Abouttext2)
+Gui, 1:Add, Link, yp x+150 vlblAboutText3, % L(lTab5Abouttext3)
+Gui, 1:Add, Button, vbtnCheck4Update gButtonCheck4Update, % L(lTab5Check4Update)
+Gui, 1:Add, Button, yp x+20 vbtnDonate gButtonDonate default, % L(lTab5Donate)
+Gui, 1:Font
+GuiControl, 1:+Default, btnDonate
+GuiControl, 1:Focus, btnDonate
 
 Gui, 1:Tab
 
+Gui, 1:Font, % "s" . strFontSizeList, %strFontNameList%
 Gui, 1:Add, ListView, 	x10 r24 w955 vlvData -ReadOnly NoSort gListViewEvents AltSubmit -LV0x10
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+
+strFontSizeLabels := strFontSizeLabelsBackup
+strFontSizeEdit := strFontSizeEditBackup
 
 Gui, Add, StatusBar
 SB_SetParts(200, 300)
@@ -446,6 +634,19 @@ Gui, 1:Show, Autosize
 blnButtonCheck4Update := False
 Gosub, Check4Update
 Gosub, Check4CommandLineParameter
+
+GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
+Gui, % "1:+MinSize" . aaPosW + 20 . "x" . 500
+
+/* #### Auto loading for testing
+strInputFile := A_ScriptDir . "\TEST-Reuse-One-Simple.csv"
+GuiControl, 1:, strFileToLoad, %strInputFile%
+GuiControl, 1:+Default, btnLoadFile
+GuiControl, 1:Focus, btnLoadFile
+gosub, DetectDelimiters
+Gosub, ButtonLoadFile
+GuiControl, 1:Choose, tabCSVBuddy, 5
+*/
 
 return
 
@@ -808,6 +1009,13 @@ Gui, 1:Submit, NoHide
 Help(lTab2HelpRename, strCurrentVisibleFieldDelimiter, strCurrentVisibleFieldDelimiter, strCurrentFieldEncapsulator)
 return
 
+
+ButtonZoomRename:
+ButtonZoomSelect:
+ButtonZoomOrder:
+Gui, Submit, NoHide
+MsgBox, To be completed...
+return
 
 
 ButtonSetSelect:
@@ -1409,7 +1617,13 @@ return
 ButtonSaveOptions:
 Gui, 1:Submit, NoHide
 
-IniWrite, %intRecordEditor%, %strIniFile%, Global, RecordEditor
+IniWrite, %strFontNameLabels%, %strIniFile%, global, FontNameLabels
+IniWrite, %strFontSizeLabels%, %strIniFile%, global, FontSizeLabels
+IniWrite, %strFontNameEdit%, %strIniFile%, global, FontNameEdit
+IniWrite, %strFontSizeEdit%, %strIniFile%, global, FontSizeEdit
+IniWrite, %strFontNameList%, %strIniFile%, global, FontNameList
+IniWrite, %strFontSizeList%, %strIniFile%, global, FontSizeList
+IniWrite, % (drpRecordEditor = "Field-by-field" ? 1 : 2), %strIniFile%, Global, RecordEditor
 IniWrite, %intSreenHeightCorrection%, %strIniFile%, Global, SreenHeightCorrection
 IniWrite, %intSreenWidthCorrection%, %strIniFile%, Global, SreenWidthCorrection
 IniWrite, %strTextEditorExe%, %strIniFile%, Global, TextEditorExe
@@ -2133,37 +2347,44 @@ if A_EventInfo = 1  ; The window has been minimized.  No action needed.
 ; Otherwise, the window has been resized or maximized. Resize the controls to match.
 GuiControl, 1:Move, tabCSVBuddy, % "W" . (A_GuiWidth - 20)
 
-GuiControl, 1:Move, strFileToLoad, % "W" . (A_GuiWidth - 200)
-GuiControl, 1:Move, btnHelpFileToLoad, % "X" . (A_GuiWidth - 90)
-GuiControl, 1:Move, btnSelectFileToLoad, % "X" . (A_GuiWidth - 65)
-GuiControl, 1:Move, strFileHeaderEscaped, % "W" . (A_GuiWidth - 200)
-GuiControl, 1:Move, btnHelpHeader, % "X" . (A_GuiWidth - 90)
-GuiControl, 1:Move, btnPreviewFile, % "X" . (A_GuiWidth - 65)
-GuiControl, 1:Move, btnLoadFile, % "X" . (A_GuiWidth - 65)
+; tab 1
+GuiControl, 1:Move, strFileToLoad, % "W" . (A_GuiWidth - intTab1aEditW)
+GuiControl, 1:Move, btnHelpFileToLoad, % "X" . (A_GuiWidth - intTab1aCol3X)
+GuiControl, 1:Move, btnSelectFileToLoad, % "X" . (A_GuiWidth - intTab1aCol4X)
+GuiControl, 1:Move, strFileHeaderEscaped, % "W" . (A_GuiWidth - intTab1aEditW)
+GuiControl, 1:Move, btnHelpHeader, % "X" . (A_GuiWidth - intTab1aCol3X)
+GuiControl, 1:Move, btnPreviewFile, % "X" . (A_GuiWidth - intTab1aCol4X)
+GuiControl, 1:Move, btnLoadFile, % "X" . (A_GuiWidth - intTab1aCol4X)
 
-GuiControl, 1:Move, strRenameEscaped, % "W" . (A_GuiWidth - 205)
-GuiControl, 1:Move, btnSetRename, % "X" . (A_GuiWidth - 95)
-GuiControl, 1:Move, btnHelpRename, % "X" . (A_GuiWidth - 40)
-GuiControl, 1:Move, strSelectEscaped, % "W" . (A_GuiWidth - 205)
-GuiControl, 1:Move, btnSetSelect, % "X" . (A_GuiWidth - 95)
-GuiControl, 1:Move, btnHelpSelect, % "X" . (A_GuiWidth - 40)
-GuiControl, 1:Move, strOrderEscaped, % "W" . (A_GuiWidth - 205)
-GuiControl, 1:Move, btnSetOrder, % "X" . (A_GuiWidth - 95)
-GuiControl, 1:Move, btnHelpOrder, % "X" . (A_GuiWidth - 40)
+; tab 2
+GuiControl, 1:Move, strRenameEscaped, % "W" . (A_GuiWidth - intTab2EditW)
+GuiControl, 1:Move, btnZoomRename, % "X" . (A_GuiWidth - intTab2Col3X)
+GuiControl, 1:Move, btnHelpRename, % "X" . (A_GuiWidth - intTab2Col4X)
+GuiControl, 1:Move, btnSetRename, % "X" . (A_GuiWidth - intTab2Col5X)
+GuiControl, 1:Move, strSelectEscaped, % "W" . (A_GuiWidth - intTab2EditW)
+GuiControl, 1:Move, btnZoomSelect, % "X" . (A_GuiWidth - intTab2Col3X)
+GuiControl, 1:Move, btnHelpSelect, % "X" . (A_GuiWidth - intTab2Col4X)
+GuiControl, 1:Move, btnSetSelect, % "X" . (A_GuiWidth - intTab2Col5X)
+GuiControl, 1:Move, strOrderEscaped, % "W" . (A_GuiWidth - intTab2EditW)
+GuiControl, 1:Move, btnZoomOrder, % "X" . (A_GuiWidth - intTab2Col3X)
+GuiControl, 1:Move, btnHelpOrder, % "X" . (A_GuiWidth - intTab2Col4X)
+GuiControl, 1:Move, btnSetOrder, % "X" . (A_GuiWidth - intTab2Col5X)
 
-GuiControl, 1:Move, strFileToSave, % "W" . (A_GuiWidth - 200)
-GuiControl, 1:Move, btnHelpFileToSave, % "X" . (A_GuiWidth - 90)
-GuiControl, 1:Move, btnSelectFileToSave, % "X" . (A_GuiWidth - 65)
-GuiControl, 1:Move, btnSaveFile, % "X" . (A_GuiWidth - 65)
-GuiControl, 1:Move, btnCheckFile, % "X" . (A_GuiWidth - 65)
+; tab 3
+GuiControl, 1:Move, strFileToSave, % "W" . (A_GuiWidth - intTab3aEditW)
+GuiControl, 1:Move, btnHelpFileToSave, % "X" . (A_GuiWidth - intTab3aCol3X)
+GuiControl, 1:Move, btnSelectFileToSave, % "X" . (A_GuiWidth - intTab3aCol4X)
+GuiControl, 1:Move, btnSaveFile, % "X" . (A_GuiWidth - intTab3aCol4X)
+GuiControl, 1:Move, btnCheckFile, % "X" . (A_GuiWidth - intTab3aCol4X)
 
-GuiControl, 1:Move, strFileToExport, % "W" . (A_GuiWidth - 200)
-GuiControl, 1:Move, btnHelpFileToExport, % "X" . (A_GuiWidth - 90)
-GuiControl, 1:Move, btnSelectFileToExport, % "X" . (A_GuiWidth - 65)
-GuiControl, 1:Move, btnExportFile, % "X" . (A_GuiWidth - 65)
-GuiControl, 1:Move, btnCheckExportFile, % "X" . (A_GuiWidth - 65)
-GuiControl, 1:Move, strMultiPurpose, % "W" . (A_GuiWidth - 305)
-GuiControl, 1:Move, btnMultiPurpose, % "X" . (A_GuiWidth - 190)
+; tab 4
+GuiControl, 1:Move, strFileToExport, % "W" . (A_GuiWidth - intTab4aEditW)
+GuiControl, 1:Move, btnHelpFileToExport, % "X" . (A_GuiWidth - intTab4aCol3X)
+GuiControl, 1:Move, btnSelectFileToExport, % "X" . (A_GuiWidth - intTab4aCol4X)
+GuiControl, 1:Move, btnExportFile, % "X" . (A_GuiWidth - intTab4aCol4X)
+GuiControl, 1:Move, btnCheckExportFile, % "X" . (A_GuiWidth - intTab4aCol4X)
+GuiControl, 1:Move, strMultiPurpose, % "W" . (A_GuiWidth - intTab4bEditW)
+GuiControl, 1:Move, btnMultiPurpose, % "X" . (A_GuiWidth - intTab4bCol3X)
 
 GuiControl, 1:Move, lvData, % "W" . (A_GuiWidth - 20) . " H" . (A_GuiHeight - 215)
 
@@ -2880,3 +3101,32 @@ GetLvColumnWidth(intCol)
 	SendMessage, 4125, intCol - 1, 0, SysListView321  ; 4125 is LVM_GETCOLUMNWIDTH.
 	return ErrorLevel
 }
+
+GetWidestControl(strControl, arrLabels*)
+{
+	intWidest := 0
+	Gui, GetWidest:New
+	if (strControl = "Edit")
+		Gui, GetWidest:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+	else
+		Gui, GetWidest:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+	for intIndex, strLabel in arrLabels
+	{
+		Gui, GetWidest:Add, %strControl%, +HwndintHwnd, %strLabel%
+		ControlGetPos, , , intWidth, , , ahk_id %intHwnd%
+		intWidest := (intWidth > intWidest ? intWidth : intWidest)
+	}
+	Gui, GetWidest:Destroy
+	return intWidest
+}
+
+GetEditHeight()
+{
+	Gui, GetHeight:New
+	Gui, GetHeight:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+	Gui, GetHeight:Add, Edit, +HwndintHwnd, TEXT
+	ControlGetPos, , , , intHeight, , ahk_id %intHwnd%
+	Gui, GetHeight:Destroy
+	return intHeight
+}
+
