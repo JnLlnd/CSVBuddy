@@ -2061,21 +2061,23 @@ else
 	InputBox, strSearch, % L((A_ThisLabel = "MenuSearch" ? lLvEventsSearchInputTitle : lLvEventsReplaceInputTitle), lAppName), %lLvEventsSearchInput%, , , 150
 	intSelectedRows := 0
 }
+if !StrLen(strSearch) or (ErrorLevel = 1) ; user pressed cancel
+	return
 if (A_ThisLabel = "MenuReplace")
 {
 	InputBox, strReplaceString, % L(lLvEventsReplaceInputTitle, lAppName), %lLvEventsReplaceInput%, , , 150
+	if (ErrorLevel = 1) ; user pressed cancel
+		return
 	MsgBox, 35, % L(lLvEventsReplaceInputTitle, lAppName), %lLvEventsReplaceCaseSensitive%
 	IfMsgBox, Yes
 		blnReplaceCaseSensitive := True
 	IfMsgBox, No
 		blnReplaceCaseSensitive := False
 	IfMsgBox, Cancel
-		strReplaceString := ""
+		return
 }
 else
 	blnReplaceCaseSensitive := False ; required for NotMatchingRow
-if !StrLen(strSearch) or (A_ThisLabel = "MenuReplace" and !StrLen(strReplaceString))
-	return
 intRowNumber := 0
 intLastRow := LV_GetCount()
 blnNotFound := true
