@@ -387,9 +387,9 @@ Gui, 1:Add, Button, yp x+5 w%intTab1aCol4W% h%intButtonH% vbtnLoadFile gButtonLo
 Gui, 1:Add, Button, yp xp w%intTab1aCol4W% h%intButtonH% vbtnCreateFile gMenuCreateNewFile, % L(lTab1Create)
 
 ; tab 2 positions
-intTab2Col1W := GetWidestControl("Text", lTab2Renamefields, lTab2Selectfields, lTab2Orderfields)
+intTab2Col1W := GetWidestControl("Text", lTab2Renamefields, lTab2Selectfields, lTab2Orderfields, lTab2Reusefields)
 intTab2Col2X := intCol1X + intTab2Col1W + intSpaceBewtween
-intTab2Col5W := GetWidestControl("Button", lTab2Rename, lTab2Select, lTab2Order)
+intTab2Col5W := GetWidestControl("Button", lTab2Rename, lTab2Select, lTab2Order, lTab2Reuse)
 ; values x to substract from gui width
 intTab2Col5X := intTab2Col5W + intSpaceBewtween + intTabMargin
 intTab2Col4X := intTab2Col5X + intButtonSingleCharW + intSpaceBewtween
@@ -404,20 +404,26 @@ Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoRename gButtonUndoRename, %strUndoChar%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpRename gButtonHelpRename, % L(lTab0QuestionMark)
 Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetRename gButtonSetRename, % L(lTab2Rename)
-Gui, 1:Add, Text, y+20 x%intCol1X% w%intTab2Col1W% vlblSelectFields right, % L(lTab2Selectfields)
-Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrSelectEscaped gSelectEscapedChanged
-Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
-Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoSelect gButtonUndoSelect, %strUndoChar%
-Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpSelect gButtonHelpSelect, % L(lTab0QuestionMark)
-Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetSelect gButtonSetSelect, % L(lTab2Select)
-Gui, 1:Add, Text, y+20 x%intCol1X% w%intTab2Col1W% vlblOrderFields right, % L(lTab2Orderfields)
+Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblOrderFields right, % L(lTab2Orderfields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrOrderEscaped
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoOrder gButtonUndoOrder, %strUndoChar%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpOrder gButtonHelpOrder, % L(lTab0QuestionMark)
 Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetOrder gButtonSetOrder, % L(lTab2Order)
+Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblSelectFields right, % L(lTab2Selectfields)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrSelectEscaped
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpSelect gButtonHelpSelect, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetSelect gButtonSetSelect, % L(lTab2Select)
+Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblReuseFields right, % L(lTab2Reusefields)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrReuseEscaped
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoReuse gButtonUndoReuse, %strUndoChar%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpReuse gButtonHelpReuse, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetReuse gButtonSetReuse, % L(lTab2Reuse)
 
 ; tab 3a positions
 intTab3aCol1W := GetWidestControl("Text", lTab3CSVfiletosave)
@@ -638,6 +644,7 @@ Gosub, Check4CommandLineParameter
 GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
 Gui, % "1:+MinSize" . aaPosW + 20 . "x" . 500
 
+/* #### Auto loading for testing
 strInputFile := A_ScriptDir . "\TEST-Reuse-One-Simple.csv"
 GuiControl, 1:, strFileToLoad, %strInputFile%
 GuiControl, 1:+Default, btnLoadFile
@@ -645,7 +652,6 @@ GuiControl, 1:Focus, btnLoadFile
 gosub, DetectDelimiters
 Gosub, ButtonLoadFile
 GuiControl, 1:Choose, tabCSVBuddy, 2
-/* #### Auto loading for testing
 */
 
 return
@@ -961,11 +967,6 @@ return
 
 ; --------------------- TAB 2 --------------------------
 
-SelectEscapedChanged:
-Gui, 1:Submit, NoHide
-GuiControl, % (InStr(strSelectEscaped, StrSplit(strReuseDelimiters)[1] . StrSplit(strReuseDelimiters)[1]) ? "Show" : "Hide"), btnUndoSelect
-return
-
 ButtonSetRename:
 Gui, 1:+OwnDialogs 
 Gui, 1:Submit, NoHide
@@ -1015,14 +1016,15 @@ return
 
 
 ButtonUndoRename:
-ButtonUndoSelect:
 ButtonUndoOrder:
+ButtonUndoReuse:
 Gui, Submit, NoHide
 MsgBox, To be completed...
 return
 
 
 ButtonSetSelect:
+ButtonSetReuse:
 Gui, 1:Submit, NoHide
 
 GoSub, RemoveSorting
@@ -1033,11 +1035,21 @@ if !LV_GetCount()
 	GuiControl, 1:Choose, tabCSVBuddy, 1
 	return
 }
-if !StrLen(strSelectEscaped)
+
+if (A_ThisLabel = "ButtonSetReuse")
+	if StrLen(strReuseEscaped)
+		strSelectEscaped := strCurrentHeader . strCurrentFieldDelimiter . strReuseEscaped
+	else
+	{
+		Oops(lTab2ReuseNoString, strCurrentVisibleFieldDelimiter, StrSplit(strReuseDelimiters)[1], StrSplit(strReuseDelimiters)[2])
+		return
+	}
+else if !StrLen(strSelectEscaped)
 {
 	Oops(lTab2SelectNoString, strCurrentVisibleFieldDelimiter)
 	return
 }
+
 ; ObjCSV_ReturnDSVObjectArray(strCurrentDSVLine, strDelimiter = ",", strEncapsulator = """")
 objCurrentHeader := ObjCSV_ReturnDSVObjectArray(strCurrentHeader, strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
 objCurrentHeaderPositionByName := Object()
@@ -1205,6 +1217,10 @@ Help(lTab2HelpOrder, strCurrentVisibleFieldDelimiter)
 return
 
 
+ButtonHelpReuse:
+Gui, 1:Submit, NoHide
+Help(lTab2HelpReuse, StrSplit(strReuseDelimiters)[1], StrSplit(strReuseDelimiters)[2])
+return
 
 
 ; --------------------- TAB 3 --------------------------
@@ -2368,13 +2384,16 @@ GuiControl, 1:Move, btnUndoRename, % "X" . (A_GuiWidth - intTab2Col3X)
 GuiControl, 1:Move, btnHelpRename, % "X" . (A_GuiWidth - intTab2Col4X)
 GuiControl, 1:Move, btnSetRename, % "X" . (A_GuiWidth - intTab2Col5X)
 GuiControl, 1:Move, strSelectEscaped, % "W" . (A_GuiWidth - intTab2EditW)
-GuiControl, 1:Move, btnUndoSelect, % "X" . (A_GuiWidth - intTab2Col3X)
 GuiControl, 1:Move, btnHelpSelect, % "X" . (A_GuiWidth - intTab2Col4X)
 GuiControl, 1:Move, btnSetSelect, % "X" . (A_GuiWidth - intTab2Col5X)
 GuiControl, 1:Move, strOrderEscaped, % "W" . (A_GuiWidth - intTab2EditW)
 GuiControl, 1:Move, btnUndoOrder, % "X" . (A_GuiWidth - intTab2Col3X)
 GuiControl, 1:Move, btnHelpOrder, % "X" . (A_GuiWidth - intTab2Col4X)
 GuiControl, 1:Move, btnSetOrder, % "X" . (A_GuiWidth - intTab2Col5X)
+GuiControl, 1:Move, strReuseEscaped, % "W" . (A_GuiWidth - intTab2EditW)
+GuiControl, 1:Move, btnUndoReuse, % "X" . (A_GuiWidth - intTab2Col3X)
+GuiControl, 1:Move, btnHelpReuse, % "X" . (A_GuiWidth - intTab2Col4X)
+GuiControl, 1:Move, btnSetReuse, % "X" . (A_GuiWidth - intTab2Col5X)
 
 ; tab 3
 GuiControl, 1:Move, strFileToSave, % "W" . (A_GuiWidth - intTab3aEditW)
