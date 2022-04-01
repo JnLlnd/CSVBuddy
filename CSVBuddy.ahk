@@ -313,11 +313,11 @@ Gui, 1:Add, Tab3, vtabCSVBuddy gChangedTabCSVBuddy, % L(lTab0List)
 Gui, 1:Font
 
 intButtonH := GetEditHeight()
-strZoomChar := Chr(0x2315) ; Unicode chars: https://www.fileformat.info/info/unicode/category/So/list.htm
+strUndoChar :=  Chr(0x238C) ; Unicode chars: https://www.fileformat.info/info/unicode/category/So/list.htm
 
 ; global positions
 intCol1X := 20 ; left margin inside tab
-intButtonSingleCharW := GetWidestControl("Button", lTab0QuestionMark, strZoomChar)
+intButtonSingleCharW := GetWidestControl("Button", lTab0QuestionMark, strUndoChar)
 intEditSingleCharW := GetWidestControl("Edit", "W") ; use W largest char
 intEditSmallW := GetWidestControl("Edit", "WW")
 intDropDownEncoding := GetWidestControl("Text", "UTF-16-RAW") + 20 ; 20 for dropdown arrow
@@ -401,21 +401,21 @@ Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblRenameFields right, % L(l
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrRenameEscaped
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
-Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnZoomRename gButtonZoomRename, %strZoomChar%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoRename gButtonUndoRename, %strUndoChar%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpRename gButtonHelpRename, % L(lTab0QuestionMark)
 Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetRename gButtonSetRename, % L(lTab2Rename)
 Gui, 1:Add, Text, y+20 x%intCol1X% w%intTab2Col1W% vlblSelectFields right, % L(lTab2Selectfields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrSelectEscaped
+Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrSelectEscaped gSelectEscapedChanged
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
-Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnZoomSelect gButtonZoomSelect, %strZoomChar%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoSelect gButtonUndoSelect, %strUndoChar%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpSelect gButtonHelpSelect, % L(lTab0QuestionMark)
 Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetSelect gButtonSetSelect, % L(lTab2Select)
 Gui, 1:Add, Text, y+20 x%intCol1X% w%intTab2Col1W% vlblOrderFields right, % L(lTab2Orderfields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrOrderEscaped
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
-Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnZoomOrder gButtonZoomOrder, %strZoomChar%
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoOrder gButtonUndoOrder, %strUndoChar%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpOrder gButtonHelpOrder, % L(lTab0QuestionMark)
 Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetOrder gButtonSetOrder, % L(lTab2Order)
 
@@ -638,14 +638,14 @@ Gosub, Check4CommandLineParameter
 GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
 Gui, % "1:+MinSize" . aaPosW + 20 . "x" . 500
 
-/* #### Auto loading for testing
 strInputFile := A_ScriptDir . "\TEST-Reuse-One-Simple.csv"
 GuiControl, 1:, strFileToLoad, %strInputFile%
 GuiControl, 1:+Default, btnLoadFile
 GuiControl, 1:Focus, btnLoadFile
 gosub, DetectDelimiters
 Gosub, ButtonLoadFile
-GuiControl, 1:Choose, tabCSVBuddy, 5
+GuiControl, 1:Choose, tabCSVBuddy, 2
+/* #### Auto loading for testing
 */
 
 return
@@ -961,6 +961,10 @@ return
 
 ; --------------------- TAB 2 --------------------------
 
+SelectEscapedChanged:
+Gui, 1:Submit, NoHide
+GuiControl, % (InStr(strSelectEscaped, StrSplit(strReuseDelimiters)[1] . StrSplit(strReuseDelimiters)[1]) ? "Show" : "Hide"), btnUndoSelect
+return
 
 ButtonSetRename:
 Gui, 1:+OwnDialogs 
@@ -1010,9 +1014,9 @@ Help(lTab2HelpRename, strCurrentVisibleFieldDelimiter, strCurrentVisibleFieldDel
 return
 
 
-ButtonZoomRename:
-ButtonZoomSelect:
-ButtonZoomOrder:
+ButtonUndoRename:
+ButtonUndoSelect:
+ButtonUndoOrder:
 Gui, Submit, NoHide
 MsgBox, To be completed...
 return
@@ -2360,15 +2364,15 @@ GuiControl, 1:Move, btnLoadFile, % "X" . (A_GuiWidth - intTab1aCol4X)
 
 ; tab 2
 GuiControl, 1:Move, strRenameEscaped, % "W" . (A_GuiWidth - intTab2EditW)
-GuiControl, 1:Move, btnZoomRename, % "X" . (A_GuiWidth - intTab2Col3X)
+GuiControl, 1:Move, btnUndoRename, % "X" . (A_GuiWidth - intTab2Col3X)
 GuiControl, 1:Move, btnHelpRename, % "X" . (A_GuiWidth - intTab2Col4X)
 GuiControl, 1:Move, btnSetRename, % "X" . (A_GuiWidth - intTab2Col5X)
 GuiControl, 1:Move, strSelectEscaped, % "W" . (A_GuiWidth - intTab2EditW)
-GuiControl, 1:Move, btnZoomSelect, % "X" . (A_GuiWidth - intTab2Col3X)
+GuiControl, 1:Move, btnUndoSelect, % "X" . (A_GuiWidth - intTab2Col3X)
 GuiControl, 1:Move, btnHelpSelect, % "X" . (A_GuiWidth - intTab2Col4X)
 GuiControl, 1:Move, btnSetSelect, % "X" . (A_GuiWidth - intTab2Col5X)
 GuiControl, 1:Move, strOrderEscaped, % "W" . (A_GuiWidth - intTab2EditW)
-GuiControl, 1:Move, btnZoomOrder, % "X" . (A_GuiWidth - intTab2Col3X)
+GuiControl, 1:Move, btnUndoOrder, % "X" . (A_GuiWidth - intTab2Col3X)
 GuiControl, 1:Move, btnHelpOrder, % "X" . (A_GuiWidth - intTab2Col4X)
 GuiControl, 1:Move, btnSetOrder, % "X" . (A_GuiWidth - intTab2Col5X)
 
