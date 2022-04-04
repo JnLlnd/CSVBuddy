@@ -661,7 +661,6 @@ Gosub, Check4CommandLineParameter
 GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
 Gui, % "1:+MinSize" . aaPosW + 20 . "x" . 500
 
-/* #### Auto loading for testing
 strInputFile := A_ScriptDir . "\TEST-Reuse-One-Simple.csv"
 GuiControl, 1:, strFileToLoad, %strInputFile%
 GuiControl, 1:+Default, btnLoadFile
@@ -670,6 +669,7 @@ gosub, DetectDelimiters
 Gosub, ButtonLoadFile
 Sleep, 10 ; if not, lvData grid and color are not always set correctly
 GuiControl, 1:Choose, tabCSVBuddy, 2
+/* #### Auto loading for testing
 */
 
 return
@@ -1044,6 +1044,9 @@ ButtonSetMerge:
 ButtonUndoMerge:
 Gui, 1:Submit, NoHide
 
+strMergeDelimiterOpening := StrSplit(strMergeDelimiters)[1]
+strMergeDelimiterClosing := StrSplit(strMergeDelimiters)[2]
+
 GoSub, RemoveSorting
 
 if !LV_GetCount()
@@ -1054,11 +1057,12 @@ if !LV_GetCount()
 }
 
 if (A_ThisLabel = "ButtonSetMerge")
-	if StrLen(strMergeEscaped)
-		strSelectEscaped := strCurrentHeader . strCurrentFieldDelimiter . strMergeEscaped
+	if StrLen(strMergeEscaped) and StrLen(strMergeNewNameEscaped)
+		strSelectEscaped := strCurrentHeader . strCurrentFieldDelimiter . strMergeDelimiterOpening . strMergeDelimiterOpening . strMergeEscaped . strMergeDelimiterClosing
+			. strMergeDelimiterOpening . strMergeNewNameEscaped . strMergeDelimiterClosing . strMergeDelimiterClosing
 	else
 	{
-		Oops(lTab2MergeNoString, StrSplit(strMergeDelimiters)[1], StrSplit(strMergeDelimiters)[2])
+		Oops(lTab2MergeNoString, strMergeDelimiterOpening, strMergeDelimiterClosing)
 		return
 	}
 else if (A_ThisLabel = "ButtonUndoMerge")
@@ -1088,7 +1092,7 @@ objMergeSpecs := Object()
 objMergePositions := Object()
 for intKey, strVal in objNewHeader
 {
-	if SubStr(strVal, 1, 1) = StrSplit(strMergeDelimiters)[1] ; this is a reuse field
+	if SubStr(strVal, 1, 1) = strMergeDelimiterOpening ; this is a reuse field
 	{
 		; check that all fields in objNewHeader are present in objCurrentHeader
 		for intPositionInArray, strFieldName in objCurrentHeader
@@ -1182,6 +1186,8 @@ Gosub, UpdateCurrentHeader
 ShowHideUndoButtons(A_ThisLabel = "ButtonUndoMerge" ? "" : A_ThisLabel)
 objCurrentHeader := ; release object
 objNewHeader := ; release object
+strMergeDelimiterOpening := ""
+strMergeDelimiterClosing := ""
 return
 
 
