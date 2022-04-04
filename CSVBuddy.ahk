@@ -661,7 +661,9 @@ Gosub, Check4CommandLineParameter
 GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
 Gui, % "1:+MinSize" . aaPosW + 20 . "x" . 500
 
-strInputFile := A_ScriptDir . "\TEST-Reuse-One-Simple.csv"
+/* #### Auto loading for testing
+; strInputFile := A_ScriptDir . "\TEST-Reuse-One-Simple.csv"
+strInputFile := A_ScriptDir . "\Test files\50000 Sales Records.csv"
 GuiControl, 1:, strFileToLoad, %strInputFile%
 GuiControl, 1:+Default, btnLoadFile
 GuiControl, 1:Focus, btnLoadFile
@@ -669,7 +671,6 @@ gosub, DetectDelimiters
 Gosub, ButtonLoadFile
 Sleep, 10 ; if not, lvData grid and color are not always set correctly
 GuiControl, 1:Choose, tabCSVBuddy, 2
-/* #### Auto loading for testing
 */
 
 return
@@ -1101,19 +1102,18 @@ for intKey, strVal in objNewHeader
 				Oops(lTab2SelectFieldMissingInMerge, strFieldName)
 				return
 			}
-		if ObjCSV_ReuseSpecsError(strMergeDelimiters, strVal)
+		if ObjCSV_MergeSpecsError(strMergeDelimiters, strVal)
 			strNewFieldName := ""
 		else
-			ObjCSV_BuildReuseField(strMergeDelimiters, strVal, [], [], 0, strNewFieldName) ; return the new field name in strNewFieldName
+			ObjCSV_BuildMergeField(strMergeDelimiters, strVal, [], 0, strNewFieldName) ; return the new field name in strNewFieldName
 		if !StrLen(strNewFieldName)
 		{
 			Oops(lTab2MergeInvalid, strVal)
 			return
 		}
-		; ##### check if strNewFieldName exists in current header
 		if objCurrentHeaderPositionByName.HasKey(strNewFieldName)
 		{
-			Oops(#####)
+			Oops(lTab2SelectFieldExistingInMerge, strNewFieldName)
 			return
 		}
 		objMergeSpecs[strNewFieldName] := strVal
@@ -1136,10 +1136,16 @@ for intKey, strVal in objNewHeader
 }
 if (intMergedFields)
 {
+	intMax := LV_GetCount()
+	Gui, 1:+Disabled
+	strStatus := StrReplace(lTab0BuildingMergeField, "##", 0)
+	SB_SetText(strStatus, -intProgressType)
 	intMergedFields := 0
 	GuiControl, 1:Focus, lvData
 	Loop, % LV_GetCount()
 	{
+		strStatus := StrReplace(lTab0BuildingMergeField, "##", Round(A_Index*100/intMax))
+		SB_SetText(strStatus, -intProgressType)
 		objRow := Object()
 		intRow := A_Index
 		Loop, % LV_GetCount("Column")
@@ -1149,13 +1155,15 @@ if (intMergedFields)
 		}
 		for strNewFieldName, strSpecs in objMergeSpecs
 		{
-			strMergeField := ObjCSV_BuildReuseField(strMergeDelimiters, strSpecs, objRow, objNewHeader, intRow, strNewFieldName)
+			strMergeField := ObjCSV_BuildMergeField(strMergeDelimiters, strSpecs, objRow, intRow, strNewFieldName)
 			objRow[strNewFieldName] := strMergeField
 			LV_Modify(intRow, "Col" . objMergePositions[strNewFieldName], strMergeField)
 		}
 	}
 	LV_ModifyCol()
 }
+Gui, 1:-Disabled
+SB_SetText("", 2)
 intMaxCurrent := objCurrentHeader.MaxIndex()
 intMaxNew := objNewHeader.MaxIndex()
 intIndexCurrent := 1
@@ -2475,7 +2483,7 @@ GuiControl, 1:Move, btnCheckExportFile, % "X" . (A_GuiWidth - intTab4aCol4X)
 GuiControl, 1:Move, strMultiPurpose, % "W" . (A_GuiWidth - intTab4bEditW)
 GuiControl, 1:Move, btnMultiPurpose, % "X" . (A_GuiWidth - intTab4bCol3X)
 
-GuiControl, 1:Move, lvData, % "W" . (A_GuiWidth - 20) . " H" . (A_GuiHeight - 215)
+GuiControl, 1:Move, lvData, % "W" . (A_GuiWidth - 20) . " H" . (A_GuiHeight - 222)
 
 return
 
