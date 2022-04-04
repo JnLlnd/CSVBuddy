@@ -23,7 +23,12 @@ Version history
 ---------------
 
 2022-03-28 BETA v2.1.9.3
-- #####
+- display error message if a reuse field has invalid syntax when a CSV file is loaded and when the Select command is used; support placeholder ROWNUMBER (enclosed with reuse delimiters) in reuse fields format section, for example "#[ROWNUMBER]"
+new settings for labels, edit controls and listview fonts; redesign of tab content unsing tab3 control with font size adaptation; new functions to get controls width and height; new zoom buttons for rename, select and order edit controls in tab 2 (to be completed)
+fix bug preventing from search and replace with an empty string
+in tab 2, restore zomme buttons and rename them undo buttons; hide Select undo button if there is no resue field
+in tab 2, add a reuse command, change order (Rename, Order, Select and Reuse); add gosub ButtonSetReuse merged with ButtonSetSelect and adapt to execute one or the other; undo buttons to be completed
+#####
 
 2022-03-02 BETA v2.1.9.2
 - support multiple reuse in select command
@@ -235,7 +240,7 @@ strListTextColor := "000000"
 blnListGrid := 1
 intDefaultWidth := 16
 strTemplateDelimiter := "~"
-strReuseDelimiters := "[]"
+strMergeDelimiters := "[]"
 strTextEditorExe := "notepad.exe"
 
 strIniFile := A_ScriptDir . "\CSVBuddy.ini"
@@ -265,7 +270,7 @@ IfNotExist, %strIniFile%
 			TemplateDelimiter=%strTemplateDelimiter%
 			AlwaysEncapsulate=0
 			Startups=1
-			ReuseDelimiters=[]
+			MergeDelimiters=[]
 		)
 		, %strIniFile%
 
@@ -294,7 +299,7 @@ IniRead, intSreenHeightCorrection, %strIniFile%, Global, SreenHeightCorrection, 
 IniRead, intSreenWidthCorrection, %strIniFile%, Global, SreenWidthCorrection, -100 ; negative number to redure the width of edit row dialog box
 IniRead, intRecordEditor, %strIniFile%, Global, RecordEditor, 2 ; 1: full screen editor / 2: field by field editor
 IniRead, blnAlwaysEncapsulate, %strIniFile%, Global, AlwaysEncapsulate, 0
-IniRead, strReuseDelimiters, %strIniFile%, Global, ReuseDelimiters, %strReuseDelimiters%
+IniRead, strMergeDelimiters, %strIniFile%, Global, MergeDelimiters, %strMergeDelimiters%
 IniRead, strIniFileEncoding, %strIniFile%, Global, DefaultFileEncoding, %A_Space% ; default file encoding (ANSI, UTF-8, UTF-16, UTF-8-RAW, UTF-16-RAW or CPnnn)
 if !StrLen(strIniFileEncoding)
 	strIniFileEncoding := lFileEncodingsDetect
@@ -328,7 +333,7 @@ intTabMargin := 25
 intTab1aCol1W := GetWidestControl("Text", lTab1CSVFileToLoad, lTab1CSVFileHeader)
 intTab1aCol2X := intCol1X + intTab1aCol1W + intSpaceBewtween
 intTab1aCol4W := GetWidestControl("Button", lTab1Select, lTab1PreviewFile, lTab1Load, lTab1Create)
-; values x to substract from gui width
+; values x and w to substract from gui width
 intTab1aCol4X := intTab1aCol4W + intSpaceBewtween + intTabMargin
 intTab1aCol3X := intTab1aCol4X + intButtonSingleCharW + intSpaceBewtween
 intTab1aEditW := intTab1aCol2X + intTab1aCol3X
@@ -387,49 +392,60 @@ Gui, 1:Add, Button, yp x+5 w%intTab1aCol4W% h%intButtonH% vbtnLoadFile gButtonLo
 Gui, 1:Add, Button, yp xp w%intTab1aCol4W% h%intButtonH% vbtnCreateFile gMenuCreateNewFile, % L(lTab1Create)
 
 ; tab 2 positions
-intTab2Col1W := GetWidestControl("Text", lTab2Renamefields, lTab2Selectfields, lTab2Orderfields, lTab2Reusefields)
+intTab2Col1W := GetWidestControl("Text", lTab2Renamefields, lTab2Selectfields, lTab2Orderfields, lTab2Mergefields)
 intTab2Col2X := intCol1X + intTab2Col1W + intSpaceBewtween
-intTab2Col5W := GetWidestControl("Button", lTab2Rename, lTab2Select, lTab2Order, lTab2Reuse)
-; values x to substract from gui width
-intTab2Col5X := intTab2Col5W + intSpaceBewtween + intTabMargin
-intTab2Col4X := intTab2Col5X + intButtonSingleCharW + intSpaceBewtween
-intTab2Col3X := intTab2Col4X + intButtonSingleCharW + intSpaceBewtween
-intTab2EditW := intTab2Col2X + intTab2Col3X
+intTab2Col3W := GetWidestControl("Text", lTab2MergeNewName)
+intTab2Col4W := GetWidestControl("Button", lTab2Rename, lTab2Select, lTab2Order, lTab2Merge)
+; values x and w to substract from gui width
+intTab2Col6X := intButtonSingleCharW + intSpaceBewtween + intTabMargin
+intTab2Col5X := intTab2Col6X + intButtonSingleCharW + intSpaceBewtween
+intTab2Col4X := intTab2Col5X + intTab2Col4W + intSpaceBewtween
+intTab2EditW := intTab2Col2X + intTab2Col4X
+; values x and w to substract with additional edit field for new name
+intTab2EditMerge2W := 150
+intTab2Col3bX := intTab2Col4X + intTab2EditMerge2W + 5 + intSpaceBewtween
+intTab2Col3aX := intTab2Col3bX + intTab2Col3W + intSpaceBewtween
+intTab2EditMergeW := intTab2Col2X + intTab2Col3aX
 
 Gui, 1:Tab, 2
 Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblRenameFields right, % L(lTab2Renamefields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrRenameEscaped
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
-Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoRename gButtonUndoRename, %strUndoChar%
+Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetRename gButtonSetRename, % L(lTab2Rename)
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpRename gButtonHelpRename, % L(lTab0QuestionMark)
-Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetRename gButtonSetRename, % L(lTab2Rename)
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoRename gButtonUndoRename hidden, %strUndoChar%
 Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblOrderFields right, % L(lTab2Orderfields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrOrderEscaped
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
-Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoOrder gButtonUndoOrder, %strUndoChar%
+Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetOrder gButtonSetOrder, % L(lTab2Order)
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpOrder gButtonHelpOrder, % L(lTab0QuestionMark)
-Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetOrder gButtonSetOrder, % L(lTab2Order)
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoOrder gButtonUndoOrder hidden, %strUndoChar%
 Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblSelectFields right, % L(lTab2Selectfields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrSelectEscaped
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetSelect gButtonSetSelect, % L(lTab2Select)
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpSelect gButtonHelpSelect, % L(lTab0QuestionMark)
-Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetSelect gButtonSetSelect, % L(lTab2Select)
-Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblReuseFields right, % L(lTab2Reusefields)
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoSelect gButtonUndoSelect hidden, %strUndoChar%
+Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblMergeFields right, % L(lTab2Mergefields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrReuseEscaped
+Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrMergeEscaped
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
-Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoReuse gButtonUndoReuse, %strUndoChar%
-Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpReuse gButtonHelpReuse, % L(lTab0QuestionMark)
-Gui, 1:Add, Button, yp x+5 w%intTab2Col5W% h%intButtonH% vbtnSetReuse gButtonSetReuse, % L(lTab2Reuse)
+Gui, 1:Add, Text, yp x+5 w%intTab2Col3W% vlblMergeFieldsNewName right, % L(lTab2MergeNewName)
+Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 1:Add, Edit, yp x+5 w%intTab2EditMerge2W% vstrMergeNewNameEscaped
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetMerge gButtonSetMerge, % L(lTab2Merge)
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpMerge gButtonHelpMerge, % L(lTab0QuestionMark)
+Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoMerge gButtonUndoMerge hidden, %strUndoChar%
 
 ; tab 3a positions
 intTab3aCol1W := GetWidestControl("Text", lTab3CSVfiletosave)
 intTab3aCol2X := intCol1X + intTab3aCol1W + intSpaceBewtween
 intTab3aCol4W := GetWidestControl("Button", lTab3Select, lTab3Save, lTab3Check)
-; values x to substract from gui width
+; values x and w to substract from gui width
 intTab3aCol4X := intTab3aCol4W + intSpaceBewtween + intTabMargin
 intTab3aCol3X := intTab3aCol4X + intButtonSingleCharW + intSpaceBewtween
 intTab3aEditW := intTab3aCol2X + intTab3aCol3X
@@ -487,7 +503,7 @@ Gui, 1:Add, Button, y+10 x+5 w%intTab3aCol4W% h%intButtonH% vbtnCheckFile hidden
 intTab4aCol1W := GetWidestControl("Text", lTab4Exportdatatofile, lTab4Exportformat, lTab4Fieldswidth, lTab4HTMLtemplate, lTab4Expresstemplate)
 intTab4aCol2X := intCol1X + intTab4aCol1W + intSpaceBewtween
 intTab4aCol4W := GetWidestControl("Button", lTab3Select, lTab4Export, lTab4Check)
-; values x to substract from gui width
+; values x and w to substract from gui width
 intTab4aCol4X := intTab4aCol4W + intSpaceBewtween + intTabMargin
 intTab4aCol3X := intTab4aCol4X + intButtonSingleCharW + intSpaceBewtween
 intTab4aEditW := intTab4aCol2X + intTab4aCol3X
@@ -503,7 +519,7 @@ Gui, 1:Add, Button, yp x+5 h%intButtonH% w%intTab4aCol4W% vbtnSelectFileToExport
 ; tab 4b positions
 intHelpExportMultiW := GetWidestControl("Button", lTab4FixedwidthExportHelp, lTab4HTMLExportHelp, lTab4XMLExportHelp, lTab4ExpressExportHelp)
 intBtnMultiPurposeW := GetWidestControl("Button", lTab4Changedefaultwidth, lTab4SelectHTMLtemplate)
-; values x to substract from gui width
+; values x and w to substract from gui width
 intTab4bCol3X := intTab4aCol3X + intBtnMultiPurposeW + (2* intSpaceBewtween)
 intTab4bEditW := intTab4aCol2X + intTab4bCol3X
 
@@ -589,14 +605,14 @@ Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, yp x+5 w35 r1 center vintSreenWidthCorrection, %intSreenWidthCorrection%
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 
-intOptionsW := GetWidestControl("Text", lTab6FixedWidthDefault, lTab6HTMLTemplateDelimiter, lTab6ReuseDelimiters)
+intOptionsW := GetWidestControl("Text", lTab6FixedWidthDefault, lTab6HTMLTemplateDelimiter, lTab6MergeDelimiters)
 Gui, 1:Add, Text, ys x+10 w%intOptionsW%  section, %lTab6FixedWidthDefault%
 Gui, 1:Add, Text, w%intOptionsW% right, %lTab6HTMLTemplateDelimiter%
-Gui, 1:Add, Text, w%intOptionsW% right, %lTab6ReuseDelimiters%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6MergeDelimiters%
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, ys x+5 w30 r1 center vintDefaultWidth, %intDefaultWidth%
 Gui, 1:Add, Edit, w30 r1 center vstrTemplateDelimiter, %strTemplateDelimiter%
-Gui, 1:Add, Edit, w30 r1 center vstrReuseDelimiters, %strReuseDelimiters%
+Gui, 1:Add, Edit, w30 r1 center vstrMergeDelimiters, %strMergeDelimiters%
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 
 Gui, 1:Add, Button, ys x+25 w80 gButtonSaveOptions, %lTab6SaveOptions%
@@ -616,6 +632,7 @@ Gui, 1:Font
 GuiControl, 1:+Default, btnDonate
 GuiControl, 1:Focus, btnDonate
 
+Gui, 1:Default ; reset default Gui after use of Gui to measure controls
 Gui, 1:Tab
 
 Gui, 1:Font, % "s" . strFontSizeList, %strFontNameList%
@@ -625,7 +642,7 @@ Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 strFontSizeLabels := strFontSizeLabelsBackup
 strFontSizeEdit := strFontSizeEditBackup
 
-Gui, Add, StatusBar
+Gui, 1:Add, StatusBar
 SB_SetParts(200, 300)
 SB_SetText(L(lSBEmpty), 1)
 if (A_IsCompiled)
@@ -651,6 +668,7 @@ GuiControl, 1:+Default, btnLoadFile
 GuiControl, 1:Focus, btnLoadFile
 gosub, DetectDelimiters
 Gosub, ButtonLoadFile
+Sleep, 10 ; if not, lvData grid and color are not always set correctly
 GuiControl, 1:Choose, tabCSVBuddy, 2
 */
 
@@ -903,10 +921,10 @@ FileGetSize, intFileSize, %strFileToLoad%, K
 intActualSize := intActualSize + intFileSize
 
 ; ObjCSV_CSV2Collection(strFilePath, ByRef strFieldNames, blnHeader := 1, blnMultiline := 1, intProgressType := 0
-	; , strFieldDelimiter := ",", strEncapsulator := """", strEolReplacement := "", strProgressText := "", ByRef strFileEncoding := "", strReuseDelimiters := "")
+	; , strFieldDelimiter := ",", strEncapsulator := """", strEolReplacement := "", strProgressText := "", ByRef strFileEncoding := "", strMergeDelimiters := "")
 obj := ObjCSV_CSV2Collection(strFileToLoad, strCurrentHeader, radGetHeader, blnMultiline1, intProgressType
 	, strCurrentFieldDelimiter, strCurrentFieldEncapsulator, strEndoflineReplacement1, L(lTab1ReadingCSVdata)
-	, strCurrentFileEncodingLoad, strReuseDelimiters)
+	, strCurrentFileEncodingLoad, strMergeDelimiters)
 if !StrLen(strCurrentFileEncodingLoad)
 	strCurrentFileEncodingLoad := "ANSI"
 if (ErrorLevel)
@@ -914,7 +932,7 @@ if (ErrorLevel)
 	if (ErrorLevel = 3)
 		strError := L(lTab1CSVfilenotloadedNoUnusedRepl)
 	else if (ErrorLevel = 4) ; reuse field syntax invalid
-		strError := L(lTab2ReuseInvalid, strCurrentHeader)
+		strError := L(lTab2MergeInvalid, strCurrentHeader)
 	else
 	{
 		strError := L(lTab1CSVfilenotloadedTooLarge, intActualSize)
@@ -938,7 +956,7 @@ if (ErrorLevel)
 	SB_SetText("", 3)
 	return
 }
-GuiControl, % (blnListGrid ? "+Grid" : "") . " Background" . strListBackgroundColor . " c" . strListTextColor, lvData
+GuiControl, % "1:" . (blnListGrid ? "+Grid" : "") . " Background" . strListBackgroundColor . " c" . strListTextColor, lvData
 
 SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"), 1)
 SB_SetText(lSBHelp, 3)
@@ -968,6 +986,7 @@ return
 ; --------------------- TAB 2 --------------------------
 
 ButtonSetRename:
+ButtonUndoRename:
 Gui, 1:+OwnDialogs 
 Gui, 1:Submit, NoHide
 
@@ -979,6 +998,9 @@ if !LV_GetCount()
 	GuiControl, 1:Choose, tabCSVBuddy, 1
 	return
 }
+if (A_ThisLabel = "ButtonUndoRename")
+	strRenameEscaped := strCurrentHeaderEscapedBK
+
 ; ObjCSV_ReturnDSVObjectArray(strCurrentDSVLine, strDelimiter = ",", strEncapsulator = """")
 objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strRenameEscaped), strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
 intNbFieldNames := objNewHeader.MaxIndex()
@@ -1004,6 +1026,7 @@ Loop, % LV_GetCount("Column")
 	LV_ModifyCol(A_Index, "AutoHdr")
 }
 Gosub, UpdateCurrentHeader
+ShowHideUndoButtons(A_ThisLabel)
 objNewHeader := ; release object
 return
 
@@ -1015,16 +1038,10 @@ Help(lTab2HelpRename, strCurrentVisibleFieldDelimiter, strCurrentVisibleFieldDel
 return
 
 
-ButtonUndoRename:
-ButtonUndoOrder:
-ButtonUndoReuse:
-Gui, Submit, NoHide
-MsgBox, To be completed...
-return
-
 
 ButtonSetSelect:
-ButtonSetReuse:
+ButtonSetMerge:
+ButtonUndoMerge:
 Gui, 1:Submit, NoHide
 
 GoSub, RemoveSorting
@@ -1036,58 +1053,70 @@ if !LV_GetCount()
 	return
 }
 
-if (A_ThisLabel = "ButtonSetReuse")
-	if StrLen(strReuseEscaped)
-		strSelectEscaped := strCurrentHeader . strCurrentFieldDelimiter . strReuseEscaped
+if (A_ThisLabel = "ButtonSetMerge")
+	if StrLen(strMergeEscaped)
+		strSelectEscaped := strCurrentHeader . strCurrentFieldDelimiter . strMergeEscaped
 	else
 	{
-		Oops(lTab2ReuseNoString, strCurrentVisibleFieldDelimiter, StrSplit(strReuseDelimiters)[1], StrSplit(strReuseDelimiters)[2])
+		Oops(lTab2MergeNoString, StrSplit(strMergeDelimiters)[1], StrSplit(strMergeDelimiters)[2])
 		return
 	}
+else if (A_ThisLabel = "ButtonUndoMerge")
+	strSelectEscaped := strCurrentHeaderEscapedBK
 else if !StrLen(strSelectEscaped)
 {
 	Oops(lTab2SelectNoString, strCurrentVisibleFieldDelimiter)
 	return
 }
+if (A_ThisLabel = "ButtonSetSelect")
+	; ObjCSV_ListView2Collection([strGuiID = "", strListViewID = "", strFieldOrder = "", strFieldDelimiter = ","
+	;	, strEncapsulator = """", intProgressType = 0, strProgressText = ""])
+	objBK := ObjCSV_ListView2Collection("1", "lvData", , , , intProgressType, L(lTab0SavingBackupFromList))
 
 ; ObjCSV_ReturnDSVObjectArray(strCurrentDSVLine, strDelimiter = ",", strEncapsulator = """")
 objCurrentHeader := ObjCSV_ReturnDSVObjectArray(strCurrentHeader, strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
 objCurrentHeaderPositionByName := Object()
 for intPositionInArray, strFieldName in objCurrentHeader
 	objCurrentHeaderPositionByName[strFieldName] := intPositionInArray
-objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strSelectEscaped), strCurrentFieldDelimiter, strCurrentFieldEncapsulator, true, strReuseDelimiters)
+objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strSelectEscaped), strCurrentFieldDelimiter, strCurrentFieldEncapsulator, true, strMergeDelimiters)
 objNewHeaderPositionByName := Object()
 for intPositionInArray, strFieldName in objNewHeader
 	objNewHeaderPositionByName[strFieldName] := intPositionInArray
 intPosPrevious := 0
-intReusedFields := 0
-objReuseSpecs := Object()
-objReusePositions := Object()
+intMergedFields := 0
+objMergeSpecs := Object()
+objMergePositions := Object()
 for intKey, strVal in objNewHeader
 {
-	if SubStr(strVal, 1, 1) = StrSplit(strReuseDelimiters)[1] ; this is a reuse field
+	if SubStr(strVal, 1, 1) = StrSplit(strMergeDelimiters)[1] ; this is a reuse field
 	{
 		; check that all fields in objNewHeader are present in objCurrentHeader
 		for intPositionInArray, strFieldName in objCurrentHeader
 			if !objNewHeaderPositionByName.HasKey(strFieldName)
 			{
-				Oops(lTab2SelectFieldMissingInReuse, strFieldName)
+				Oops(lTab2SelectFieldMissingInMerge, strFieldName)
 				return
 			}
-		if ObjCSV_ReuseSpecsError(strReuseDelimiters, strVal)
+		if ObjCSV_ReuseSpecsError(strMergeDelimiters, strVal)
 			strNewFieldName := ""
 		else
-			ObjCSV_BuildReuseField(strReuseDelimiters, strVal, [], [], 0, strNewFieldName) ; return the new field name in strNewFieldName
+			ObjCSV_BuildReuseField(strMergeDelimiters, strVal, [], [], 0, strNewFieldName) ; return the new field name in strNewFieldName
 		if !StrLen(strNewFieldName)
 		{
-			Oops(lTab2ReuseInvalid, strVal)
+			Oops(lTab2MergeInvalid, strVal)
 			return
 		}
-		objReuseSpecs[strNewFieldName] := strVal
-		objReusePositions[strNewFieldName] := intKey
+		; ##### check if strNewFieldName exists in current header
+		if objCurrentHeaderPositionByName.HasKey(strNewFieldName)
+		{
+			Oops(#####)
+			return
+		}
+		objMergeSpecs[strNewFieldName] := strVal
+		objMergePositions[strNewFieldName] := intKey
 		objNewHeader[intKey] := strNewFieldName
 		LV_InsertCol(intKey, , objNewHeader[intKey])
-		intReusedFields++
+		intMergedFields++
 	}
 	else if !objCurrentHeaderPositionByName.HasKey(strVal)
 	{
@@ -1101,10 +1130,10 @@ for intKey, strVal in objNewHeader
 	}
 	intPosPrevious := objCurrentHeaderPositionByName[strVal]
 }
-if (intReusedFields)
+if (intMergedFields)
 {
-	intReusedFields := 0
-	GuiControl, Focus, lvData
+	intMergedFields := 0
+	GuiControl, 1:Focus, lvData
 	Loop, % LV_GetCount()
 	{
 		objRow := Object()
@@ -1114,11 +1143,11 @@ if (intReusedFields)
 			LV_GetText(strCell, intRow, A_Index)
 			objRow[objNewHeader[A_Index]] := strCell
 		}
-		for strNewFieldName, strSpecs in objReuseSpecs
+		for strNewFieldName, strSpecs in objMergeSpecs
 		{
-			strReuseField := ObjCSV_BuildReuseField(strReuseDelimiters, strSpecs, objRow, objNewHeader, intRow, strNewFieldName)
-			objRow[strNewFieldName] := strReuseField
-			LV_Modify(intRow, "Col" . objReusePositions[strNewFieldName], strReuseField)
+			strMergeField := ObjCSV_BuildReuseField(strMergeDelimiters, strSpecs, objRow, objNewHeader, intRow, strNewFieldName)
+			objRow[strNewFieldName] := strMergeField
+			LV_Modify(intRow, "Col" . objMergePositions[strNewFieldName], strMergeField)
 		}
 	}
 	LV_ModifyCol()
@@ -1130,10 +1159,10 @@ intIndexNew := 1
 intDeleted := 0
 Loop
 {
-	if (objReusePositions[objNewHeader[A_Index]] = A_Index)
+	if (objMergePositions[objNewHeader[A_Index]] = A_Index)
 	{
 		intIndexNew := intIndexNew + 1
-		intReusedFields++
+		intMergedFields++
 	}
 	else if (objCurrentHeader[intIndexCurrent] = objNewHeader[intIndexNew])
 	{
@@ -1142,7 +1171,7 @@ Loop
 	}
 	else
 	{
-		LV_DeleteCol(intIndexCurrent - intDeleted + intReusedFields)
+		LV_DeleteCol(intIndexCurrent - intDeleted + intMergedFields)
 		intDeleted := intDeleted + 1
 		intIndexCurrent := intIndexCurrent + 1
 	}
@@ -1150,25 +1179,50 @@ Loop
 		break
 }
 Gosub, UpdateCurrentHeader
+ShowHideUndoButtons(A_ThisLabel = "ButtonUndoMerge" ? "" : A_ThisLabel)
 objCurrentHeader := ; release object
 objNewHeader := ; release object
 return
 
 
 
+ButtonUndoSelect:
+Gosub, DeleteListviewData
+GoSub, RemoveSorting
+
+; ObjCSV_Collection2ListView(objCollection [, strGuiID = "", strListViewID = "", strFieldOrder = "", strFieldDelimiter = ","
+;	, strEncapsulator = """", strSortFields = "", strSortOptions = "", intProgressType = 0, strProgressText = ""])
+ObjCSV_Collection2ListView(objBK, "1", "lvData", StrUnEscape(strCurrentHeaderEscapedBK), strCurrentFieldDelimiter
+	, strCurrentFieldEncapsulator, , , intProgressType, lTab0RestoringFromBackup)
+
+SB_SetText("", 2)
+SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"), 1)
+
+Gosub, UpdateCurrentHeader
+ShowHideUndoButtons("") ; none
+
+objCurrentHeader := ; release object
+objBK := ""
+return
+
+
+
 ButtonHelpSelect:
 Gui, 1:Submit, NoHide
-Help(lTab2HelpSelect, StrSplit(strReuseDelimiters)[1], StrSplit(strReuseDelimiters)[2], strCurrentVisibleFieldDelimiter, strCurrentFieldEncapsulator)
+Help(lTab2HelpSelect, StrSplit(strMergeDelimiters)[1], StrSplit(strMergeDelimiters)[2], strCurrentVisibleFieldDelimiter, strCurrentFieldEncapsulator)
 return
 
 
 
 ButtonSetOrder:
+ButtonUndoOrder:
 Gui, 1:Submit, NoHide
 
 GoSub, RemoveSorting
 
-if !StrLen(strOrderEscaped)
+if (A_ThisLabel = "ButtonUndoOrder")
+	strOrderEscaped := strCurrentHeaderEscapedBK
+else if !StrLen(strOrderEscaped)
 {
 	Oops(lTab2OrderNoString, strCurrentVisibleFieldDelimiter)
 	return
@@ -1206,6 +1260,7 @@ ObjCSV_Collection2ListView(objNewCollection, "1", "lvData", StrUnEscape(strOrder
 if (ErrorLevel)
 	Oops(lTab2OrderNotLoaded)
 Gosub, UpdateCurrentHeader
+ShowHideUndoButtons(A_ThisLabel)
 objNewCollection := ; release object
 return
 
@@ -1217,9 +1272,9 @@ Help(lTab2HelpOrder, strCurrentVisibleFieldDelimiter)
 return
 
 
-ButtonHelpReuse:
+ButtonHelpMerge:
 Gui, 1:Submit, NoHide
-Help(lTab2HelpReuse, StrSplit(strReuseDelimiters)[1], StrSplit(strReuseDelimiters)[2])
+Help(lTab2HelpMerge, strCurrentFieldDelimiter, StrSplit(strMergeDelimiters)[1], StrSplit(strMergeDelimiters)[2])
 return
 
 
@@ -1432,7 +1487,7 @@ ClickRadFixed:
 Gui, 1:Submit, NoHide
 if !DelimitersOK(3)
 {
-	GuiControl, , radFixed, 0
+	GuiControl, 1:, radFixed, 0
 	return
 }
 GuiControl, 1:Show, btnHelpExportMulti
@@ -1494,7 +1549,7 @@ ClickRadExpress:
 Gui, 1:Submit, NoHide
 if !DelimitersOK(3)
 {
-	GuiControl, , radExpress, 0
+	GuiControl, 1:, radExpress, 0
 	return
 }
 GuiControl, 1:Show, btnHelpExportMulti
@@ -1558,7 +1613,7 @@ if (radFixed)
 		, % L(lTab4MultiFixedInputPrompt), , , 150, , , , , %intDefaultWidth%
 	if !ErrorLevel
 		if (intNewDefaultWidth > 0)
-			GuiControl, , intDefaultWidth, %intNewDefaultWidth%
+			GuiControl, 1:, intDefaultWidth, %intNewDefaultWidth%
 		else
 			Oops(L(lTab4MultiFixedGreaterZero))
 	Gosub, ClickRadFixed
@@ -1657,7 +1712,7 @@ IniWrite, %strCodePageSave%, %strIniFile%, Global, CodePageSave
 IniWrite, %drpDefaultEileEncoding%, %strIniFile%, Global, DefaultFileEncoding
 IniWrite, %intDefaultWidth%, %strIniFile%, Global, DefaultWidth
 IniWrite, %strTemplateDelimiter%, %strIniFile%, Global, TemplateDelimiter
-IniWrite, %strReuseDelimiters%, %strIniFile%, Global, ReuseDelimiters
+IniWrite, %strMergeDelimiters%, %strIniFile%, Global, MergeDelimiters
 IniWrite, %blnAlwaysEncapsulate%, %strIniFile%, Global, AlwaysEncapsulate
 
 MsgBox, , % L(lAppName), % L(lTab6OptionsSaved, strIniFile)
@@ -1808,7 +1863,7 @@ Gui, 1:Submit, NoHide
 if !StrLen(strFileHeaderEscaped)
 {
 	Oops(L(lTab1NewFileInstructions, StrEscape(StrMakeRealFieldDelimiter(strFieldDelimiter1))))
-	GuiControl, , radSetHeader, 1
+	GuiControl, 1:, radSetHeader, 1
 	gosub, ClickRadSetHeader
 }
 else
@@ -1829,7 +1884,7 @@ else
 	strCurrentVisibleFieldDelimiter := strFieldDelimiter1
 	strCurrentFieldEncapsulator := strFieldEncapsulator1
 
-	GuiControl, , strFileToLoad ; empty the file to load field
+	GuiControl, 1:, strFileToLoad ; empty the file to load field
 	
 	objHeader := ObjCSV_ReturnDSVObjectArray(strCurrentHeader, strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
 	if objHeader.MaxIndex() > 200 ; ListView cannot display more that 200 columns
@@ -1851,7 +1906,7 @@ return
 
 
 MenuSelectAll:
-GuiControl, Focus, lvData
+GuiControl, 1:Focus, lvData
 LV_Modify(0, "Select")
 Menu, ContextMenu, Delete
 return
@@ -1859,7 +1914,7 @@ return
 
 
 MenuSelectNone:
-GuiControl, Focus, lvData
+GuiControl, 1:Focus, lvData
 LV_Modify(0, "-Select")
 Menu, ContextMenu, Delete
 return
@@ -1867,7 +1922,7 @@ return
 
 
 MenuSelectReverse:
-GuiControl, Focus, lvData
+GuiControl, 1:Focus, lvData
 Loop, % LV_GetCount()
 	if IsRowSelected(A_Index)
 		LV_Modify(A_Index, "-Select")
@@ -1994,14 +2049,14 @@ return
 MenuDeleteRow:
 intPrevNbRows := LV_GetCount()
 intRowNumber := 0 ; scan each selected row of the ListView
-GuiControl, -Redraw, lvData ; stop drawing the ListView during delete
+GuiControl, 1:-Redraw, lvData ; stop drawing the ListView during delete
 loop, % LV_GetCount("Selected")
 {
 	intRowNumber := LV_GetNext(intRowNumber) ; get next selected row number
 	LV_Delete(intRowNumber)
 	intRowNumber := intRowNumber - 1 ; continue searching from the row before the deleted row
 }
-GuiControl, +Redraw, lvData ; redraw the ListView
+GuiControl, 1:+Redraw, lvData ; redraw the ListView
 intNewNbRows := LV_GetCount()
 intActualSize := Round(intActualSize * intNewNbRows / intPrevNbRows)
 if (intNewNbRows)
@@ -2027,7 +2082,7 @@ intPrevNbRows := LV_GetCount()
 intProgressBatchSize := ProgressBatchSize(intPrevNbRows)
 ProgressStart(intProgressType, intPrevNbRows, lLvEventsFilterProgress)
 intRowNumber := 0 ; scan each matching row of the ListView
-GuiControl, -Redraw, lvData ; stop drawing the ListView during filtering
+GuiControl, 1:-Redraw, lvData ; stop drawing the ListView during filtering
 loop, %intPrevNbRows%
 {
 	intRowNumber := intRowNumber + 1
@@ -2040,7 +2095,7 @@ loop, %intPrevNbRows%
 		intRowNumber := intRowNumber - 1 ; reduce the counter for deleted row
 	}
 }
-GuiControl, +Redraw, lvData ; redraw the ListView
+GuiControl, 1:+Redraw, lvData ; redraw the ListView
 ProgressStop(intProgressType)
 blnFilterActive := true
 
@@ -2183,7 +2238,7 @@ intGui1WinID := WinExist("A")
 Gui, EditRecord:New, +Resize +HwndstrEditRecordGuiHandle +MinSize240x240, %strGuiTitle%
 Gui, EditRecord:+Owner1 ; Make the main window (Gui #1) the owner of the EditRecord window (Gui EditRecord).
 Gui, EditRecord:Add, ListView, x10 y10 h162 w480 vlvEditRecord +ReadOnly gEditRecordListViewEvents AltSubmit -LV0x10, %lLvEditRecordColumnHeader%
-GuiControl, % (blnListGrid ? "+Grid" : "") . " Background" . strListBackgroundColor . " c" . strListTextColor, lvEditRecord
+GuiControl, % "1:" . (blnListGrid ? "+Grid" : "") . " Background" . strListBackgroundColor . " c" . strListTextColor, lvEditRecord
 GuiControlGet, intListViewEditRecord, Pos, lvEditRecord
 LV_ModifyCol(1, "Integer")
 LV_ModifyCol(4, "Integer")
@@ -2236,10 +2291,10 @@ return
 EditRecordLoadField:
 LV_GetText(strFieldName, intEditField, 2)
 LV_GetText(strFieldData, intEditField, 3)
-GuiControl, , lblFieldName, %strFieldName%
-GuiControl, , txtFieldData, %strFieldData%
-GuiControl, Enable, btnSaveField
-GuiControl, Enable, btnResetField
+GuiControl, EditRecord:, lblFieldName, %strFieldName%
+GuiControl, EditRecord:, txtFieldData, %strFieldData%
+GuiControl, EditRecord:Enable, btnSaveField
+GuiControl, EditRecord:Enable, btnResetField
 strFieldDataPrev := strFieldData
 return
 
@@ -2269,7 +2324,7 @@ return
 
 
 EditRecordResetField:
-GuiControl, , txtFieldData, %strFieldDataPrev%
+GuiControl, EditRecord:, txtFieldData, %strFieldDataPrev%
 return
 
 
@@ -2380,20 +2435,23 @@ GuiControl, 1:Move, btnLoadFile, % "X" . (A_GuiWidth - intTab1aCol4X)
 
 ; tab 2
 GuiControl, 1:Move, strRenameEscaped, % "W" . (A_GuiWidth - intTab2EditW)
-GuiControl, 1:Move, btnUndoRename, % "X" . (A_GuiWidth - intTab2Col3X)
-GuiControl, 1:Move, btnHelpRename, % "X" . (A_GuiWidth - intTab2Col4X)
-GuiControl, 1:Move, btnSetRename, % "X" . (A_GuiWidth - intTab2Col5X)
-GuiControl, 1:Move, strSelectEscaped, % "W" . (A_GuiWidth - intTab2EditW)
-GuiControl, 1:Move, btnHelpSelect, % "X" . (A_GuiWidth - intTab2Col4X)
-GuiControl, 1:Move, btnSetSelect, % "X" . (A_GuiWidth - intTab2Col5X)
+GuiControl, 1:Move, btnSetRename, % "X" . (A_GuiWidth - intTab2Col4X)
+GuiControl, 1:Move, btnHelpRename, % "X" . (A_GuiWidth - intTab2Col5X)
+GuiControl, 1:Move, btnUndoRename, % "X" . (A_GuiWidth - intTab2Col6X)
 GuiControl, 1:Move, strOrderEscaped, % "W" . (A_GuiWidth - intTab2EditW)
-GuiControl, 1:Move, btnUndoOrder, % "X" . (A_GuiWidth - intTab2Col3X)
-GuiControl, 1:Move, btnHelpOrder, % "X" . (A_GuiWidth - intTab2Col4X)
-GuiControl, 1:Move, btnSetOrder, % "X" . (A_GuiWidth - intTab2Col5X)
-GuiControl, 1:Move, strReuseEscaped, % "W" . (A_GuiWidth - intTab2EditW)
-GuiControl, 1:Move, btnUndoReuse, % "X" . (A_GuiWidth - intTab2Col3X)
-GuiControl, 1:Move, btnHelpReuse, % "X" . (A_GuiWidth - intTab2Col4X)
-GuiControl, 1:Move, btnSetReuse, % "X" . (A_GuiWidth - intTab2Col5X)
+GuiControl, 1:Move, btnSetOrder, % "X" . (A_GuiWidth - intTab2Col4X)
+GuiControl, 1:Move, btnHelpOrder, % "X" . (A_GuiWidth - intTab2Col5X)
+GuiControl, 1:Move, btnUndoOrder, % "X" . (A_GuiWidth - intTab2Col6X)
+GuiControl, 1:Move, strSelectEscaped, % "W" . (A_GuiWidth - intTab2EditW)
+GuiControl, 1:Move, btnSetSelect, % "X" . (A_GuiWidth - intTab2Col4X)
+GuiControl, 1:Move, btnHelpSelect, % "X" . (A_GuiWidth - intTab2Col5X)
+GuiControl, 1:Move, btnUndoSelect, % "X" . (A_GuiWidth - intTab2Col6X)
+GuiControl, 1:Move, strMergeEscaped, % "W" . (A_GuiWidth - intTab2EditMergeW)
+GuiControl, 1:Move, lblMergeFieldsNewName, % "X" . (A_GuiWidth - intTab2Col3aX)
+GuiControl, 1:Move, strMergeNewNameEscaped, % "X" . (A_GuiWidth - intTab2Col3bX)
+GuiControl, 1:Move, btnSetMerge, % "X" . (A_GuiWidth - intTab2Col4X)
+GuiControl, 1:Move, btnHelpMerge, % "X" . (A_GuiWidth - intTab2Col5X)
+GuiControl, 1:Move, btnUndoMerge, % "X" . (A_GuiWidth - intTab2Col6X)
 
 ; tab 3
 GuiControl, 1:Move, strFileToSave, % "W" . (A_GuiWidth - intTab3aEditW)
@@ -2562,11 +2620,12 @@ return
 
 UpdateCurrentHeader:
 Gui, 1:Submit, NoHide
+strCurrentHeaderEscapedBK := strCurrentHeaderEscaped
 strCurrentHeader := GetListViewHeader(strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
 strCurrentHeaderEscaped := StrEscape(strCurrentHeader)
 GuiControl, 1:, strRenameEscaped, %strCurrentHeaderEscaped%
-GuiControl, 1:, strSelectEscaped, %strCurrentHeaderEscaped%
 GuiControl, 1:, strOrderEscaped, %strCurrentHeaderEscaped%
+GuiControl, 1:, strSelectEscaped, %strCurrentHeaderEscaped%
 if (radFixed)
 	Gosub, ClickRadFixed
 else if (radExpress)
@@ -2830,7 +2889,7 @@ CheckOneRow()
 		MsgBox, 35, % L(lLvEventsOnerecordselectedTitle, lAppName), % L(lLvEventsOnerecordselectedMessage)
 		IfMsgBox, No
 		{
-			GuiControl, Focus, lvData
+			GuiControl, 1:Focus, lvData
 			LV_Modify(0, "-Select")
 		}
 		IfMsgBox, Cancel
@@ -3023,9 +3082,9 @@ DelimitersOK(intTab)
 		Oops(lFuncDelimitersOK, intTab)
 		GuiControl, 1:Choose, tabCSVBuddy, %intTab%
 		if (strFieldDelimiter%intTab% = strFieldEncapsulator%intTab%) or (strFieldDelimiter%intTab% = "")
-			GuiControl, Focus, strFieldDelimiter%intTab%
+			GuiControl, 1:Focus, strFieldDelimiter%intTab%
 		else
-			GuiControl, Focus, strFieldEncapsulator%intTab%
+			GuiControl, 1:Focus, strFieldEncapsulator%intTab%
 		return false
 	}
 	else
@@ -3154,4 +3213,11 @@ GetEditHeight()
 	Gui, GetHeight:Destroy
 	return intHeight
 }
+
+ShowHideUndoButtons(strButtonLabel)
+{
+	Loop, Parse, % "Rename|Order|Select|Merge", |
+		GuiControl, % "1:" . (InStr(strButtonLabel, A_LoopField) ? "Show" : "Hide"), % "btnUndo" . A_LoopField
+}
+
 
