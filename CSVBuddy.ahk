@@ -921,18 +921,21 @@ strCurrentFileEncodingLoad := (strFileEncoding1 = lFileEncodingsDetect ? "" : st
 FileGetSize, intFileSize, %strFileToLoad%, K
 intActualSize := intActualSize + intFileSize
 
+Gui, 1:+Disabled
 ; ObjCSV_CSV2Collection(strFilePath, ByRef strFieldNames, blnHeader := 1, blnMultiline := 1, intProgressType := 0
 	; , strFieldDelimiter := ",", strEncapsulator := """", strEolReplacement := "", strProgressText := "", ByRef strFileEncoding := "", strMergeDelimiters := "")
 obj := ObjCSV_CSV2Collection(strFileToLoad, strCurrentHeader, radGetHeader, blnMultiline1, intProgressType
 	, strCurrentFieldDelimiter, strCurrentFieldEncapsulator, strEndoflineReplacement1, L(lTab1ReadingCSVdata)
 	, strCurrentFileEncodingLoad, strMergeDelimiters)
+intErrorLevel := ErrorLevel
+Gui, 1:-Disabled
 if !StrLen(strCurrentFileEncodingLoad)
 	strCurrentFileEncodingLoad := "ANSI"
-if (ErrorLevel)
+if (intErrorLevel)
 {
-	if (ErrorLevel = 3)
+	if (intErrorLevel = 3)
 		strError := L(lTab1CSVfilenotloadedNoUnusedRepl)
-	else if (ErrorLevel = 4) ; reuse field syntax invalid
+	else if (intErrorLevel = 4) ; reuse field syntax invalid
 		strError := L(lTab2MergeInvalid, strCurrentHeader)
 	else
 	{
@@ -943,6 +946,7 @@ if (ErrorLevel)
 	Oops(strError)
 	SB_SetText(lSBEmpty, 1)
 	SB_SetText("", 3)
+	intErrorLevel := ""
 	return
 }
 SB_SetText("", 2)
@@ -950,7 +954,8 @@ SB_SetText("", 2)
 ;	, strEncapsulator = """", strSortFields = "", strSortOptions = "", intProgressType = 0, strProgressText = ""])
 ObjCSV_Collection2ListView(obj, "1", "lvData", strCurrentHeader, strCurrentFieldDelimiter
 	, strCurrentFieldEncapsulator, , , intProgressType, L(lTab0LoadingToList))
-if (ErrorLevel)
+intErrorLevel := ErrorLevel
+if (intErrorLevel)
 {
 	Oops(lTab1CSVfilenotloadedMax200fields)
 	SB_SetText(lSBEmpty, 1)
@@ -970,6 +975,7 @@ GuiControl, 1:ChooseString, strFileEncoding1, %strCurrentFileEncodingLoad%
 GuiControl, 1:ChooseString, strFileEncoding3, %strCurrentFileEncodingLoad%
 blnFilterActive := false
 obj := ; release object
+intErrorLevel := ""
 return
 
 
@@ -1137,15 +1143,15 @@ for intKey, strVal in objNewHeader
 if (intMergedFields)
 {
 	intMax := LV_GetCount()
-	Gui, 1:+Disabled
-	strStatus := StrReplace(lTab0BuildingMergeField, "##", 0)
-	SB_SetText(strStatus, -intProgressType)
+	intProgressBatchSize := ProgressBatchSize(intMax) ; internal function from ObjCSV library
+	ProgressStart(intProgressType, intMax, lTab0BuildingMergeField)
 	intMergedFields := 0
 	GuiControl, 1:Focus, lvData
 	Loop, % LV_GetCount()
 	{
-		strStatus := StrReplace(lTab0BuildingMergeField, "##", Round(A_Index*100/intMax))
-		SB_SetText(strStatus, -intProgressType)
+		if !Mod(A_Index, intProgressBatchSize)
+			ProgressUpdate(intProgressType, A_Index, intMax, lTab0BuildingMergeField)
+				; update progress bar only every %intProgressBatchSize% records
 		objRow := Object()
 		intRow := A_Index
 		Loop, % LV_GetCount("Column")
@@ -1161,8 +1167,8 @@ if (intMergedFields)
 		}
 	}
 	LV_ModifyCol()
+	ProgressStop(intProgressType)
 }
-Gui, 1:-Disabled
 SB_SetText("", 2)
 intMaxCurrent := objCurrentHeader.MaxIndex()
 intMaxNew := objNewHeader.MaxIndex()
@@ -1429,6 +1435,7 @@ else
 	strEolReplacement := strEndoflineReplacement3
 strRealFieldDelimiter3 := StrMakeRealFieldDelimiter(strFieldDelimiter3)
 strCurrentFileEncodingSave := (strFileEncoding3 = lFileEncodingsSelect ? "" : strFileEncoding3)
+Gui, 1:+Disabled
 ; ObjCSV_Collection2CSV(objCollection, strFilePath [, blnHeader = 0
 ;	, strFieldOrder = "", intProgressType = 0, blnOverwrite = 0
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText = ""])
@@ -1436,8 +1443,10 @@ ObjCSV_Collection2CSV(obj, strFileToSave, radSaveWithHeader
 	, GetListViewHeader(strRealFieldDelimiter3, strFieldEncapsulator3), intProgressType, blnOverwrite
 	, strRealFieldDelimiter3, strFieldEncapsulator3, strEolReplacement, L(lTab3SavingCSV)
 	, strCurrentFileEncodingSave, blnAlwaysEncapsulate)
-if (ErrorLevel)
-	if (ErrorLevel = 1)
+intErrorLevel := ErrorLevel
+Gui, 1:-Disabled
+if (intErrorLevel)
+	if (intErrorLevel = 1)
 		Oops(lExportSystemError, A_LastError)
 	else
 		Oops(lExportUnknownError)
@@ -1448,6 +1457,7 @@ if FileExist(strFileToSave)
 	GuiControl, 1:Focus, btnCheckFile
 }
 obj := ; release object
+intErrorLevel := ""
 return
 
 
@@ -2093,7 +2103,7 @@ InputBox, strFilter, % L(lLvEventsFilterInputTitle, lAppName), %lLvEventsFilterI
 if (ErrorLevel or !StrLen(strFilter)) ; ErrorLevel = 1 when user hits Cancel
 	return
 intPrevNbRows := LV_GetCount()
-intProgressBatchSize := ProgressBatchSize(intPrevNbRows)
+intProgressBatchSize := ProgressBatchSize(intPrevNbRows) ; internal function from ObjCSV library
 ProgressStart(intProgressType, intPrevNbRows, lLvEventsFilterProgress)
 intRowNumber := 0 ; scan each matching row of the ListView
 GuiControl, 1:-Redraw, lvData ; stop drawing the ListView during filtering
@@ -2683,10 +2693,13 @@ else
 	strEolReplacement := strEndoflineReplacement
 ; ObjCSV_Collection2Fixed(objCollection, strFilePath, strWidth [, blnHeader = 0, strFieldOrder = "", intProgressType = 0, blnOverwrite = 0
 ;	, strFieldDelimiter = ",", strEncapsulator = """", strEolReplacement = "", strProgressText = ""])
+Gui, 1:+Disabled
 ObjCSV_Collection2Fixed(obj, strFileToExport, strFieldsWidth, radSaveWithHeader, strFieldsName, intProgressType, blnOverwrite
 	, strRealFieldDelimiter3, strFieldEncapsulator3, strEolReplacement, L(lExportSaving), strCurrentFileEncodingSave)
-if (ErrorLevel)
-	if (ErrorLevel = 1)
+intErrorLevel := ErrorLevel
+Gui, 1:-Disabled
+if (intErrorLevel)
+	if (intErrorLevel = 1)
 		Oops(lExportSystemError, A_LastError)
 	else
 		Oops(lExportUnknownError)
@@ -2697,6 +2710,7 @@ if FileExist(strFileToExport)
 	GuiControl, 1:Focus, btnCheckExportFile
 }
 obj := ; release object
+intErrorLevel := ""
 return
 
 
@@ -2705,14 +2719,17 @@ ExportHTML:
 ; ObjCSV_ListView2Collection([strGuiID = "", strListViewID = "", strFieldOrder = "", strFieldDelimiter = ","
 ;	, strEncapsulator = """", intProgressType = 0, strProgressText = ""])
 obj := ObjCSV_ListView2Collection("1", "lvData", , , , intProgressType, L(lTab0ReadingFromList))
+Gui, 1:+Disabled
 ; ObjCSV_Collection2HTML(objCollection, strFilePath, strTemplateFile [, strTemplateEncapsulator = ~
 ;	, intProgressType = 0, blnOverwrite = 0, strProgressText = ""])
 ObjCSV_Collection2HTML(obj, strFileToExport, strMultiPurpose, strTemplateDelimiter
 	, intProgressType, blnOverwrite, L(lExportSaving), strCurrentFileEncodingSave)
-if (ErrorLevel)
-	if (ErrorLevel = 1)
+intErrorLevel := ErrorLevel
+Gui, 1:-Disabled
+if (intErrorLevel)
+	if (intErrorLevel = 1)
 		Oops(lExportSystemError, A_LastError)
-	else if (ErrorLevel = 4 or ErrorLevel = 5)
+	else if (intErrorLevel = 4 or intErrorLevel = 5)
 		Oops(lExportHTMLError)
 	else
 		Oops(lExportParameterError)
@@ -2723,6 +2740,7 @@ if FileExist(strFileToExport)
 	GuiControl, 1:Focus, btnCheckExportFile
 }
 obj := ; release object
+intErrorLevel := ""
 return
 
 
@@ -2731,10 +2749,13 @@ ExportXML:
 ; ObjCSV_ListView2Collection([strGuiID = "", strListViewID = "", strFieldOrder = "", strFieldDelimiter = ","
 ;	, strEncapsulator = """", intProgressType = 0, strProgressText = ""])
 obj := ObjCSV_ListView2Collection("1", "lvData", , , , intProgressType, L(lTab0ReadingFromList))
+Gui, 1:+Disabled
 ; ObjCSV_Collection2XML(objCollection, strFilePath [, intProgressType = 0, blnOverwrite = 0, strProgressText = ""])
 ObjCSV_Collection2XML(obj, strFileToExport, intProgressType, blnOverwrite, L(lExportSaving), strCurrentFileEncodingSave)
-if (ErrorLevel)
-	if (ErrorLevel = 1)
+intErrorLevel := ErrorLevel
+Gui, 1:-Disabled
+if (intErrorLevel)
+	if (intErrorLevel = 1)
 		Oops(lExportSystemError, A_LastError)
 	else
 		Oops(lExportUnknownError)
@@ -2745,6 +2766,7 @@ if FileExist(strFileToExport)
 	GuiControl, 1:Focus, btnCheckExportFile
 }
 obj := ; release object
+intErrorLevel := ""
 return
 
 
@@ -2764,12 +2786,15 @@ if FileExist(strExpressTemplateTempFile)
 {
 	; ObjCSV_Collection2HTML(objCollection, strFilePath, strTemplateFile [, strTemplateEncapsulator = ~
 	;	, intProgressType = 0, blnOverwrite = 0, strProgressText = ""])
+	Gui, 1:+Disabled
 	ObjCSV_Collection2HTML(obj, strFileToExport, strExpressTemplateTempFile, strTemplateDelimiter
 		, intProgressType, blnOverwrite, L(lExportSaving), strCurrentFileEncodingSave)
-	if (ErrorLevel)
-		if (ErrorLevel = 1)
+	intErrorLevel := ErrorLevel
+	Gui, 1:-Disabled
+	if (intErrorLevel)
+		if (intErrorLevel = 1)
 			Oops(lExportSystemError, A_LastError)
-		else if (ErrorLevel = 4 or ErrorLevel = 5)
+		else if (intErrorLevel = 4 or intErrorLevel = 5)
 			Oops(lExportHTMLError)
 		else
 			Oops(lExportParameterError)
@@ -2784,6 +2809,7 @@ if FileExist(strExpressTemplateTempFile)
 else
 	Oops(lExportErrorTempFile)
 obj := ; release object
+intErrorLevel := ""
 return
 
 
