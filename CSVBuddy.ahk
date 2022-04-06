@@ -234,6 +234,7 @@ global strFontNameEdit := "Courier New"
 global strFontSizeEdit := 10
 global strFontNameList := "Microsoft Sans Serif"
 global strFontSizeList := 10
+global blnChangesUnsaved
 
 strListBackgroundColor := "D0D0D0"
 strListTextColor := "000000"
@@ -287,7 +288,6 @@ IniRead, intDefaultWidth, %strIniFile%, global, DefaultWidth, %intDefaultWidth% 
 IniRead, strTemplateDelimiter, %strIniFile%, global, TemplateDelimiter, %strTemplateDelimiter% ; Default ~ (tilde), used when export to HTML and Express formats
 IniRead, strTextEditorExe, %strIniFile%, global, TextEditorExe, %strTextEditorExe% ; Default notepad.exe
 IniRead, blnSkipHelpReadyToEdit, %strIniFile%, global, SkipHelpReadyToEdit, 0 ; Default 0
-IniRead, blnSkipConfirmQuit, %strIniFile%, global, SkipConfirmQuit, 0 ; Default 0
 IniRead, strLatestSkipped, %strIniFile%, global, LatestVersionSkipped, 0.0
 IniRead, intStartups, %strIniFile%, Global, Startups, 1
 IniRead, blnDonator, %strIniFile%, Global, Donator, 0 ; Please, be fair. Don't cheat with this.
@@ -588,13 +588,11 @@ Gui, 1:Add, Edit, w80 r1 center vstrCodePageLoad, %strCodePageLoad%
 Gui, 1:Add, Edit, w80 r1 center vstrCodePageSave, %strCodePageSave%
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 
-intOptionsW := GetWidestControl("Checkbox", lTab6EncapsulateAllValues, lTab6SkipReadyPrompt, lTab6SkipQuitPrompt)
+intOptionsW := GetWidestControl("Checkbox", lTab6EncapsulateAllValues, lTab6SkipReadyPrompt)
 Gui, 1:Add, Checkbox, ys x+10 w%intOptionsW% right section vblnAlwaysEncapsulate, %lTab6EncapsulateAllValues%
 GuiControl, 1:, blnAlwaysEncapsulate, %blnAlwaysEncapsulate%
 Gui, 1:Add, Checkbox, y+15 w%intOptionsW% right vblnSkipHelpReadyToEdit, %lTab6SkipReadyPrompt%
 GuiControl, 1:, blnSkipHelpReadyToEdit, %blnSkipHelpReadyToEdit%
-Gui, 1:Add, Checkbox, y+15 w%intOptionsW% right vblnSkipConfirmQuit, %lTab6SkipQuitPrompt%
-GuiControl, 1:, blnSkipConfirmQuit, %blnSkipConfirmQuit%
 intOptionsW := GetWidestControl("Text", lTab6ScreenHeightCorrection, lTab6ScreenWidthCorrection)
 Gui, 1:Add, Text, y+15 w%intOptionsW% right, %lTab6ScreenHeightCorrection%
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
@@ -643,7 +641,7 @@ strFontSizeLabels := strFontSizeLabelsBackup
 strFontSizeEdit := strFontSizeEditBackup
 
 Gui, 1:Add, StatusBar
-SB_SetParts(200, 300)
+SB_SetParts(150, 300, 100)
 SB_SetText(L(lSBEmpty), 1)
 if (A_IsCompiled)
 	SB_SetIcon(A_ScriptFullPath)
@@ -662,8 +660,8 @@ GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
 Gui, % "1:+MinSize" . aaPosW + 20 . "x" . 500
 
 /* #### Auto loading for testing
-; strInputFile := A_ScriptDir . "\TEST-Reuse-One-Simple.csv"
-strInputFile := A_ScriptDir . "\Test files\50000 Sales Records.csv"
+strInputFile := A_ScriptDir . "\TEST-Reuse-One-Simple.csv"
+; strInputFile := A_ScriptDir . "\Test files\50000 Sales Records.csv"
 GuiControl, 1:, strFileToLoad, %strInputFile%
 GuiControl, 1:+Default, btnLoadFile
 GuiControl, 1:Focus, btnLoadFile
@@ -945,11 +943,10 @@ if (intErrorLevel)
 	}
 	Oops(strError)
 	SB_SetText(lSBEmpty, 1)
-	SB_SetText("", 3)
+	SB_SetText("", 4)
 	intErrorLevel := ""
 	return
 }
-SB_SetText("", 2)
 ; ObjCSV_Collection2ListView(objCollection [, strGuiID = "", strListViewID = "", strFieldOrder = "", strFieldDelimiter = ","
 ;	, strEncapsulator = """", strSortFields = "", strSortOptions = "", intProgressType = 0, strProgressText = ""])
 ObjCSV_Collection2ListView(obj, "1", "lvData", strCurrentHeader, strCurrentFieldDelimiter
@@ -959,13 +956,14 @@ if (intErrorLevel)
 {
 	Oops(lTab1CSVfilenotloadedMax200fields)
 	SB_SetText(lSBEmpty, 1)
-	SB_SetText("", 3)
+	SB_SetText("", 4)
 	return
 }
 GuiControl, % "1:" . (blnListGrid ? "+Grid" : "") . " Background" . strListBackgroundColor . " c" . strListTextColor, lvData
 
 SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"), 1)
-SB_SetText(lSBHelp, 3)
+SB_SetText(lLvEventsNoRecordSelected, 2)
+SB_SetText(lSBHelp, 4)
 Gosub, UpdateCurrentHeader
 if (!blnSkipHelpReadyToEdit)
 	Help(lTab1HelpReadyToEdit)
@@ -976,6 +974,7 @@ GuiControl, 1:ChooseString, strFileEncoding3, %strCurrentFileEncodingLoad%
 blnFilterActive := false
 obj := ; release object
 intErrorLevel := ""
+ChangesToSave(false)
 return
 
 
@@ -984,7 +983,7 @@ LV_Delete() ; delete all rows - better performance on large files when we delete
 loop, % LV_GetCount("Column")
 	LV_DeleteCol(1) ; delete all columns
 SB_SetText(L(lSBEmpty), 1)
-SB_SetText("", 3)
+SB_SetText("", 4)
 intActualSize := 0
 return
 
@@ -1035,6 +1034,7 @@ Loop, % LV_GetCount("Column")
 Gosub, UpdateCurrentHeader
 ShowHideUndoButtons(A_ThisLabel)
 objNewHeader := ; release object
+ChangesToSave(true)
 return
 
 
@@ -1064,6 +1064,12 @@ if !LV_GetCount()
 }
 
 if (A_ThisLabel = "ButtonSetMerge")
+{
+	if InStr(strMergeNewNameEscaped, strMergeDelimiterOpening) or InStr(strMergeNewNameEscaped, strMergeDelimiterClosing)
+	{
+		Oops(lTab2MergeDelimietInNewName, strMergeDelimiterOpening, strMergeDelimiterClosing)
+		return
+	}
 	if StrLen(strMergeEscaped) and StrLen(strMergeNewNameEscaped)
 		strSelectEscaped := strCurrentHeader . strCurrentFieldDelimiter . strMergeDelimiterOpening . strMergeDelimiterOpening . strMergeEscaped . strMergeDelimiterClosing
 			. strMergeDelimiterOpening . strMergeNewNameEscaped . strMergeDelimiterClosing . strMergeDelimiterClosing
@@ -1072,6 +1078,7 @@ if (A_ThisLabel = "ButtonSetMerge")
 		Oops(lTab2MergeNoString, strMergeDelimiterOpening, strMergeDelimiterClosing)
 		return
 	}
+}
 else if (A_ThisLabel = "ButtonUndoMerge")
 	strSelectEscaped := strCurrentHeaderEscapedBK
 else if !StrLen(strSelectEscaped)
@@ -1169,7 +1176,7 @@ if (intMergedFields)
 	LV_ModifyCol()
 	ProgressStop(intProgressType)
 }
-SB_SetText("", 2)
+SB_SetText(lLvEventsNoRecordSelected, 2)
 intMaxCurrent := objCurrentHeader.MaxIndex()
 intMaxNew := objNewHeader.MaxIndex()
 intIndexCurrent := 1
@@ -1198,6 +1205,7 @@ Loop
 }
 Gosub, UpdateCurrentHeader
 ShowHideUndoButtons(A_ThisLabel = "ButtonUndoMerge" ? "" : A_ThisLabel)
+ChangesToSave(true)
 objCurrentHeader := ; release object
 objNewHeader := ; release object
 strMergeDelimiterOpening := ""
@@ -1215,11 +1223,12 @@ GoSub, RemoveSorting
 ObjCSV_Collection2ListView(objBK, "1", "lvData", StrUnEscape(strCurrentHeaderEscapedBK), strCurrentFieldDelimiter
 	, strCurrentFieldEncapsulator, , , intProgressType, lTab0RestoringFromBackup)
 
-SB_SetText("", 2)
 SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"), 1)
+SB_SetText(lLvEventsNoRecordSelected, 2)
 
 Gosub, UpdateCurrentHeader
 ShowHideUndoButtons("") ; none
+ChangesToSave(true)
 
 objCurrentHeader := ; release object
 objBK := ""
@@ -1281,6 +1290,7 @@ if (ErrorLevel)
 	Oops(lTab2OrderNotLoaded)
 Gosub, UpdateCurrentHeader
 ShowHideUndoButtons(A_ThisLabel)
+ChangesToSave(true)
 objNewCollection := ; release object
 return
 
@@ -1455,7 +1465,12 @@ if FileExist(strFileToSave)
 	GuiControl, 1:Show, btnCheckFile
 	GuiControl, 1:+Default, btnCheckFile
 	GuiControl, 1:Focus, btnCheckFile
+	ChangesToSave(false)
 }
+if LV_GetCount("Selected")
+	SB_SetText(L(lLvEventsRecordsSelected, LV_GetCount("Selected")), 2)
+else
+	SB_SetText(lLvEventsNoRecordSelected, 2)
 obj := ; release object
 intErrorLevel := ""
 return
@@ -1730,7 +1745,6 @@ IniWrite, %strListBackgroundColor%, %strIniFile%, Global, ListBackgroundColor
 IniWrite, %strListTextColor%, %strIniFile%, Global, ListTextColor
 IniWrite, %blnListGrid%, %strIniFile%, Global, ListGrid
 IniWrite, %blnSkipHelpReadyToEdit%, %strIniFile%, Global, SkipHelpReadyToEdit
-IniWrite, %blnSkipConfirmQuit%, %strIniFile%, Global, SkipConfirmQuit
 IniWrite, %strCodePageLoad%, %strIniFile%, Global, CodePageLoad
 IniWrite, %strCodePageSave%, %strIniFile%, Global, CodePageSave
 IniWrite, %drpDefaultEileEncoding%, %strIniFile%, Global, DefaultFileEncoding
@@ -1800,7 +1814,10 @@ if (A_GuiEvent = "DoubleClick")
 	else
 		Gosub, MenuEditRecord
 }
-SB_SetText(L(lLvEventsRecordsSelected, LV_GetCount("Selected")), 2)
+if LV_GetCount("Selected")
+	SB_SetText(L(lLvEventsRecordsSelected, LV_GetCount("Selected")), 2)
+else
+	SB_SetText(lLvEventsNoRecordSelected, 2)
 return
 
 
@@ -1924,6 +1941,7 @@ else
 	loop, % LV_GetCount("Column")
 		LV_ModifyCol(A_Index, "AutoHdr")
 	blnFilterActive := false
+	ChangesToSave(true)
 }
 return
 
@@ -2088,8 +2106,9 @@ if (intNewNbRows)
 else
 {
 	SB_SetText(L(lSBEmpty), 1)
-	SB_SetText("", 3)
+	SB_SetText("", 4)
 }
+ChangesToSave(true)
 return
 
 
@@ -2131,8 +2150,9 @@ if (intNewNbRows)
 else
 {
 	SB_SetText(L(lSBEmpty), 1)
-	SB_SetText("", 3)
+	SB_SetText("", 4)
 }
+ChangesToSave(true)
 return
 
 
@@ -2204,6 +2224,7 @@ Loop
 				StringReplace, strCell, strCell, %strSearch%, %strReplaceString%, All
 				StringCaseSense, %strPreviousCaseSense%
 				LV_Modify(intRowNumber, "Col" . intColNumber, strCell)
+				ChangesToSave(true)
 			}
 			else
 				Gosub, ReplaceShowRecord
@@ -2365,6 +2386,7 @@ loop, % LV_GetCount("Column")
 }
 blnRecordChanged := false
 gosub, EditRecordGuiClose
+ChangesToSave(true)
 return
 
 
@@ -2500,13 +2522,22 @@ return
 
 
 GuiEscape:
+; do nothing
+return
+
+
+
 GuiClose:
 Gui, 1:+OwnDialogs
-if (blnSkipConfirmQuit)
-	ExitApp
-MsgBox, 292, %lAppName%, % L(lQuitApp, lAppName) ; task modal
-IfMsgBox, Yes
-	ExitApp
+if (blnChangesUnsaved)
+{
+	MsgBox, % 8192 + 4  + 48 + 256, %lAppName%, % L(lQuitUnsaved, lAppName) ; Task Modal 8192 + Yes/No 4 + Icon Exclamation 48 + Makes the 2nd button the default 256
+	IfMsgBox, No
+		return
+}
+
+ExitApp
+
 return
 
 
@@ -2546,7 +2577,8 @@ Gui, 1:Default
 loop, % LV_GetCount("Column")
 	if (A_Index <= intLastFieldIn2Gui)
 		LV_Modify(intRowNumber, "Col" . A_Index, strEdit%A_Index%)
-Goto, 2GuiClose
+Gosub, 2GuiClose
+ChangesToSave(true)
 return
 
 
@@ -2619,6 +2651,7 @@ if (A_ThisLabel = "ButtonZoomSave")
 	Gui, 3:Submit, NoHide
 	strNewZoomFieldContent := strZoomedEdit
 	GuiControl, 2:, %strZoomField%, %strNewZoomFieldContent%
+	ChangesToSave(true)
 }
 Gui, 2:-Disabled
 Gui, 3:Destroy
@@ -2650,6 +2683,8 @@ strCurrentHeaderEscaped := StrEscape(strCurrentHeader)
 GuiControl, 1:, strRenameEscaped, %strCurrentHeaderEscaped%
 GuiControl, 1:, strOrderEscaped, %strCurrentHeaderEscaped%
 GuiControl, 1:, strSelectEscaped, %strCurrentHeaderEscaped%
+GuiControl, 1:, strMergeEscaped
+GuiControl, 1:, strMergeNewNameEscaped
 if (radFixed)
 	Gosub, ClickRadFixed
 else if (radExpress)
@@ -2870,22 +2905,6 @@ return
 
 
 
-Time2Donate(intStartups, blnDonor)
-{
-	if (intStartups > 200)
-		intDivisor := 50
-	else if (intStartups > 120)
-		intDivisor := 40
-	else if (intStartups > 60)
-		intDivisor := 30
-	else
-		intDivisor := 20
-		
-	return !Mod(intStartups, intDivisor) and !(blnDonor)
-}
-
-
-
 Check4CommandLineParameter:
 if 0 > 0 
 ; The left side of a non-expression if-statement is always the name of a variable = %0% command line parameter
@@ -2917,7 +2936,34 @@ return
 
 
 
+ChangeButtonNamesOneRwo: 
+IfWinNotExist, % L(lLvEventsOnerecordselectedTitle, lAppName)
+    return  ; Keep waiting.
+SetTimer, ChangeButtonNamesOneRwo, Off 
+WinActivate 
+ControlSetText, Button1, %lTab3ThisRecord%
+ControlSetText, Button2, %lTab3AllRecord%
+return
+
+
+
 ; --------------------- FUNCTIONS --------------------------
+
+
+Time2Donate(intStartups, blnDonor)
+{
+	if (intStartups > 200)
+		intDivisor := 50
+	else if (intStartups > 120)
+		intDivisor := 40
+	else if (intStartups > 60)
+		intDivisor := 30
+	else
+		intDivisor := 20
+		
+	return !Mod(intStartups, intDivisor) and !(blnDonor)
+}
+
 
 
 CheckOneRow()
@@ -2937,17 +2983,6 @@ CheckOneRow()
 	}
 	return True
 }
-
-
-
-ChangeButtonNamesOneRwo: 
-IfWinNotExist, % L(lLvEventsOnerecordselectedTitle, lAppName)
-    return  ; Keep waiting.
-SetTimer, ChangeButtonNamesOneRwo, Off 
-WinActivate 
-ControlSetText, Button1, %lTab3ThisRecord%
-ControlSetText, Button2, %lTab3AllRecord%
-return
 
 
 
@@ -3211,6 +3246,7 @@ FirstVsSecondIs(strFirstVersion, strSecondVersion)
 }
 
 
+
 GetNbLinesOfControl(strThisEditHandle)
 {
 	EM_GETLINECOUNT = 0xBA
@@ -3225,6 +3261,8 @@ GetLvColumnWidth(intCol)
 	SendMessage, 4125, intCol - 1, 0, SysListView321  ; 4125 is LVM_GETCOLUMNWIDTH.
 	return ErrorLevel
 }
+
+
 
 GetWidestControl(strControl, arrLabels*)
 {
@@ -3244,6 +3282,8 @@ GetWidestControl(strControl, arrLabels*)
 	return intWidest
 }
 
+
+
 GetEditHeight()
 {
 	Gui, GetHeight:New
@@ -3254,6 +3294,8 @@ GetEditHeight()
 	return intHeight
 }
 
+
+
 ShowHideUndoButtons(strButtonLabel)
 {
 	Loop, Parse, % "Rename|Order|Select|Merge", |
@@ -3261,3 +3303,9 @@ ShowHideUndoButtons(strButtonLabel)
 }
 
 
+
+ChangesToSave(blnTrueFalse)
+{
+	blnChangesUnsaved := blnTrueFalse
+	SB_SetText((blnChangesUnsaved ? lChangesUnSaved : ""), 3)
+}
