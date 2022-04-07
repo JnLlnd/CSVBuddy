@@ -1,7 +1,7 @@
 ;===============================================
 /*
 CSV Buddy
-Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org/)
+Written using AutoHotkey_L v1.1.09.03+ (http://www.autohotkey.com/)
 By JnLlnd on AHK forum
 This script uses the library ObjCSV v0.5.9 (https://github.com/JnLlnd/ObjCSV)
 
@@ -22,13 +22,24 @@ limitations under the License.
 Version history
 ---------------
 
-2022-03-28 BETA v2.1.9.3
-- display error message if a reuse field has invalid syntax when a CSV file is loaded and when the Select command is used; support placeholder ROWNUMBER (enclosed with reuse delimiters) in reuse fields format section, for example "#[ROWNUMBER]"
-new settings for labels, edit controls and listview fonts; redesign of tab content unsing tab3 control with font size adaptation; new functions to get controls width and height; new zoom buttons for rename, select and order edit controls in tab 2 (to be completed)
-fix bug preventing from search and replace with an empty string
-in tab 2, restore zomme buttons and rename them undo buttons; hide Select undo button if there is no resue field
-in tab 2, add a reuse command, change order (Rename, Order, Select and Reuse); add gosub ButtonSetReuse merged with ButtonSetSelect and adapt to execute one or the other; undo buttons to be completed
-#####
+2022-04-06 BETA v2.1.9.3
+ 
+Merge fields
+- add a "Merge" command in tab 2 (previously named "Reuse") with separate text boxes for 1) fields and format (including existing fields enclosed by merge delimiters, for example "[FirstName] [LastName]) and 2) new field name
+- display error message if a merge field has invalid syntax when loading a CSV file
+- support placeholder ROWNUMBER (enclosed with reuse delimiters) in reuse fields format section, for example "#[ROWNUMBER]"
+- update status bar with progress during build merge fields
+ 
+User interface
+- redesign the user interface to support font changes in the main window
+- new font settings in "Options" tab for labels (default Microsoft Sans Serif, 11), text input (default Courier New, 10) and list (default Microsoft Sans Serif, 10)
+- change the order of commands in tab 2 to "Rename", "Order", "Select" and "Merge"
+- add Undo buttons for each commands in tab 2 allowing to revert the last change
+- track changes in list data and alert user for unsaved changes before quiting the application; add a section to status bar to show that changes need to be saved
+- remove the previous prompt when quitting (and its associated option in tab 6)
+- stop quitting the app on Escape key
+- fix bug preventing from search something and replace it with nothing
+- disable window during loading file, loading to listview, saving to csv or exporting data
 
 2022-03-02 BETA v2.1.9.2
 - support multiple reuse in select command
@@ -218,7 +229,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 2.1.9.2
+;@Ahk2Exe-SetVersion 2.1.9.3
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -226,7 +237,8 @@ SetWorkingDir, %A_ScriptDir%
 ; --------------------- GLOBAL AND DEFAULT VALUES --------------------------
 
 
-global strAppVersionLong := "v" . lAppVersion . " BETA"
+; global strAppVersionLong := "v" . lAppVersion . " BETA"
+global strAppVersionLong := "v" . lAppVersion
 global intCurrentSortColumn
 global strFontNameLabels := "Microsoft Sans Serif"
 global strFontSizeLabels := 11
@@ -314,7 +326,7 @@ intProgressType := -2 ; Status Bar, part 2
 Gui, 1:New, +Resize, % L(lAppName . " " . strAppVersionLong)
 
 Gui, 1:Font, s10 w700, Verdana
-Gui, 1:Add, Tab3, vtabCSVBuddy gChangedTabCSVBuddy, % L(lTab0List)
+Gui, 1:Add, Tab3, x10 vtabCSVBuddy gChangedTabCSVBuddy, % L(lTab0List)
 Gui, 1:Font
 
 intButtonH := GetEditHeight()
@@ -559,16 +571,18 @@ Gui, 1:Add, Edit, w80 r1 vstrListBackgroundColor, %strListBackgroundColor%
 Gui, 1:Add, Edit, w80 r1 vstrListTextColor, %strListTextColor%
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 
-intOptionsW := GetWidestControl("Text", lTab6LabelsFontSize, lTab6EditFontSize, lTab6ListFontSize, lTab6ListGridLines)
+intOptionsW := GetWidestControl("Text", lTab6LabelsFontSize, lTab6EditFontSize, lTab6ListFontSize, lTab6ScreenHeightCorrection, lTab6ScreenWidthCorrection)
 Gui, 1:Add, Text, ys x+10 w%intOptionsW% right section, %lTab6LabelsFontSize%
 Gui, 1:Add, Text, w%intOptionsW% right, %lTab6EditFontSize%
 Gui, 1:Add, Text, w%intOptionsW% right, %lTab6ListFontSize%
-Gui, 1:Add, Text, w%intOptionsW% right, %lTab6ListGridLines%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6ScreenHeightCorrection%
+Gui, 1:Add, Text, w%intOptionsW% right, %lTab6ScreenWidthCorrection%
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, ys x+5 w30 r1 section center vstrFontSizeLabels, %strFontSizeLabelsBackup%
-Gui, 1:Add, Edit, w30 r1 center vstrFontSizeEdit, %strFontSizeEditBackup%
-Gui, 1:Add, Edit, w30 r1 center vstrFontSizeList, %strFontSizeList%
-Gui, 1:Add, Edit, w30 r1 center vblnListGrid, %blnListGrid%
+Gui, 1:Add, Edit, ys x+5 w35 r1 section center vstrFontSizeLabels, %strFontSizeLabelsBackup%
+Gui, 1:Add, Edit, w35 r1 center vstrFontSizeEdit, %strFontSizeEditBackup%
+Gui, 1:Add, Edit, w35 r1 center vstrFontSizeList, %strFontSizeList%
+Gui, 1:Add, Edit, w35 r1 center vintSreenHeightCorrection, %intSreenHeightCorrection%
+Gui, 1:Add, Edit, w35 r1 center vintSreenWidthCorrection, %intSreenWidthCorrection%
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 
 intOptionsW := GetWidestControl("Text", lTab6TextEditor, lTab6DefaultEditor, lTab6DefaultFileEncoding)
@@ -578,30 +592,23 @@ Gui, 1:Add, Text, w%intOptionsW% right, %lTab6DefaultFileEncoding%
 Gui, 1:Add, Text, w%intOptionsW% right, %lTab6LoadCodePage%
 Gui, 1:Add, Text, w%intOptionsW% right, %lTab6SaveCodePage%
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, ys x+5 w80 r1 vstrTextEditorExe, %strTextEditorExe%
+Gui, 1:Add, Edit, ys x+5 w90 r1 vstrTextEditorExe, %strTextEditorExe%
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 drpRecordEditor := (intRecordEditor = 1 ? "Field-by-field" : "Full screen")
-Gui, 1:Add, DropDownList, w80 vdrpRecordEditor, % StrReplace(L(lTab6RecordEditors), drpRecordEditor . "|", drpRecordEditor . "||") 
-Gui, 1:Add, DropDownList, w80 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsDetect), strIniFileEncoding . "|", strIniFileEncoding . "||") 
+Gui, 1:Add, DropDownList, w90 vdrpRecordEditor, % StrReplace(L(lTab6RecordEditors), drpRecordEditor . "|", drpRecordEditor . "||") 
+Gui, 1:Add, DropDownList, w90 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsDetect), strIniFileEncoding . "|", strIniFileEncoding . "||") 
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, w80 r1 center vstrCodePageLoad, %strCodePageLoad%
-Gui, 1:Add, Edit, w80 r1 center vstrCodePageSave, %strCodePageSave%
+Gui, 1:Add, Edit, w90 r1 center vstrCodePageLoad, %strCodePageLoad%
+Gui, 1:Add, Edit, w90 r1 center vstrCodePageSave, %strCodePageSave%
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 
-intOptionsW := GetWidestControl("Checkbox", lTab6EncapsulateAllValues, lTab6SkipReadyPrompt)
+intOptionsW := GetWidestControl("Checkbox", lTab6EncapsulateAllValues, lTab6SkipReadyPrompt, lTab6ListGridLines)
 Gui, 1:Add, Checkbox, ys x+10 w%intOptionsW% right section vblnAlwaysEncapsulate, %lTab6EncapsulateAllValues%
 GuiControl, 1:, blnAlwaysEncapsulate, %blnAlwaysEncapsulate%
 Gui, 1:Add, Checkbox, y+15 w%intOptionsW% right vblnSkipHelpReadyToEdit, %lTab6SkipReadyPrompt%
 GuiControl, 1:, blnSkipHelpReadyToEdit, %blnSkipHelpReadyToEdit%
-intOptionsW := GetWidestControl("Text", lTab6ScreenHeightCorrection, lTab6ScreenWidthCorrection)
-Gui, 1:Add, Text, y+15 w%intOptionsW% right, %lTab6ScreenHeightCorrection%
-Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, yp x+5 w35 r1 center vintSreenHeightCorrection, %intSreenHeightCorrection%
-Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
-Gui, 1:Add, Text, xs w%intOptionsW% right, %lTab6ScreenWidthCorrection%
-Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, yp x+5 w35 r1 center vintSreenWidthCorrection, %intSreenWidthCorrection%
-Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+Gui, 1:Add, Checkbox, y+15 w%intOptionsW% right vblnListGrid, %lTab6ListGridLines%
+GuiControl, 1:, blnListGrid, %blnListGrid%
 
 intOptionsW := GetWidestControl("Text", lTab6FixedWidthDefault, lTab6HTMLTemplateDelimiter, lTab6MergeDelimiters)
 Gui, 1:Add, Text, ys x+10 w%intOptionsW%  section, %lTab6FixedWidthDefault%
@@ -634,7 +641,7 @@ Gui, 1:Default ; reset default Gui after use of Gui to measure controls
 Gui, 1:Tab
 
 Gui, 1:Font, % "s" . strFontSizeList, %strFontNameList%
-Gui, 1:Add, ListView, 	x10 r24 w955 vlvData -ReadOnly NoSort gListViewEvents AltSubmit -LV0x10
+Gui, 1:Add, ListView, y+9 x10 r24 w955 vlvData -ReadOnly NoSort gListViewEvents AltSubmit -LV0x10
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 
 strFontSizeLabels := strFontSizeLabelsBackup
@@ -660,7 +667,7 @@ GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
 Gui, % "1:+MinSize" . aaPosW + 20 . "x" . 500
 
 /* #### Auto loading for testing
-strInputFile := A_ScriptDir . "\TEST-Reuse-One-Simple.csv"
+strInputFile := A_ScriptDir . "\TEST-Merge-One-Simple.csv"
 ; strInputFile := A_ScriptDir . "\Test files\50000 Sales Records.csv"
 GuiControl, 1:, strFileToLoad, %strInputFile%
 GuiControl, 1:+Default, btnLoadFile
@@ -668,7 +675,7 @@ GuiControl, 1:Focus, btnLoadFile
 gosub, DetectDelimiters
 Gosub, ButtonLoadFile
 Sleep, 10 ; if not, lvData grid and color are not always set correctly
-GuiControl, 1:Choose, tabCSVBuddy, 2
+GuiControl, 1:Choose, tabCSVBuddy, 1
 */
 
 return
@@ -1304,7 +1311,7 @@ return
 
 ButtonHelpMerge:
 Gui, 1:Submit, NoHide
-Help(lTab2HelpMerge, strCurrentFieldDelimiter, StrSplit(strMergeDelimiters)[1], StrSplit(strMergeDelimiters)[2])
+Help(lTab2HelpMerge, StrSplit(strMergeDelimiters)[1], StrSplit(strMergeDelimiters)[2])
 return
 
 
@@ -2515,7 +2522,7 @@ GuiControl, 1:Move, btnCheckExportFile, % "X" . (A_GuiWidth - intTab4aCol4X)
 GuiControl, 1:Move, strMultiPurpose, % "W" . (A_GuiWidth - intTab4bEditW)
 GuiControl, 1:Move, btnMultiPurpose, % "X" . (A_GuiWidth - intTab4bCol3X)
 
-GuiControl, 1:Move, lvData, % "W" . (A_GuiWidth - 20) . " H" . (A_GuiHeight - 222)
+GuiControl, 1:Move, lvData, % "W" . (A_GuiWidth - 20) . " H" . (A_GuiHeight - 234)
 
 return
 
