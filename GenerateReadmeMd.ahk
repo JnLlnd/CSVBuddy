@@ -16,7 +16,7 @@ global strMD := ""
 
 H(1, L("~1~ (~2~) - Read me", lAppName,  "v" . lAppVersion))
 P(lDocDesc450)
-P("Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org)`nBy JnLlnd on [AHK forum](http://www.ahkscript.org/boards/)`nFirst official release: 2013-11-30")
+P("Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org)`nBy Jean Lalonde (JnLlnd on [AHK forum](http://www.autohotkey.com/boards/)`nFirst official release: 2013-11-30")
 
 H(2, "Links")
 B("[Application home](http://code.jeanlalonde.ca/csvbuddy/)")
@@ -24,6 +24,23 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
+H(3, "2022-03-01 v2.1.9.3")
+B("Merge fields")
+B("add a ""Merge"" command in tab 2 (previously named ""Reuse"") with separate text boxes for 1) fields and format (including existing fields enclosed by merge delimiters, for example ""[FirstName] [LastName]) and 2) new field name")
+B("display error message if a merge field has invalid syntax when loading a CSV file")
+B("support placeholder ROWNUMBER (enclosed with reuse delimiters) in reuse fields format section, for example ""#[ROWNUMBER]""")
+B("update status bar with progress during build merge fields")
+B("User interface")
+B("redesign the user interface to support font changes in the main window")
+B("new font settings in ""Options"" tab for labels (default Microsoft Sans Serif, 11), text input (default Courier New, 10) and list (default Microsoft Sans Serif, 10)")
+B("change the order of commands in tab 2 to ""Rename"", ""Order"", ""Select"" and ""Merge""")
+B("add Undo buttons for each commands in tab 2 allowing to revert the last change")
+B("track changes in list data and alert user for unsaved changes before quiting the application; add a section to status bar to show that changes need to be saved")
+B("remove the previous prompt when quitting (and its associated option in tab 6)")
+B("stop quitting the app on Escape key")
+B("fix bug preventing from search something and replace it with nothing")
+B("disable window during loading file, loading to listview, saving to csv or exporting data")
+
 H(3, "2022-03-01 v2.1.9.2")
 B("Support multiple reuse in select command")
 B("Known limitation: when adding reuse fields, all existing fields must be present in the Select list (abort select command if required)")

@@ -1,12 +1,12 @@
 ﻿
-# CSV Buddy (v2.1.9.2) - Read me
+# CSV Buddy (v2.1.9.3) - Read me
 
 
-CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Unicode ready. Freeware.
+CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, merge fields in new columns, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Unicode ready. Freeware.
 
 
 Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org)  
-By JnLlnd on [AHK forum](http://www.ahkscript.org/boards/)  
+By Jean Lalonde (JnLlnd on [AHK forum](http://www.autohotkey.com/boards/)  
 First official release: 2013-11-30
 
 
@@ -18,6 +18,24 @@ First official release: 2013-11-30
 
 ## History
 
+
+### 2022-03-01 v2.1.9.3
+
+* Merge fields
+* add a "Merge" command in tab 2 (previously named "Reuse") with separate text boxes for 1) fields and format (including existing fields enclosed by merge delimiters, for example "[FirstName] [LastName]) and 2) new field name
+* display error message if a merge field has invalid syntax when loading a CSV file
+* support placeholder ROWNUMBER (enclosed with reuse delimiters) in reuse fields format section, for example "#[ROWNUMBER]"
+* update status bar with progress during build merge fields
+* User interface
+* redesign the user interface to support font changes in the main window
+* new font settings in "Options" tab for labels (default Microsoft Sans Serif, 11), text input (default Courier New, 10) and list (default Microsoft Sans Serif, 10)
+* change the order of commands in tab 2 to "Rename", "Order", "Select" and "Merge"
+* add Undo buttons for each commands in tab 2 allowing to revert the last change
+* track changes in list data and alert user for unsaved changes before quiting the application; add a section to status bar to show that changes need to be saved
+* remove the previous prompt when quitting (and its associated option in tab 6)
+* stop quitting the app on Escape key
+* fix bug preventing from search something and replace it with nothing
+* disable window during loading file, loading to listview, saving to csv or exporting data
 
 ### 2022-03-01 v2.1.9.2
 

@@ -37,11 +37,12 @@ H(4, lDocDescription)
 
 P(lDocDesc2000)
 
-T("CSVBuddy-01.jpg", lTab0Load)
-T("CSVBuddy-02.jpg", lTab0Edit)
-T("CSVBuddy-03.jpg", lLvEventsEditrowMenu)
-T("CSVBuddy-04.jpg", lTab0Save)
-T("CSVBuddy-05.jpg", lTab0Export)
+T("CSVBuddy-01.png", lTab0Load)
+T("CSVBuddy-02.png", lTab0Edit)
+T("CSVBuddy-03.png", lLvEventsEditrowMenu)
+T("CSVBuddy-04.png", lTab0Save)
+T("CSVBuddy-05.png", lTab0Export)
+T("CSVBuddy-06.png", SubStr(lTab2MergeFields, 1, -1))
 
 H(4, lDocFeatures)
 
@@ -54,7 +55,7 @@ P(lDocHelpIntro)
 
 H(3, lTab0Load . " " . lDocTab)
 
-I("CSVBuddy-tab1.jpg")
+I("CSVBuddy-tab1.png")
 
 Help(L(lTab1HelpFileToLoad, lAppName, lAppName))
 Help(lTab1HelpHeader)
@@ -62,31 +63,34 @@ Help(lTab1HelpSetHeader)
 Help(L(lTab1HelpDelimiter1, lAppName))
 Help(L(lTab1HelpEncapsulator1, lAppName))
 Help(lTab1HelpMultiline1)
-Help(lDocReuseFields)
+Help(L(lTab1HelpFileEncoding, lTab1HelpFileEncodingLoad))
+Help(lDocMergeFields)
 Help(lTab1HelpReadyToEdit)
 
 H(3, lTab0Edit . " " . lDocTab)
 
-I("CSVBuddy-tab2.jpg")
+I("CSVBuddy-tab2.png")
 
 Help(L(lTab2HelpRename, "usually comma", "comma", "usually double-quotes"))
 Help(L(lTab2HelpSelect, "[", "]", "usually comma", "usually double-quotes"))
 Help(L(lTab2HelpOrder, "usually comma"))
+Help(L(lTab2HelpMerge, "[", "]"))
 
 H(3, lTab0Save . " " . lDocTab)
 
 Help(lTab3HelpFileToSave)
 
-I("CSVBuddy-tab3.jpg")
+I("CSVBuddy-tab3.png")
 
 Help(lTab3HelpSaveHeader)
 Help(lTab3HelpFieldDelimiter3)
 Help(lTab3HelpEncapsulator3)
 Help(lTab3HelpSaveMultiline)
+Help(L(lTab1HelpFileEncoding, lTab3HelpFileEncodingSave) . "`n`n" . lTab1HelpFileEncodingExport)
 
 H(3, lTab0Export . " " . lDocTab)
 
-I("CSVBuddy-tab4.jpg")
+I("CSVBuddy-tab4.png")
 
 Help(lTab4HelpFileToExport)
 Help(lTab4HelpExportFormat)
@@ -95,13 +99,16 @@ Help(lTab4HelpExportHTML)
 Help(lTab4HelpExportXML)
 Help(lTab4HelpExportExpress)
 
+H(3, lDocIniTitle)
+I("CSVBuddy-tab5.png")
+W(lDocIniHelp)
+
 H(2, lDocKeyboardHelp)
 W(lDocKeyboardHelpDetail)
 
 H(2, lDocAdvancedTopicsTitle)
 N("inioptions")
-H(3, lDocIniTitle)
-W(lDocIniHelp)
+
 H(3, lDocCommandLineTitle)
 W(lDocCommandLineHelp)
 
@@ -122,7 +129,7 @@ FileDelete, %strFile%
 Sleep, 100
 FileAppend, %strHtml%`r`n, %strFile%, UTF-8
 Sleep, 100
-run, "C:\Program Files\Internet Explorer\iexplore.exe" %strFile%
+run, %strFile%
 
 return
 
