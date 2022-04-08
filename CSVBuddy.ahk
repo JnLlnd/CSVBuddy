@@ -426,21 +426,27 @@ Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrRenameEscaped
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetRename gButtonSetRename, % L(lTab2Rename)
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpRename gButtonHelpRename, % L(lTab0QuestionMark)
+Gui, 1:Font, % "s" . strFontSizeLabels * 2, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoRename gButtonUndoRename hidden, %strUndoChar%
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblOrderFields right, % L(lTab2Orderfields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrOrderEscaped
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetOrder gButtonSetOrder, % L(lTab2Order)
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpOrder gButtonHelpOrder, % L(lTab0QuestionMark)
+Gui, 1:Font, % "s" . strFontSizeLabels * 2, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoOrder gButtonUndoOrder hidden, %strUndoChar%
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblSelectFields right, % L(lTab2Selectfields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrSelectEscaped
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetSelect gButtonSetSelect, % L(lTab2Select)
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpSelect gButtonHelpSelect, % L(lTab0QuestionMark)
+Gui, 1:Font, % "s" . strFontSizeLabels * 2, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoSelect gButtonUndoSelect hidden, %strUndoChar%
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblMergeFields right, % L(lTab2Mergefields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrMergeEscaped
@@ -451,7 +457,9 @@ Gui, 1:Add, Edit, yp x+5 w%intTab2EditMerge2W% vstrMergeNewNameEscaped
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetMerge gButtonSetMerge, % L(lTab2Merge)
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpMerge gButtonHelpMerge, % L(lTab0QuestionMark)
+Gui, 1:Font, % "s" . strFontSizeLabels * 2, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoMerge gButtonUndoMerge hidden, %strUndoChar%
+Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 
 ; tab 3a positions
 intTab3aCol1W := GetWidestControl("Text", lTab3CSVfiletosave)
@@ -666,7 +674,6 @@ Gosub, Check4CommandLineParameter
 GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
 Gui, % "1:+MinSize" . aaPosW + 20 . "x" . 500
 
-/* #### Auto loading for testing
 strInputFile := A_ScriptDir . "\TEST-Merge-One-Simple.csv"
 ; strInputFile := A_ScriptDir . "\Test files\50000 Sales Records.csv"
 GuiControl, 1:, strFileToLoad, %strInputFile%
@@ -676,6 +683,7 @@ gosub, DetectDelimiters
 Gosub, ButtonLoadFile
 Sleep, 10 ; if not, lvData grid and color are not always set correctly
 GuiControl, 1:Choose, tabCSVBuddy, 1
+/* #### Auto loading for testing
 */
 
 return
@@ -1817,9 +1825,9 @@ if (A_GuiEvent = "DoubleClick")
 {
 	intRowNumber := A_EventInfo
 	if (intRecordEditor = 1)
-		Gosub, MenuEditRow
-	else
 		Gosub, MenuEditRecord
+	else
+		Gosub, MenuEditRow
 }
 if LV_GetCount("Selected")
 	SB_SetText(L(lLvEventsRecordsSelected, LV_GetCount("Selected")), 2)
