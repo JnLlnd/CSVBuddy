@@ -171,9 +171,10 @@ If file encoding is not specified (if you leave encoding at "Detect") when loadi
 <BR />
 Insert merged field specs in the CSV file header in two parts: 1) fields to merge and format, 2) new field name "[[fields and format][name]]".<BR />
 &nbsp;&nbsp;&nbsp;&nbsp;1) [fields and format]: format the new field reusing existing fields by enclosing their name between delimiters, example [Client: [LastName], [FirstName]]<BR />
-&nbsp;&nbsp;&nbsp;&nbsp;2) [name]: name of the new field<BR />
-<BR />
-For example: inserting merge specs in the header "LastName,FirstName,City,[[Client: [FirstName] [LastName] ([City])][Name and city]]" would add to your data a new field named "Name and city" with content "Lalonde,Jean,Montreal,Client: Jean Lalonde (Montreal)" or "Presley,Elvis,Memphis,Client: Elvis Presley (Memphis)".<BR />
+&nbsp;&nbsp;&nbsp;&nbsp;2) [name]: name of the new field</P>
+
+<blockquote> <p><font face="monospace"><font size="7" color="#ff8000">[</font><font size="6" color="#00b3b3">[</font><font size="5">[Address Line] in [City]][MyField]</font><font size="6" color="#00b3b3">]</font><font size="7" color="#ff8000">]</font><br> </font></p> <ul> <li><font face="monospace"> <b><font color="#ff8000" size="4">The first [] pair delimits the whole reuse field.</font></b></font></li> <li><font face="monospace"> <b><font color="#00b3b3" size="4">The second level of pairs delimits the two sections: [[format][name]]</font></b></font></li> <li><font face="monospace" size="4"> Inside [format], a third level of pairs delimits the fields reused.</font></li> </ul> </blockquote>
+<P>For example: inserting merge specs in the header "LastName,FirstName,City,[[Client: [FirstName] [LastName] ([City])][Name and city]]" would add to your data a new field named "Name and city" with content "Lalonde,Jean,Montreal,Client: Jean Lalonde (Montreal)" or "Presley,Elvis,Memphis,Client: Elvis Presley (Memphis)".<BR />
 <BR />
 Requirements:<BR />
 - fields reused in merge specs must appear in columns before the merged specs;<BR />
