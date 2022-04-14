@@ -3291,6 +3291,7 @@ GetWidestControl(strControl, arrLabels*)
 	{
 		Gui, GetWidest:Add, %strControl%, +HwndintHwnd, %strLabel%
 		ControlGetPos, , , intWidth, , , ahk_id %intHwnd%
+		intWidth := Round(intWidth // (A_ScreenDPI / 96) * 1.05) ; compensate for scaling, 5% more for safety
 		intWidest := (intWidth > intWidest ? intWidth : intWidest)
 	}
 	Gui, GetWidest:Destroy
@@ -3306,7 +3307,7 @@ GetEditHeight()
 	Gui, GetHeight:Add, Edit, +HwndintHwnd, TEXT
 	ControlGetPos, , , , intHeight, , ahk_id %intHwnd%
 	Gui, GetHeight:Destroy
-	return intHeight
+	return Round(intHeight // (A_ScreenDPI / 96) * 1.05) ; compensate for scaling, 5% more for safety
 }
 
 
