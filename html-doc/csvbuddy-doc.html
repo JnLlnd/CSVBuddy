@@ -5,7 +5,7 @@
 <link href="csvbuddy-doc.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-<H1>CSV Buddy (v2.1.9.3) - Documentation</H1>
+<H1>CSV Buddy (v2.1.9.4) - Documentation</H1>
 
 <P>CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, merge fields in new columns, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Unicode ready. Freeware.</P>
 
@@ -173,7 +173,7 @@ Insert merged field specs in the CSV file header in two parts: 1) fields to merg
 &nbsp;&nbsp;&nbsp;&nbsp;1) [fields and format]: format the new field reusing existing fields by enclosing their name between delimiters, example [Client: [LastName], [FirstName]]<BR />
 &nbsp;&nbsp;&nbsp;&nbsp;2) [name]: name of the new field</P>
 
-<blockquote> <p><font face="monospace"><font size="7" color="#ff8000">[</font><font size="6" color="#00b3b3">[</font><font size="5">[Address Line] in [City]][MyField]</font><font size="6" color="#00b3b3">]</font><font size="7" color="#ff8000">]</font><br> </font></p> <ul> <li><font face="monospace"> <b><font color="#ff8000" size="4">The first [] pair delimits the whole reuse field.</font></b></font></li> <li><font face="monospace"> <b><font color="#00b3b3" size="4">The second level of pairs delimits the two sections: [[format][name]]</font></b></font></li> <li><font face="monospace" size="4"> Inside [format], a third level of pairs delimits the fields reused.</font></li> </ul> </blockquote>
+<blockquote> <p><font face="monospace"><font size="7" color="#ff8000">[</font><font size="6" color="#00b3b3">[</font><font size="5">[Address Line] in [City]][MyField]</font><font size="6" color="#00b3b3">]</font><font size="7" color="#ff8000">]</font><br> </font></p> <ul> <li><font face="monospace"> <b><font color="#ff8000" size="4">The first [] pair delimits the whole merge specs.</font></b></font></li> <li><font face="monospace"> <b><font color="#00b3b3" size="4">The second level of pairs delimits the two sections: [[fields and format][name]]</font></b></font></li> <li><font face="monospace" size="4"> Inside [fields and format], a third level of pairs delimits the fields merged.</font></li> </ul> </blockquote>
 <P>For example: inserting merge specs in the header "LastName,FirstName,City,[[Client: [FirstName] [LastName] ([City])][Name and city]]" would add to your data a new field named "Name and city" with content "Lalonde,Jean,Montreal,Client: Jean Lalonde (Montreal)" or "Presley,Elvis,Memphis,Client: Elvis Presley (Memphis)".<BR />
 <BR />
 Requirements:<BR />

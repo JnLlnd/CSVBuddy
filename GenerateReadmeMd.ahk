@@ -24,7 +24,11 @@ B("[Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy
 B("[Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)")
 
 H(2, "History")
-H(3, "2022-03-01 v2.1.9.3")
+H(3, "2022-04-15 v2.1.9.4")
+B("adjust display of tabs content for HDPI screens")
+B("fix bug opening the wrong record editor")
+B("increase size of the undo buttons")
+H(3, "2022-04-06 v2.1.9.3")
 B("Merge fields")
 B("add a ""Merge"" command in tab 2 (previously named ""Reuse"") with separate text boxes for 1) fields and format (including existing fields enclosed by merge delimiters, for example ""[FirstName] [LastName]) and 2) new field name")
 B("display error message if a merge field has invalid syntax when loading a CSV file")

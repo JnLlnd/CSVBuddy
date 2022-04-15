@@ -22,6 +22,11 @@ limitations under the License.
 Version history
 ---------------
 
+2022-04-15 BETA v2.1.9.4
+- adjust display of tabs content for HDPI screens
+- fix bug opening the wrong record editor
+- increase size of the undo buttons
+
 2022-04-06 BETA v2.1.9.3
  
 Merge fields
@@ -229,7 +234,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 2.1.9.3
+;@Ahk2Exe-SetVersion 2.1.9.4
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -237,8 +242,8 @@ SetWorkingDir, %A_ScriptDir%
 ; --------------------- GLOBAL AND DEFAULT VALUES --------------------------
 
 
-; global strAppVersionLong := "v" . lAppVersion . " BETA"
-global strAppVersionLong := "v" . lAppVersion
+global strAppVersionLong := "v" . lAppVersion . " BETA"
+; global strAppVersionLong := "v" . lAppVersion
 global intCurrentSortColumn
 global strFontNameLabels := "Microsoft Sans Serif"
 global strFontSizeLabels := 11
@@ -674,7 +679,8 @@ Gosub, Check4CommandLineParameter
 GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
 Gui, % "1:+MinSize" . aaPosW + 20 . "x" . 500
 
-strInputFile := A_ScriptDir . "\TEST-Merge-One-Simple.csv"
+; strInputFile := A_ScriptDir . "\TEST-Merge-One-Simple.csv"
+strInputFile := A_ScriptDir . "\TEST-Merge-None.csv"
 ; strInputFile := A_ScriptDir . "\Test files\50000 Sales Records.csv"
 GuiControl, 1:, strFileToLoad, %strInputFile%
 GuiControl, 1:+Default, btnLoadFile
