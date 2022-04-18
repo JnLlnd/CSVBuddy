@@ -334,7 +334,7 @@ Gui, 1:Font, s10 w700, Verdana
 Gui, 1:Add, Tab3, x10 vtabCSVBuddy gChangedTabCSVBuddy, % L(lTab0List)
 Gui, 1:Font
 
-intButtonH := GetEditHeight()
+intButtonH := GetControlHeight("Edit") * 1.1 ; align buttons height to edit control height
 strUndoChar :=  Chr(0x238C) ; Unicode chars: https://www.fileformat.info/info/unicode/category/So/list.htm
 
 ; global positions
@@ -514,7 +514,7 @@ Gui, 1:Add, Radio, ys x%intTab3bCol6X% w%intTab3bCol6W% vradSaveMultiline gClick
 Gui, 1:Add, Radio, y+10 x%intTab3bCol6X% w%intTab3bCol6W% vradSaveSingleline gClickRadSaveSingleline, % L(lTab3Savesingleline)
 Gui, 1:Add, Text, y+10 x%intTab3bCol6X% w%intTab3bCol6W% vlblEndoflineReplacement3 hidden, % L(lTab3Endoflinereplacement)
 GuiControlGet, aaEolReplacementPos, 1:Pos, lblEndoflineReplacement3
-intEolReplacementY := aaEolReplacementPosY
+intEolReplacementY := ScreenScaling(aaEolReplacementPosY)
 Gui, 1:Add, Button, ys x%intTab3bCol7X% w%intButtonSingleCharW% h%intButtonH% vbtnHelpMultiline gButtonHelpSaveMultiline, % L(lTab0QuestionMark)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, y%intEolReplacementY% x%intTab3bCol7X% w%intEditSmallW% vstrEndoflineReplacement3 hidden center, % chr(182)
@@ -677,7 +677,7 @@ Gosub, Check4Update
 Gosub, Check4CommandLineParameter
 
 GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
-Gui, % "1:+MinSize" . aaPosW + 20 . "x" . 500
+Gui, % "1:+MinSize" . ScreenScaling(aaPosW) + 20 . "x" . 500
 
 ; strInputFile := A_ScriptDir . "\TEST-Merge-One-Simple.csv"
 strInputFile := A_ScriptDir . "\TEST-Merge-None.csv"
@@ -960,7 +960,8 @@ if (intErrorLevel)
 	{
 		strError := L(lTab1CSVfilenotloadedTooLarge, intActualSize)
 		if (A_PtrSize = 4) ; 32-bits
-			strError := strError . L(lTab1Trythe64bitsversion)
+			strError := strError . " " . L(lTab1Trythe64bitsversion)
+		 strError := strError . "`n`nError #: " . intErrorLevel . "`nFile: "
 	}
 	Oops(strError)
 	SB_SetText(lSBEmpty, 1)
@@ -2034,7 +2035,6 @@ if (intRowNumber = 0)
 intGui1WinID := WinExist("A")
 Gui, 2:New, +Resize +Hwndstr2GuiHandle, %strGuiTitle%
 Gui, 2:+Owner1 ; Make the main window (Gui #1) the owner of the EditRow window (Gui #2).
-Gui, 1:Default
 SysGet, intMonWork, MonitorWorkArea 
 intColWidth := 380
 intEditWidth := intColWidth - 20
@@ -2043,17 +2043,24 @@ intX := 10
 intY := 5
 intCol := 1
 strZoomField := ""
+intHeightLabel := GetControlHeight("Text")
+Gui, 1:Default
 loop, % LV_GetCount("Column")
 {
+	Gui, 2:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 	if ((intY + 100) > (intMonWorkBottom + intSreenHeightCorrection))
 	{
 		if (intCol = 1)
+		{
+			intY := intY + 5
 			Gosub, DisplayShowRecordsButtons
+		}
 		if (intCol = intMaxNbCol)
 		{
 			intYLabel := intY
 			Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabelMissing, % L(lLvEventsFieldsMissing)
 			intLastFieldIn2Gui := A_Index - 1
+			Gui, 2:Font
 			break
 		}
 		intCol := intCol + 1
@@ -2063,7 +2070,7 @@ loop, % LV_GetCount("Column")
 	else
 		intLastFieldIn2Gui := A_Index
 	intYLabel := intY
-	intYEdit := intY + 15
+	intYEdit := intY + intHeightLabel + 5
 	LV_GetText(strColHeader, 0, A_Index)
 	if (A_Index = intCurrentSortColumn)
 		strColHeader := SubStr(strColHeader, 3)
@@ -2076,14 +2083,20 @@ loop, % LV_GetCount("Column")
 		StringReplace, strColData, strColData, %strSearch%, %strReplaceString%, All
 		StringCaseSense, %strPreviousCaseSense%
 	}
-	Gui, 2:Add, Edit, y%intYEdit% x%intX% w%intEditWidth% vstrEdit%A_Index% +HwndstrEditHandle, %strColData%
+	
+	Gui, 2:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+	Gui, 2:Add, Edit, y%intYEdit% x%intX% w%intEditWidth% vstrEdit%A_Index% +HwndstrEditHandle Multi +WantReturn, %strColData%
 	ShrinkEditControl(strEditHandle, 2, "2")
 	GuiControlGet, intPosEdit, 2:Pos, %strEditHandle%
-	intY := intY + intPosEditH + 19
+	intY := intY + ScreenScaling(intPosEditH) + intHeightLabel + 10
 	intNbFieldsOnScreen := A_Index ; incremented at each occurence of the loop
 }
+Gui, 2:Font
 if (intCol = 1) ; duplicate of line above in the loop, but much simpler that way
+{
+	intY := intY + 5
 	Gosub, DisplayShowRecordsButtons
+}
 
 if ((strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceShowRecord") and intColFound)
 {
@@ -2099,12 +2112,16 @@ return
 
 
 DisplayShowRecordsButtons:
+Gui, 2:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+; x position of buttons is set by 2GuiSize
+intButtonWidth := Round(GetWidestControl("Button", lLvEventsReplaceAll, lLvEventsStop, lLvEventsSave, strCancelButtonLabel) / 1.05) ; remove safety
 if (strShowRecordLabel = "ReplaceShowRecord")
 	Gui, 2:Add, Button, y%intY% x10 vbtnReplaceAll gButtonReplaceAll, % L(lLvEventsReplaceAll)
 if (strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceShowRecord")
-	Gui, 2:Add, Button, % (strShowRecordLabel = "ReplaceShowRecord" ? "yp x+5" : "y" . intY . "x10") . " vbtnStopSearch gButtonStopSearch", % L(lLvEventsStop)
+	Gui, 2:Add, Button, % (strShowRecordLabel = "ReplaceShowRecord" ? "yp x+5" : "y" . intY . " x10") . " vbtnStopSearch gButtonStopSearch", % L(lLvEventsStop)
 Gui, 2:Add, Button, % (strShowRecordLabel = "SearchShowRecord" ? "yp x+5" : "y" . intY . "x60") . " vbtnSaveRecord g" . strSaveRecordButton, % L(lLvEventsSave)
 Gui, 2:Add, Button, yp x+5 vbtnCancel g%strCancelButton%, %strCancelButtonLabel%
+Gui, 2:Font
 return
 
 
@@ -2250,6 +2267,7 @@ Loop
 			else
 				Gosub, ReplaceShowRecord
 		WinWaitClose, %strGuiTitle%
+		Gui, 1:Default
 		LV_Modify(intRowNumber, "-Select")
 	}
 }
@@ -2629,10 +2647,10 @@ return
 2GuiSize: ; Expand or shrink the ListView in response to the user's resizing of the window.
 if A_EventInfo = 1  ; The window has been minimized.  No action needed.
     return
-GuiControl, 2:Move, btnReplaceAll, % "x" . (A_GuiWidth - 235)
-GuiControl, 2:Move, btnStopSearch, % "x" . (A_GuiWidth - 155)
-GuiControl, 2:Move, btnSaveRecord, % "x" . (A_GuiWidth - 105)
-GuiControl, 2:Move, btnCancel, % "x" . (A_GuiWidth - 55)
+GuiControl, 2:Move, btnReplaceAll, % "x" . (A_GuiWidth - ((intButtonWidth + 8) * 4) - 0) . " w" . intButtonWidth
+GuiControl, 2:Move, btnStopSearch, % "x" . (A_GuiWidth - ((intButtonWidth + 8) * 3) - 0) . " w" . intButtonWidth
+GuiControl, 2:Move, btnSaveRecord, % "x" . (A_GuiWidth - ((intButtonWidth + 8) * 2)) . " w" . intButtonWidth
+GuiControl, 2:Move, btnCancel, % "x" . (A_GuiWidth - intButtonWidth - 8) . " w" . intButtonWidth
 if intCol > 1 ; The window has been minimized.  No action needed.
     return
 intWidthSize := A_GuiWidth - 20
@@ -3083,13 +3101,13 @@ ShrinkEditControl(strThisEditHandle, intMaxRows, strGuiName)
 	{
 		GuiControlGet, intPosEdit, %strGuiName%:Pos, %strThisEditHandle%
 		intEditMargin := 8 ; top & bottom margin of the Edit control (regardless of the nb of rows)
-		intOriginalHeight := intPosEditH
+		intOriginalHeight := ScreenScaling(intPosEditH)
 		intHeightOneRow := Round((intOriginalHeight - intEditMargin) / intNbRows)
 		intNewHeight := (intHeightOneRow * intMaxRows) + intEditMargin
 		; MsgBox, % "intNbRows: " . intNbRows . "`nintOriginalHeight: " . intOriginalHeight 
 		;	. "`nintHeightOneRow: " . intHeightOneRow . "`nintNewHeight: " . intNewHeight
-		GuiControl, %strGuiName%:Move, %strThisEditHandle%, % "x" . intPosEditX + 20 . "h" . intNewHeight ; width - 20 set by 2GuiSize
-		Gui, %strGuiName%:Add, Button, x%intPosEditX% y%intPosEditY% w20 gButtonZoom vstrEdit%strThisEditHandle%, %lLvEventsZoomOut%
+		GuiControl, %strGuiName%:Move, %strThisEditHandle%, % "x" . ScreenScaling(intPosEditX) + 20 . "h" . intNewHeight ; width - 20 set by 2GuiSize
+		Gui, %strGuiName%:Add, Button, % "x" . ScreenScaling(intPosEditX) . " y" . ScreenScaling(intPosEditY) . " w20 gButtonZoom vstrEdit" . strThisEditHandle, %lLvEventsZoomOut%
 	}
 }
 
@@ -3297,7 +3315,7 @@ GetWidestControl(strControl, arrLabels*)
 	{
 		Gui, GetWidest:Add, %strControl%, +HwndintHwnd, %strLabel%
 		ControlGetPos, , , intWidth, , , ahk_id %intHwnd%
-		intWidth := Round(intWidth // (A_ScreenDPI / 96) * 1.05) ; compensate for scaling, 5% more for safety
+		intWidth := Round(ScreenScaling(intWidth) * 1.05) ; + 5% for safety
 		intWidest := (intWidth > intWidest ? intWidth : intWidest)
 	}
 	Gui, GetWidest:Destroy
@@ -3306,14 +3324,17 @@ GetWidestControl(strControl, arrLabels*)
 
 
 
-GetEditHeight()
+GetControlHeight(strControl := "Edit")
 {
 	Gui, GetHeight:New
-	Gui, GetHeight:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-	Gui, GetHeight:Add, Edit, +HwndintHwnd, TEXT
+	if (strControl = "Edit")
+		Gui, GetHeight:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+	else
+		Gui, GetHeight:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+	Gui, GetHeight:Add, %strControl%, +HwndintHwnd, SOME TEXT
 	ControlGetPos, , , , intHeight, , ahk_id %intHwnd%
 	Gui, GetHeight:Destroy
-	return Round(intHeight // (A_ScreenDPI / 96) * 1.05) ; compensate for scaling, 5% more for safety
+	return ScreenScaling(intHeight)
 }
 
 
@@ -3330,4 +3351,12 @@ ChangesToSave(blnTrueFalse)
 {
 	blnChangesUnsaved := blnTrueFalse
 	SB_SetText((blnChangesUnsaved ? lChangesUnSaved : ""), 3)
+}
+
+
+
+ScreenScaling(intSize)
+; compensate for scaling
+{
+	return Round(intSize // (A_ScreenDPI / 96))
 }
