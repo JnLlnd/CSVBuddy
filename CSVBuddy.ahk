@@ -22,6 +22,11 @@ limitations under the License.
 Version history
 ---------------
 
+2022-04-18 BETA v2.1.9.5
+- support custom fonts and screen scaling in full screen editor and zoom windows
+- display error message if trying to open a file that does not exist
+- put more info in error message if file does not load
+
 2022-04-15 BETA v2.1.9.4
 - adjust display of tabs content for HDPI screens
 - fix bug opening the wrong record editor
@@ -234,7 +239,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 2.1.9.4
+;@Ahk2Exe-SetVersion 2.1.9.5
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
