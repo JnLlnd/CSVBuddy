@@ -2033,6 +2033,7 @@ else
 if (intRowNumber = 0)
 	intRowNumber := 1
 intGui1WinID := WinExist("A")
+intNbColumns := LV_GetCount("Column")
 Gui, 2:New, +Resize +Hwndstr2GuiHandle, %strGuiTitle%
 Gui, 2:+Owner1 ; Make the main window (Gui #1) the owner of the EditRow window (Gui #2).
 SysGet, intMonWork, MonitorWorkArea 
@@ -2044,8 +2045,7 @@ intY := 5
 intCol := 1
 strZoomField := ""
 intHeightLabel := GetControlHeight("Text")
-Gui, 1:Default
-loop, % LV_GetCount("Column")
+loop, %intNbColumns%
 {
 	Gui, 2:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 	if ((intY + 100) > (intMonWorkBottom + intSreenHeightCorrection))
@@ -2088,7 +2088,8 @@ loop, % LV_GetCount("Column")
 	Gui, 2:Add, Edit, y%intYEdit% x%intX% w%intEditWidth% vstrEdit%A_Index% +HwndstrEditHandle Multi +WantReturn, %strColData%
 	ShrinkEditControl(strEditHandle, 2, "2")
 	GuiControlGet, intPosEdit, 2:Pos, %strEditHandle%
-	intY := intY + ScreenScaling(intPosEditH) + intHeightLabel + 10
+	; do not ScreenScaling intPosEditH
+	intY := intY + intPosEditH + intHeightLabel + 10
 	intNbFieldsOnScreen := A_Index ; incremented at each occurence of the loop
 }
 Gui, 2:Font
@@ -2106,7 +2107,7 @@ if ((strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceSho
 Gui, 2:Show, AutoSize Center
 Gui, 1:+Disabled
 if (intCol = intMaxNbCol)
-	Oops(lLvEventsFieldsMissingChangeEditor, lAppName, LV_GetCount("Column"))
+	Oops(lLvEventsFieldsMissingChangeEditor, lAppName, intNbColumns)
 return
 
 
