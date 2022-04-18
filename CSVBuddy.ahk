@@ -312,7 +312,7 @@ IniRead, blnDonor, %strIniFile%, Global, Donor, 0 ; Please, be fair. Don't cheat
 blnDonor := (blnDonator or blnDonor)
 IniRead, strCodePageLoad, %strIniFile%, Global, CodePageLoad, 1252 ; default ANSI Latin 1, Western European (Windows)
 IniRead, strCodePageSave, %strIniFile%, Global, CodePageSave, 1252 ; default ANSI Latin 1, Western European (Windows)
-IniRead, intSreenHeightCorrection, %strIniFile%, Global, SreenHeightCorrection, -100 ; negative number to redure the height of edit row dialog box
+IniRead, intSreenHeightCorrection, %strIniFile%, Global, SreenHeightCorrection, -100 ; negative number to reduce the height of edit row dialog box
 IniRead, intSreenWidthCorrection, %strIniFile%, Global, SreenWidthCorrection, -100 ; negative number to redure the width of edit row dialog box
 IniRead, intRecordEditor, %strIniFile%, Global, RecordEditor, 2 ; 1: full screen editor / 2: field by field editor
 IniRead, blnAlwaysEncapsulate, %strIniFile%, Global, AlwaysEncapsulate, 0
@@ -680,7 +680,9 @@ GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
 Gui, % "1:+MinSize" . ScreenScaling(aaPosW) + 20 . "x" . 500
 
 ; strInputFile := A_ScriptDir . "\TEST-Merge-One-Simple.csv"
-strInputFile := A_ScriptDir . "\TEST-Merge-None.csv"
+; strInputFile := A_ScriptDir . "\TEST-Merge-None.csv"
+; strInputFile := A_ScriptDir . "\..\ObjCSV Test files\200.csv"
+strInputFile := A_ScriptDir . "\..\ObjCSV Test files\20-one-long-field.csv"
 ; strInputFile := A_ScriptDir . "\Test files\50000 Sales Records.csv"
 GuiControl, 1:, strFileToLoad, %strInputFile%
 GuiControl, 1:+Default, btnLoadFile
@@ -909,6 +911,11 @@ if !StrLen(strFileToLoad)
 	Oops(lTab1FirstusetheSelectbutton)
 	return
 }
+if !FileExist(strFileToLoad)
+{
+	Oops(lTab1FileNotFound, strFileToLoad)
+	return
+}
 if !StrLen(strFileHeaderEscaped) and (radSetHeader)
 {
 	MsgBox, 52, % L(lAppName), % L(lTab1CSVHeaderisnotspecified)
@@ -961,7 +968,7 @@ if (intErrorLevel)
 		strError := L(lTab1CSVfilenotloadedTooLarge, intActualSize)
 		if (A_PtrSize = 4) ; 32-bits
 			strError := strError . " " . L(lTab1Trythe64bitsversion)
-		 strError := strError . "`n`nError #: " . intErrorLevel . "`nFile: "
+		 strError := strError . "`n`nError #: " . intErrorLevel . "`nFile: " . strFileToLoad
 	}
 	Oops(strError)
 	SB_SetText(lSBEmpty, 1)
@@ -1089,7 +1096,7 @@ if (A_ThisLabel = "ButtonSetMerge")
 {
 	if InStr(strMergeNewNameEscaped, strMergeDelimiterOpening) or InStr(strMergeNewNameEscaped, strMergeDelimiterClosing)
 	{
-		Oops(lTab2MergeDelimietInNewName, strMergeDelimiterOpening, strMergeDelimiterClosing)
+		Oops(lTab2MergeDelimiterInNewName, strMergeDelimiterOpening, strMergeDelimiterClosing)
 		return
 	}
 	if StrLen(strMergeEscaped) and StrLen(strMergeNewNameEscaped)
@@ -2033,32 +2040,33 @@ else
 if (intRowNumber = 0)
 	intRowNumber := 1
 intGui1WinID := WinExist("A")
-intNbColumns := LV_GetCount("Column")
+intNbLVColumns := LV_GetCount("Column")
 Gui, 2:New, +Resize +Hwndstr2GuiHandle, %strGuiTitle%
 Gui, 2:+Owner1 ; Make the main window (Gui #1) the owner of the EditRow window (Gui #2).
 SysGet, intMonWork, MonitorWorkArea 
 intColWidth := 380
 intEditWidth := intColWidth - 20
-intMaxNbCol := Floor((intMonWorkRight + intSreenWidthCorrection) / intColWidth)
+intMaxNbCol := Floor((ScreenScaling(intMonWorkRight) + intSreenWidthCorrection) / intColWidth)
 intX := 10
 intY := 5
 intCol := 1
 strZoomField := ""
 intHeightLabel := GetControlHeight("Text")
-loop, %intNbColumns%
+Gui, 1:Default
+loop, %intNbLVColumns%
 {
-	Gui, 2:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
-	if ((intY + 100) > (intMonWorkBottom + intSreenHeightCorrection))
+	if ((intY + 100) > (ScreenScaling(intMonWorkBottom) + intSreenHeightCorrection))
 	{
 		if (intCol = 1)
 		{
 			intY := intY + 5
 			Gosub, DisplayShowRecordsButtons
+			Gui, 1:Default
 		}
 		if (intCol = intMaxNbCol)
 		{
 			intYLabel := intY
-			Gui, 2:Add, Text, y%intYLabel% x%intX% vstrLabelMissing, % L(lLvEventsFieldsMissing)
+			Gui, 2:Add, Text, y%intYLabel% x10 vstrLabelMissing, % L(lLvEventsFieldsMissing)
 			intLastFieldIn2Gui := A_Index - 1
 			Gui, 2:Font
 			break
@@ -2069,6 +2077,7 @@ loop, %intNbColumns%
 	}
 	else
 		intLastFieldIn2Gui := A_Index
+	Gui, 2:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 	intYLabel := intY
 	intYEdit := intY + intHeightLabel + 5
 	LV_GetText(strColHeader, 0, A_Index)
@@ -2107,7 +2116,7 @@ if ((strShowRecordLabel = "SearchShowRecord" or strShowRecordLabel = "ReplaceSho
 Gui, 2:Show, AutoSize Center
 Gui, 1:+Disabled
 if (intCol = intMaxNbCol)
-	Oops(lLvEventsFieldsMissingChangeEditor, lAppName, intNbColumns)
+	Oops(lLvEventsFieldsMissingChangeEditor, lAppName, intNbLVColumns)
 return
 
 
@@ -2652,13 +2661,13 @@ GuiControl, 2:Move, btnReplaceAll, % "x" . (A_GuiWidth - ((intButtonWidth + 8) *
 GuiControl, 2:Move, btnStopSearch, % "x" . (A_GuiWidth - ((intButtonWidth + 8) * 3) - 0) . " w" . intButtonWidth
 GuiControl, 2:Move, btnSaveRecord, % "x" . (A_GuiWidth - ((intButtonWidth + 8) * 2)) . " w" . intButtonWidth
 GuiControl, 2:Move, btnCancel, % "x" . (A_GuiWidth - intButtonWidth - 8) . " w" . intButtonWidth
-if intCol > 1 ; The window has been minimized.  No action needed.
+if intCol > 1 ; do not resize edit controls if multiple columns
     return
 intWidthSize := A_GuiWidth - 20
 Loop, %intNbFieldsOnScreen%
 {
-	GuiControlGet, strFielfHwnd, 2:Hwnd, strEdit%A_Index%
-	GuiControl, 2:Move, strEdit%A_Index%, % "w" . A_GuiWidth - (GetNbLinesOfControl(strFielfHwnd) > 1 ? 40 : 20)
+	GuiControlGet, strFieldHwnd, 2:Hwnd, strEdit%A_Index%
+	GuiControl, 2:Move, strEdit%A_Index%, % "w" . A_GuiWidth - (GetNbLinesOfControl(strFieldHwnd) > 1 ? 45 : 20)
 }
 return
 
@@ -2673,9 +2682,13 @@ intGui2WinID := WinExist("A")
 GuiControlGet, strZoomFieldContent, , %strZoomField%
 Gui, 3:New, +Resize -MinimizeBox, % L(lLvEventsZoomTitle, lAppName)
 Gui, 3:+Owner2 ; Make the edit window (Gui #2) the owner of the Zoom window (Gui #3).
-Gui, 3:Add, Edit, x10 y5 w400 h300 vstrZoomedEdit, %strZoomFieldContent%
-Gui, 3:Add, Button, x10 y+20 vbtnZoomSave gButtonZoomSave, %lLvEventsSave%
-Gui, 3:Add, Button, x+10 yp vbtnZoomCancel gButtonZoomCancel, %lLvEventsCancel%
+Gui, 3:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
+Gui, 3:Add, Edit, x10 y5 w500 h500 vstrZoomedEdit, %strZoomFieldContent%
+Gui, 3:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
+intZoomButtonWidth := GetWidestControl("Button", lLvEventsSave, lLvEventsCancel)
+intZoomButtonHeight := GetControlHeight("Button")
+Gui, 3:Add, Button, % "x10 y+20 vbtnZoomSave gButtonZoomSave w" . intZoomButtonWidth, %lLvEventsSave%
+Gui, 3:Add, Button, % "x+10 yp vbtnZoomCancel gButtonZoomCancel w" . intZoomButtonWidth, %lLvEventsCancel%
 Gui, 3:Show, AutoSize Center
 Gui, 2:+Disabled
 return
@@ -2705,8 +2718,8 @@ return
 if A_EventInfo = 1  ; The window has been minimized.  No action needed.
     return
 GuiControl, 3:Move, strZoomedEdit, % "x10 y5 w" . (A_GuiWidth - 15) . " h" . (A_GuiHeight - 45)
-GuiControl, 3:Move, btnZoomSave, % "x" . (A_GuiWidth - 105) . " y" . (A_GuiHeight - 30)
-GuiControl, 3:Move, btnZoomCancel, % "x" . (A_GuiWidth - 55) . " y" . (A_GuiHeight - 30)
+GuiControl, 3:Move, btnZoomSave, % "x" . (A_GuiWidth - (2 * intZoomButtonWidth) - 10) . " y" . (A_GuiHeight - intZoomButtonHeight - 3)
+GuiControl, 3:Move, btnZoomCancel, % "x" . (A_GuiWidth - intZoomButtonWidth - 4) . " y" . (A_GuiHeight - intZoomButtonHeight - 3)
 return
 
 
@@ -3102,13 +3115,11 @@ ShrinkEditControl(strThisEditHandle, intMaxRows, strGuiName)
 	{
 		GuiControlGet, intPosEdit, %strGuiName%:Pos, %strThisEditHandle%
 		intEditMargin := 8 ; top & bottom margin of the Edit control (regardless of the nb of rows)
-		intOriginalHeight := ScreenScaling(intPosEditH)
+		intOriginalHeight := intPosEditH
 		intHeightOneRow := Round((intOriginalHeight - intEditMargin) / intNbRows)
 		intNewHeight := (intHeightOneRow * intMaxRows) + intEditMargin
-		; MsgBox, % "intNbRows: " . intNbRows . "`nintOriginalHeight: " . intOriginalHeight 
-		;	. "`nintHeightOneRow: " . intHeightOneRow . "`nintNewHeight: " . intNewHeight
-		GuiControl, %strGuiName%:Move, %strThisEditHandle%, % "x" . ScreenScaling(intPosEditX) + 20 . "h" . intNewHeight ; width - 20 set by 2GuiSize
-		Gui, %strGuiName%:Add, Button, % "x" . ScreenScaling(intPosEditX) . " y" . ScreenScaling(intPosEditY) . " w20 gButtonZoom vstrEdit" . strThisEditHandle, %lLvEventsZoomOut%
+		GuiControl, %strGuiName%:Move, %strThisEditHandle%, % "x" . intPosEditX + 25 . " h" . intNewHeight . " w" . intEditWidth - 25
+		Gui, %strGuiName%:Add, Button, % "x" . intPosEditX . " y" . intPosEditY . " w20 gButtonZoom vstrEdit" . strThisEditHandle, %lLvEventsZoomOut%
 	}
 }
 
