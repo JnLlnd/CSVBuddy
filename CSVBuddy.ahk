@@ -684,6 +684,7 @@ Gosub, Check4CommandLineParameter
 GuiControlGet, aaPos, 1:Pos, tabCSVBuddy
 Gui, % "1:+MinSize" . ScreenScaling(aaPosW) + 20 . "x" . 500
 
+/* #### Auto loading for testing
 ; strInputFile := A_ScriptDir . "\TEST-Merge-One-Simple.csv"
 ; strInputFile := A_ScriptDir . "\TEST-Merge-None.csv"
 ; strInputFile := A_ScriptDir . "\..\ObjCSV Test files\200.csv"
@@ -696,7 +697,6 @@ gosub, DetectDelimiters
 Gosub, ButtonLoadFile
 Sleep, 10 ; if not, lvData grid and color are not always set correctly
 GuiControl, 1:Choose, tabCSVBuddy, 1
-/* #### Auto loading for testing
 */
 
 return
