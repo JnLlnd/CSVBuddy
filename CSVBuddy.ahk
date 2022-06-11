@@ -22,6 +22,11 @@ limitations under the License.
 Version history
 ---------------
 
+2022-06-11 BETA v2.2.9.1
+- respond to message 0x2225 sent from CSVBuddyMessenger, returning true to confirm that CSV Buddy is running
+- receive CopyData (0x4a) message sent from CSVBuddyMessenger
+- take action on messages Tab, Exec, Set, Choose and Delim
+
 2022-04-18 BETA v2.1.9.5
 - support custom fonts and screen scaling in full screen editor and zoom windows
 - display error message if trying to open a file that does not exist
@@ -239,10 +244,17 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 2.1.9.5
+;@Ahk2Exe-SetVersion 2.2.9.1
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
+
+; Respond to SendMessage sent by CSVBuddyMessenger to respond that CSV Buddy is running
+; No specific reason for 0x2225, except that is is > 0x1000 (http://ahkscript.org/docs/commands/OnMessage.htm) and QAP is using 0x2224
+OnMessage(0x2225, "REPLY_CSVBUDDYISRUNNING")
+
+; Respond to CopyData SendMessage sent by CSVBuddyMessenger after execution of the requested action
+OnMessage(0x4a, "RECEIVE_CSVBUDDYMESSENGER")
 
 ; --------------------- GLOBAL AND DEFAULT VALUES --------------------------
 
@@ -411,7 +423,7 @@ Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, DropDownList, ys x%intTab1bCol6X% w%intDropDownEncoding% vstrFileEncoding1, %strDefaultFileEncoding%
 Gui, 1:Add, Button, yp x%intTab1bCol7X% w%intButtonSingleCharW% h%intButtonH% vbtnHelpFileEncoding1 gButtonHelpFileEncoding1, % L(lTab0QuestionMark)
 Gui, 1:Add, Button, yp x+5 w%intTab1aCol4W% h%intButtonH% vbtnLoadFile gButtonLoadFile hidden, % L(lTab1Load)
-Gui, 1:Add, Button, yp xp w%intTab1aCol4W% h%intButtonH% vbtnCreateFile gMenuCreateNewFile, % L(lTab1Create)
+Gui, 1:Add, Button, yp xp w%intTab1aCol4W% h%intButtonH% vbtnCreateFile gButtonCreateNewFile, % L(lTab1Create)
 
 ; tab 2 positions
 intTab2Col1W := GetWidestControl("Text", lTab2Renamefields, lTab2Selectfields, lTab2Orderfields, lTab2Mergefields)
@@ -698,6 +710,41 @@ Gosub, ButtonLoadFile
 Sleep, 10 ; if not, lvData grid and color are not always set correctly
 GuiControl, 1:Choose, tabCSVBuddy, 1
 */
+
+/*
+TAB 1
+Edit	strFileToLoad	ChangedFileToLoad	Set|strFileToLoad|o:\temp\countrylist.csv
+Button	btnSelectFileToLoad	ButtonSelectFileToLoad	Exec|ButtonSelectFileToLoad
+Edit	strFileHeaderEscaped	Set|strFileHeaderEscaped|A,B,C
+Button	btnPreviewFile	ButtonPreviewFile	Exec|ButtonPreviewFile
+Radio	radGetHeader	ClickRadGetHeader	Set|radGetHeader|1
+Radio	radSetHeader	ClickRadSetHeader	Set|radSetHeader|1
+Edit	strFieldDelimiter1	ChangedFieldDelimiter1	Set|strFieldDelimiter1|;
+Edit	strFieldEncapsulator1	ChangedFieldEncapsulator1	Set|strFieldEncapsulator1,*
+Checkbox	blnMultiline1	ChangedMultiline1	Set|blnMultiline1|1	("Exec|ChangedMultiline1" to see strEndoflineReplacement1) 
+Edit	strEndoflineReplacement1	Set|strEndoflineReplacement1|¶
+DropDownList	strFileEncoding1	Choose|strFileEncoding1|UTF-8
+Button	btnLoadFile	ButtonLoadFile  Exec|ButtonLoadFile
+Button	btnCreateFile	ButtonCreateNewFile
+
+*/
+; TAB 1 examples
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToLoad|o:\temp\countrylist.csv")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonPreviewFile")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSelectFileToLoad")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeaderEscaped|A,B,C")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radGetHeader|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSetHeader|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Delim$")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set$strFieldDelimiter1$|")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Delim|")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator1|*")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnMultiline1|true")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ChangedMultiline1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strEndoflineReplacement1|¶")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strFileEncoding1|UTF-8")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeaderEscaped|A,B,C")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonCreateNewFile")
 
 return
 
@@ -1894,12 +1941,12 @@ intColNumber := 0 ; tell MenuFilter and MenuSearch that search is global
 Menu, ContextMenu, Add
 Menu, ContextMenu, DeleteAll ; to avoid ghost lines at the end when menu is re-created
 if !LV_GetCount("Column")
-	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
+	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), ButtonCreateNewFile
 else if !LV_GetCount("")
 {
 	Menu, ContextMenu, Add, % L(lLvEventsAddrowField), MenuAddRecord
 	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
-	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), MenuCreateNewFile
+	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), ButtonCreateNewFile
 	Menu, ContextMenu, Add, % ((lLvEventsFilterReload)), MenuFilterReload
 	Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterReload%
 }
@@ -1932,7 +1979,7 @@ return
 
 
 
-MenuCreateNewFile:
+ButtonCreateNewFile:
 Gui, 1:+OwnDialogs 
 Gui, 1:Submit, NoHide
 if !StrLen(strFileHeaderEscaped)
@@ -3377,3 +3424,75 @@ ScreenScaling(intSize)
 {
 	return Round(intSize // (A_ScreenDPI / 96))
 }
+
+
+;------------------------------------------------------------
+REPLY_CSVBUDDYISRUNNING(wParam, lParam) 
+; Respond to message 0x2225 sent from CSVBuddyMessenger, returning true to confirm that CSV Buddy is running
+;------------------------------------------------------------
+{
+	return true
+} 
+;------------------------------------------------------------
+
+
+;------------------------------------------------------------
+RECEIVE_CSVBUDDYMESSENGER(wParam, lParam)
+; Adapted from AHK documentation (https://autohotkey.com/docs/commands/OnMessage.htm)
+; Receive CopyData (0x4a) message sent from CSVBuddyMessenger
+; returns FAIL or 0 if an error occurred, 0xFFFF if a CSV Buddy window is open or 1 if success
+;------------------------------------------------------------
+{
+    static strCopyDataDelim := "|"
+    
+    if (wParam = "test")
+        strCopyOfData := lParam
+    else
+    {
+        intStringAddress := NumGet(lParam + 2*A_PtrSize) ; Retrieves the CopyDataStruct's lpData member.
+        strCopyOfData := StrGet(intStringAddress) ; Copy the string out of the structure.
+    }
+        
+	if (SubStr(strCopyOfData, 1, 5) = "Delim")
+	{
+		strCopyDataDelim := SubStr(strCopyOfData, 6, 1) ; keep only the character after "Delim", e.g for for "Delim;", keep ";"
+		return 1
+	}
+		
+    saData := StrSplit(strCopyOfData, strCopyDataDelim)
+    strDebug1 := saData[1]
+    strDebug2 := saData[2]
+    strDebug3 := saData[3]
+	
+	if (saData[1] = "Tab")
+        
+        GuiControl, 1:Choose, tabCSVBuddy, % saData[2]
+        
+	else if (saData[1] = "Exec")
+    
+        Gosub, % saData[2]
+	
+	else if (saData[1] = "Set")
+	
+        if SubStr(saData[2], 1, 3) = "str"
+            GuiControl, 1:, % saData[2], % saData[3]
+        else if SubStr(saData[2], 1, 3) = "rad"
+            GuiControl, 1:, % saData[2], % saData[3] = 1 or saData[3] = "true"
+        else if SubStr(saData[2], 1, 3) = "bln"
+            GuiControl, 1:, % saData[2], % saData[3] = 1 or saData[3] = "true"
+        else
+            return 0
+	
+	else if (saData[1] = "Choose")
+        
+        GuiControl, 1:ChooseString, % saData[2], % saData[3]
+        
+	else
+        
+		return 0
+        
+    Sleep, 50 ; give some time if a gLabel needs to be executed
+	
+	return 1 ; success
+}
+;------------------------------------------------------------
