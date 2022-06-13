@@ -269,6 +269,7 @@ global strFontSizeEdit := 10
 global strFontNameList := "Microsoft Sans Serif"
 global strFontSizeList := 10
 global blnChangesUnsaved
+global strMainGuiTitle := lAppName . " " . strAppVersionLong
 
 strListBackgroundColor := "D0D0D0"
 strListTextColor := "000000"
@@ -345,7 +346,7 @@ intProgressType := -2 ; Status Bar, part 2
 
 ; --------------------- GUI1 --------------------------
 
-Gui, 1:New, +Resize, % L(lAppName . " " . strAppVersionLong)
+Gui, 1:New, +Resize, % L(strMainGuiTitle)
 
 Gui, 1:Font, s10 w700, Verdana
 Gui, 1:Add, Tab3, x10 vtabCSVBuddy gChangedTabCSVBuddy, % L(lTab0List)
@@ -730,12 +731,11 @@ Button	btnLoadFile	ButtonLoadFile	Exec|ButtonLoadFileReplace
 Button	btnCreateFile	ButtonCreateNewFile
 */
 ; TAB 1 examples
-RECEIVE_CSVBUDDYMESSENGER("test", "Tab|1")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToLoad|o:\temp\countrylist.csv")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnMultiline1|true")
-RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonLoadFile")
-RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonLoadFile")
-return
+RECEIVE_CSVBUDDYMESSENGER("test", A_ScriptDir . "\messenger_script.txt")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToLoad|o:\temp\countrylist.csv")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnMultiline1|true")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonLoadFile")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonPreviewFile")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSelectFileToLoad")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeader|A,B,C")
@@ -811,13 +811,23 @@ RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ClickRadSaveSingleline")
 RECEIVE_CSVBUDDYMESSENGER("test", "Set|strEndoflineReplacement3|+")
 RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strFileEncoding1|UTF-16")
 RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSaveFileOverwrite")
-RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonCheckFile")
 /*
-rename Escaped variables
-Window|Minimize
-Exit
+OTHER COMMANDS
 Window|Maximize
+Window|Minimize
+Window|Restore
+[filepath] (file path alone, COMMANDS INSIDE SCRIPT)
 */
+/*
+COMMANDS INSIDE SCRIPT
+Debug|1
+Debug|0
+Exit
+Sleep|n
+*/
+RECEIVE_CSVBUDDYMESSENGER("test", "Window|Maximize")
+RECEIVE_CSVBUDDYMESSENGER("test", "Window|Restore")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Window|Minimize")
 return
 
 
@@ -859,7 +869,7 @@ return
 
 
 ButtonHelpFileToLoad:
-Help(lTab1HelpFileToLoad, lAppName, lAppName)
+Help(lTab1HelpFileToLoad, lAppName)
 return
 
 
@@ -3527,25 +3537,54 @@ RECEIVE_CSVBUDDYMESSENGER(wParam, lParam)
 ;------------------------------------------------------------
 {
     static strCopyDataDelim := "|"
-    
-    if (wParam = "test")
+	
+    if (wParam = "test") ; to send test messages from inside this script
         strCopyOfData := lParam
     else
     {
         intStringAddress := NumGet(lParam + 2*A_PtrSize) ; Retrieves the CopyDataStruct's lpData member.
         strCopyOfData := StrGet(intStringAddress) ; Copy the string out of the structure.
     }
-        
 	if (SubStr(strCopyOfData, 1, 5) = "Delim")
 	{
 		strCopyDataDelim := SubStr(strCopyOfData, 6, 1) ; keep only the character after "Delim", e.g for for "Delim;", keep ";"
 		return 1
 	}
-		
-    saData := StrSplit(strCopyOfData, strCopyDataDelim)
+	if (StrSplit(strCopyOfData, strCopyDataDelim).Length() = 1) and FileExist(strCopyOfData)
+	; if only one parameter and it is the path of an existing file, execute the script
+	{
+		Loop, Read, %strCopyOfData% ; contains the path and name of script file
+		{
+			if (A_LoopReadLine = "Exit")
+				break
+			if !ProcessMessage(A_LoopReadLine, strCopyDataDelim)
+				return 0 ; break loop and exit with error code
+		}
+		return 1 ; no error
+	}
+	else ; execute the single command
+		return ProcessMessage(strCopyOfData, strCopyDataDelim)
+}
+;------------------------------------------------------------
+
+
+;------------------------------------------------------------
+ProcessMessage(strCopyOfData, strCopyDataDelim)
+;------------------------------------------------------------
+{
+    static blnDebug := false
+    
+	saData := StrSplit(strCopyOfData, strCopyDataDelim)
     strDebug1 := saData[1]
     strDebug2 := saData[2]
     strDebug3 := saData[3]
+	
+	if (blnDebug)
+	{
+		MsgBox, 4, %lAppName%, % L(lMessengerDebug, strCopyOfData)
+		IfMsgBox, No
+			return 0 ; exit with error code
+	}
 	
 	if (saData[1] = "Tab")
         
@@ -3570,6 +3609,23 @@ RECEIVE_CSVBUDDYMESSENGER(wParam, lParam)
         
         GuiControl, 1:ChooseString, % saData[2], % saData[3]
         
+	else if (saData[1] = "Window")
+        
+        if (saData[2] = "Minimize")
+			WinMinimize, %strMainGuiTitle%
+        else if (saData[2] = "Maximize")
+			WinMaximize, %strMainGuiTitle%
+        else ; "Restore"
+			WinRestore, %strMainGuiTitle%
+		
+	else if (saData[1] = "Debug")
+		
+		blnDebug := saData[2]
+		
+	else if (saData[1] = "Sleep")
+		
+		Sleep, % saData[2]
+		
 	else
         
 		return 0
