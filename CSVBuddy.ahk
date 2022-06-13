@@ -1169,7 +1169,7 @@ if !LV_GetCount()
 	return
 }
 if (A_ThisLabel = "ButtonUndoRename")
-	strRename := strCurrentHeaderEscapedBK
+	strRename := strCurrentHeaderBK
 
 ; ObjCSV_ReturnDSVObjectArray(strCurrentDSVLine, strDelimiter = ",", strEncapsulator = """")
 objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strRename), strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
@@ -1244,7 +1244,7 @@ if (A_ThisLabel = "ButtonSetMerge")
 	}
 }
 else if (A_ThisLabel = "ButtonUndoMerge")
-	strSelect := strCurrentHeaderEscapedBK
+	strSelect := strCurrentHeaderBK
 else if !StrLen(strSelect)
 {
 	Oops(lTab2SelectNoString, strCurrentVisibleFieldDelimiter)
@@ -1384,7 +1384,7 @@ GoSub, RemoveSorting
 
 ; ObjCSV_Collection2ListView(objCollection [, strGuiID = "", strListViewID = "", strFieldOrder = "", strFieldDelimiter = ","
 ;	, strEncapsulator = """", strSortFields = "", strSortOptions = "", intProgressType = 0, strProgressText = ""])
-ObjCSV_Collection2ListView(objBK, "1", "lvData", StrUnEscape(strCurrentHeaderEscapedBK), strCurrentFieldDelimiter
+ObjCSV_Collection2ListView(objBK, "1", "lvData", StrUnEscape(strCurrentHeaderBK), strCurrentFieldDelimiter
 	, strCurrentFieldEncapsulator, , , intProgressType, lTab0RestoringFromBackup)
 
 SB_SetText(L(lSBRecordsSize, LV_GetCount(), (intActualSize) ? intActualSize : " <1"), 1)
@@ -1414,7 +1414,7 @@ Gui, 1:Submit, NoHide
 GoSub, RemoveSorting
 
 if (A_ThisLabel = "ButtonUndoOrder")
-	strOrder := strCurrentHeaderEscapedBK
+	strOrder := strCurrentHeaderBK
 else if !StrLen(strOrder)
 {
 	Oops(lTab2OrderNoString, strCurrentVisibleFieldDelimiter)
@@ -2866,7 +2866,7 @@ return
 
 UpdateCurrentHeader:
 Gui, 1:Submit, NoHide
-strCurrentHeaderEscapedBK := strCurrentHeaderEscaped
+strCurrentHeaderBK := strCurrentHeaderEscaped
 strCurrentHeader := GetListViewHeader(strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
 strCurrentHeaderEscaped := StrEscape(strCurrentHeader)
 GuiControl, 1:, strRename, %strCurrentHeaderEscaped%
