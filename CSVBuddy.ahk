@@ -383,7 +383,7 @@ Gui, 1:Add, Button, yp x+5 w%intTab1aCol4W% h%intButtonH% vbtnSelectFileToLoad g
 
 Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab1aCol1W% vlblHeader right, % L(lTab1CSVFileHeader)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, yp x%intTab1aCol2X% w%intTab1aCol1W% vstrFileHeaderEscaped disabled
+Gui, 1:Add, Edit, yp x%intTab1aCol2X% w%intTab1aCol1W% vstrFileHeader disabled
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpHeader gButtonHelpHeader, % L(lTab0QuestionMark)
 Gui, 1:Add, Button, yp x+5 w%intTab1aCol4W% h%intButtonH% vbtnPreviewFile gButtonPreviewFile hidden, % L(lTab1PreviewFile)
@@ -715,7 +715,7 @@ GuiControl, 1:Choose, tabCSVBuddy, 1
 TAB 1
 Edit	strFileToLoad	ChangedFileToLoad	Set|strFileToLoad|o:\temp\countrylist.csv
 Button	btnSelectFileToLoad	ButtonSelectFileToLoad	Exec|ButtonSelectFileToLoad
-Edit	strFileHeaderEscaped	Set|strFileHeaderEscaped|A,B,C
+Edit	strFileHeader	Set|strFileHeader|A,B,C
 Button	btnPreviewFile	ButtonPreviewFile	Exec|ButtonPreviewFile
 Radio	radGetHeader	ClickRadGetHeader	Set|radGetHeader|1
 Radio	radSetHeader	ClickRadSetHeader	Set|radSetHeader|1
@@ -738,7 +738,7 @@ RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonLoadFile")
 return
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonPreviewFile")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSelectFileToLoad")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeaderEscaped|A,B,C")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeader|A,B,C")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radGetHeader|1")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSetHeader|1")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Delim$")
@@ -748,7 +748,7 @@ return
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ChangedMultiline1")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strEndoflineReplacement1|¶")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strFileEncoding1|UTF-8")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeaderEscaped|A,B,C")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeader|A,B,C")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonCreateNewFile")
 /*
 TAB 2
@@ -813,7 +813,7 @@ RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strFileEncoding1|UTF-16")
 RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSaveFileOverwrite")
 RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonCheckFile")
 /*
-renam Escaped variables
+rename Escaped variables
 Window|Minimize
 Exit
 Window|Maximize
@@ -867,7 +867,7 @@ return
 DetectDelimiters:
 Sleep, -1 ; makes the script immediately check its message queue. This can be used to force any pending interruptions to occur at a specific place rather than somewhere more random.
 Gui, 1:Submit, NoHide
-strFileHeaderUnEscaped := StrUnEscape(strFileHeaderEscaped)
+strFileHeaderUnEscaped := StrUnEscape(strFileHeader)
 strCandidates := "`t;,:|~" ; check tab, semi-colon, comma, colon, pipe and tilde
 strFieldDelimiterDetected := "," ; comma by default if no delimiter is detected
 loop, Parse, strCandidates
@@ -916,10 +916,10 @@ if StrLen(strFileAttribute) and !InStr(strFileAttribute, "D")
 	GuiControl, 1:Hide, btnCreateFile
 	GuiControl, 1:, strFileToSave, % NewFileName(strFileToLoad)
 	GuiControl, 1:, strFileToExport, % NewFileName(strFileToLoad, "-EXPORT", "txt")
-	if (radGetHeader) or !(StrLen(strFileHeaderEscaped))
+	if (radGetHeader) or !(StrLen(strFileHeader))
 	{
 		FileReadLine, strCurrentHeader, %strFileToLoad%, 1
-		GuiControl, 1:, strFileHeaderEscaped, % StrEscape(strCurrentHeader)
+		GuiControl, 1:, strFileHeader, % StrEscape(strCurrentHeader)
 	}
 }
 else
@@ -950,17 +950,17 @@ return
 ClickRadGetHeader:
 Gui, 1:Submit, NoHide
 FileReadLine, strCurrentHeader, %strFileToLoad%, 1
-GuiControl, 1:, strFileHeaderEscaped, % StrEscape(strCurrentHeader)
-GuiControl, 1:Disable, strFileHeaderEscaped
+GuiControl, 1:, strFileHeader, % StrEscape(strCurrentHeader)
+GuiControl, 1:Disable, strFileHeader
 GuiControl, 1:, lblHeader, % L(lTab1FileCSVHeader)
 return
 
 
 
 ClickRadSetHeader:
-GuiControl, 1:Enable, strFileHeaderEscaped
+GuiControl, 1:Enable, strFileHeader
 GuiControl, 1:, lblHeader, % L(lTab1CustomHeader)
-GuiControl, 1:Focus, strFileHeaderEscaped
+GuiControl, 1:Focus, strFileHeader
 return
 
 
@@ -1042,7 +1042,7 @@ if !FileExist(strFileToLoad)
 	Oops(lTab1FileNotFound, strFileToLoad)
 	return
 }
-if !StrLen(strFileHeaderEscaped) and (radSetHeader)
+if !StrLen(strFileHeader) and (radSetHeader)
 {
 	MsgBox, 52, % L(lAppName), % L(lTab1CSVHeaderisnotspecified)
 	IfMsgBox, No
@@ -1073,7 +1073,7 @@ else
 	intActualSize := 0
 
 intCurrentSortColumn := 0 ; indicate that no field header has the ^ or v sort indicator
-strCurrentHeader := StrUnEscape(strFileHeaderEscaped)
+strCurrentHeader := StrUnEscape(strFileHeader)
 strCurrentFieldDelimiter := StrMakeRealFieldDelimiter(strFieldDelimiter1)
 strCurrentVisibleFieldDelimiter := strFieldDelimiter1
 strCurrentFieldEncapsulator := strFieldEncapsulator1
@@ -2066,7 +2066,7 @@ return
 ButtonCreateNewFile:
 Gui, 1:+OwnDialogs 
 Gui, 1:Submit, NoHide
-if !StrLen(strFileHeaderEscaped)
+if !StrLen(strFileHeader)
 {
 	Oops(L(lTab1NewFileInstructions, StrEscape(StrMakeRealFieldDelimiter(strFieldDelimiter1))))
 	GuiControl, 1:, radSetHeader, 1
@@ -2085,7 +2085,7 @@ else
 	else
 		intActualSize := 0
 	
-	strCurrentHeader := StrUnEscape(strFileHeaderEscaped)
+	strCurrentHeader := StrUnEscape(strFileHeader)
 	strCurrentFieldDelimiter := StrMakeRealFieldDelimiter(strFieldDelimiter1)
 	strCurrentVisibleFieldDelimiter := strFieldDelimiter1
 	strCurrentFieldEncapsulator := strFieldEncapsulator1
@@ -2659,7 +2659,7 @@ GuiControl, 1:Move, tabCSVBuddy, % "W" . (A_GuiWidth - 20)
 GuiControl, 1:Move, strFileToLoad, % "W" . (A_GuiWidth - intTab1aEditW)
 GuiControl, 1:Move, btnHelpFileToLoad, % "X" . (A_GuiWidth - intTab1aCol3X)
 GuiControl, 1:Move, btnSelectFileToLoad, % "X" . (A_GuiWidth - intTab1aCol4X)
-GuiControl, 1:Move, strFileHeaderEscaped, % "W" . (A_GuiWidth - intTab1aEditW)
+GuiControl, 1:Move, strFileHeader, % "W" . (A_GuiWidth - intTab1aEditW)
 GuiControl, 1:Move, btnHelpHeader, % "X" . (A_GuiWidth - intTab1aCol3X)
 GuiControl, 1:Move, btnPreviewFile, % "X" . (A_GuiWidth - intTab1aCol4X)
 GuiControl, 1:Move, btnLoadFile, % "X" . (A_GuiWidth - intTab1aCol4X)
@@ -3106,7 +3106,7 @@ if 0 > 0
 		GuiControl, 1:Show, lblEndoflineReplacement1
 		GuiControl, 1:Show, strEndoflineReplacement1
 		FileReadLine, strCurrentHeader, %strParam%, 1
-		GuiControl, 1:, strFileHeaderEscaped, % StrEscape(strCurrentHeader)
+		GuiControl, 1:, strFileHeader, % StrEscape(strCurrentHeader)
 		gosub, DetectDelimiters
 		gosub, ButtonLoadFile
 	}
