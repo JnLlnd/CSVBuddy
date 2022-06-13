@@ -57,7 +57,7 @@ H(3, lTab0Load . " " . lDocTab)
 
 I("CSVBuddy-tab1.png")
 
-Help(L(lTab1HelpFileToLoad, lAppName, lAppName))
+Help(L(lTab1HelpFileToLoad, lAppName))
 Help(lTab1HelpHeader)
 Help(lTab1HelpSetHeader)
 Help(L(lTab1HelpDelimiter1, lAppName))
