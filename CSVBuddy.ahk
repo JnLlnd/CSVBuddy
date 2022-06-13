@@ -22,7 +22,7 @@ limitations under the License.
 Version history
 ---------------
 
-2022-06-11 BETA v2.2.9.1
+2022-06-?? BETA v2.2.9.1
 - respond to message 0x2225 sent from CSVBuddyMessenger, returning true to confirm that CSV Buddy is running
 - receive CopyData (0x4a) message sent from CSVBuddyMessenger
 - take action on messages Tab, Exec, Set, Choose and Delim
@@ -444,7 +444,7 @@ intTab2EditMergeW := intTab2Col2X + intTab2Col3aX
 Gui, 1:Tab, 2
 Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblRenameFields right, % L(lTab2Renamefields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrRenameEscaped
+Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrRename
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetRename gButtonSetRename, % L(lTab2Rename)
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpRename gButtonHelpRename, % L(lTab0QuestionMark)
@@ -453,7 +453,7 @@ Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoRename 
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblOrderFields right, % L(lTab2Orderfields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrOrderEscaped
+Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrOrder
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetOrder gButtonSetOrder, % L(lTab2Order)
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpOrder gButtonHelpOrder, % L(lTab0QuestionMark)
@@ -462,7 +462,7 @@ Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoOrder g
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblSelectFields right, % L(lTab2Selectfields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrSelectEscaped
+Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrSelect
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetSelect gButtonSetSelect, % L(lTab2Select)
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpSelect gButtonHelpSelect, % L(lTab0QuestionMark)
@@ -471,11 +471,11 @@ Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnUndoSelect 
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Text, y+10 x%intCol1X% w%intTab2Col1W% vlblMergeFields right, % L(lTab2Mergefields)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrMergeEscaped
+Gui, 1:Add, Edit, yp x%intTab2Col2X% vstrMerge
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Text, yp x+5 w%intTab2Col3W% vlblMergeFieldsNewName right, % L(lTab2MergeNewName)
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
-Gui, 1:Add, Edit, yp x+5 w%intTab2EditMerge2W% vstrMergeNewNameEscaped
+Gui, 1:Add, Edit, yp x+5 w%intTab2EditMerge2W% vstrMergeNewName
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 Gui, 1:Add, Button, yp x+5 w%intTab2Col4W% h%intButtonH% vbtnSetMerge gButtonSetMerge, % L(lTab2Merge)
 Gui, 1:Add, Button, yp x+5 w%intButtonSingleCharW% h%intButtonH% vbtnHelpMerge gButtonHelpMerge, % L(lTab0QuestionMark)
@@ -724,12 +724,18 @@ Edit	strFieldEncapsulator1	ChangedFieldEncapsulator1	Set|strFieldEncapsulator1,*
 Checkbox	blnMultiline1	ChangedMultiline1	Set|blnMultiline1|1	("Exec|ChangedMultiline1" to see strEndoflineReplacement1) 
 Edit	strEndoflineReplacement1	Set|strEndoflineReplacement1|¶
 DropDownList	strFileEncoding1	Choose|strFileEncoding1|UTF-8
-Button	btnLoadFile	ButtonLoadFile  Exec|ButtonLoadFile
+Button	btnLoadFile	ButtonLoadFile	Exec|ButtonLoadFile
+Button	btnLoadFile	ButtonLoadFile	Exec|ButtonLoadFileAdd
+Button	btnLoadFile	ButtonLoadFile	Exec|ButtonLoadFileReplace
 Button	btnCreateFile	ButtonCreateNewFile
-
 */
 ; TAB 1 examples
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToLoad|o:\temp\countrylist.csv")
+RECEIVE_CSVBUDDYMESSENGER("test", "Tab|1")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToLoad|o:\temp\countrylist.csv")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnMultiline1|true")
+RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonLoadFile")
+RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonLoadFile")
+return
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonPreviewFile")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSelectFileToLoad")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeaderEscaped|A,B,C")
@@ -739,13 +745,79 @@ Button	btnCreateFile	ButtonCreateNewFile
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set$strFieldDelimiter1$|")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Delim|")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator1|*")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnMultiline1|true")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ChangedMultiline1")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strEndoflineReplacement1|¶")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strFileEncoding1|UTF-8")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeaderEscaped|A,B,C")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonCreateNewFile")
-
+/*
+TAB 2
+Edit	strRename	Set|strRename|A,B,C
+Button	btnSetRename ButtonSetRename	Exec|ButtonSetRename
+Button	btnUndoRename	 ButtonUndoRename	Exec|ButtonUndoRename
+Edit	strOrder	Set|strOrder|A,B,C
+Button	btnSetOrder	ButtonSetOrder	Exec|ButtonSetOrder
+Button	btnUndoOrder	ButtonUndoOrder	Exec|btnUndoOrder
+Edit	strSelect	Set|strSelect|A,B,C
+Button	btnSetSelect	Exec|btnSetSelect
+Button	btnUndoSelect	ButtonUndoSelect	Exec|ButtonUndoSelect
+Edit	strMerge	Set|strMerge|A,B,C
+Edit	strMergeNewName	Set|strMergeNewName|ABC
+Button	btnSetMerge	ButtonSetMerge	Exec|ButtonSetMerge
+Button	btnUndoMerge	ButtonUndoMerge	Exec|btnUndoMerge
+*/
+; TAB 2 examples
+RECEIVE_CSVBUDDYMESSENGER("test", "Tab|2")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strRename|A,B,C")
+RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetRename")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonUndoRename")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strOrder|C,B,A")
+RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetOrder")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strSelect|B,A")
+RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetSelect")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMerge|Test: [B]-[A]")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMergeNewName|D")
+RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetMerge")
+RECEIVE_CSVBUDDYMESSENGER("test", "Tab|3")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter3|;")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator3|*")
+/*
+TAB 3
+Edit	strFileToSave	ChangedFileToSave	Set|strFileToSave|o:\temp\countrylist-rev.csv
+Button	btnSelectFileToSave	ButtonSelectFileToSave	Exec|ButtonSelectFileToSave
+Edit	strFieldDelimiter3	ChangedFieldDelimiter3	Set|strFieldDelimiter3|;
+Edit	strFieldEncapsulator3	ChangedFieldEncapsulator3	Set|strFieldEncapsulator3|*
+Radio	radSaveWithHeader	???	Set|radSaveWithHeader|1
+Radio	radSaveNoHeader	???	Set|radSaveNoHeader|1
+Radio	radSaveMultiline	ClickRadSaveMultiline	Set|radSaveMultiline|1
+Radio	radSaveSingleline	ClickRadSaveSingleline	Set|radSaveSingleline|1
+Edit	strEndoflineReplacement3	Set|strEndoflineReplacement3|¶
+DropDownList	strFileEncoding3	Choose|strFileEncoding1|UTF-8
+Button	btnSaveFile	ButtonSaveFile	Exec|ButtonSaveFile
+Button	btnSaveFile	ButtonSaveFile	Exec|ButtonSaveFileOverwrite
+Button	btnCheckFile	ButtonCheckFile	Exec|ButtonCheckFile
+*/
+; TAB 3 examples
+RECEIVE_CSVBUDDYMESSENGER("test", "Tab|3")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToSave|o:\temp\countrylist-rev.csv")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter3|;")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator3|*")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveWithHeader|1")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveNoHeader|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveMultiline|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ClickRadSaveMultiline")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveSingleline|1")
+RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ClickRadSaveSingleline")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strEndoflineReplacement3|+")
+RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strFileEncoding1|UTF-16")
+RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSaveFileOverwrite")
+RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonCheckFile")
+/*
+renam Escaped variables
+Window|Minimize
+Exit
+Window|Maximize
+*/
 return
 
 
@@ -954,6 +1026,8 @@ return
 
 
 ButtonLoadFile:
+ButtonLoadFileAdd: ; for CSV Buddy Messenger
+ButtonLoadFileReplace: ; for CSV Buddy Messenger
 Gui, 1:+OwnDialogs
 Gui, 1:Submit, NoHide
 if !DelimitersOK(1)
@@ -974,17 +1048,26 @@ if !StrLen(strFileHeaderEscaped) and (radSetHeader)
 	IfMsgBox, No
 		return
 }
+blnChangesToSave := false
 if LV_GetCount("Column")
 {
-	MsgBox, 36, % L(lAppName), % L(lTab1Replacethecurrentcontentof)
-	IfMsgBox, Yes
-		gosub, DeleteListviewData
-	IfMsgBox, No
+	if (A_ThisLabel = "ButtonLoadFileReplace")
+		Gosub, DeleteListviewData
+	else if (A_ThisLabel = "ButtonLoadFile")
 	{
-		MsgBox, 36, %lAppName%, % L(lTab1DoYouWantToAdd)
+		MsgBox, 36, % L(lAppName), % L(lTab1Replacethecurrentcontentof)
+		IfMsgBox, Yes
+			Gosub, DeleteListviewData
 		IfMsgBox, No
-			return
+		{
+			MsgBox, 36, %lAppName%, % L(lTab1DoYouWantToAdd)
+			IfMsgBox, No
+				return
+			blnChangesToSave := true ; lines are added
+		}
 	}
+	else if (A_ThisLabel = "ButtonLoadFileAdd")
+		blnChangesToSave := true ; lines are added
 }
 else
 	intActualSize := 0
@@ -1055,7 +1138,7 @@ GuiControl, 1:ChooseString, strFileEncoding3, %strCurrentFileEncodingLoad%
 blnFilterActive := false
 obj := ; release object
 intErrorLevel := ""
-ChangesToSave(false)
+ChangesToSave(blnChangesToSave)
 return
 
 
@@ -1086,13 +1169,13 @@ if !LV_GetCount()
 	return
 }
 if (A_ThisLabel = "ButtonUndoRename")
-	strRenameEscaped := strCurrentHeaderEscapedBK
+	strRename := strCurrentHeaderEscapedBK
 
 ; ObjCSV_ReturnDSVObjectArray(strCurrentDSVLine, strDelimiter = ",", strEncapsulator = """")
-objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strRenameEscaped), strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
+objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strRename), strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
 intNbFieldNames := objNewHeader.MaxIndex()
 intNbColumns := LV_GetCount("Column")
-if !StrLen(strRenameEscaped)
+if !StrLen(strRename)
 {
 	MsgBox, 52, %lAppName%, % L(lTab2RenameNoString, strCurrentVisibleFieldDelimiter)
 	IfMsgBox, No
@@ -1146,14 +1229,14 @@ if !LV_GetCount()
 
 if (A_ThisLabel = "ButtonSetMerge")
 {
-	if InStr(strMergeNewNameEscaped, strMergeDelimiterOpening) or InStr(strMergeNewNameEscaped, strMergeDelimiterClosing)
+	if InStr(strMergeNewName, strMergeDelimiterOpening) or InStr(strMergeNewName, strMergeDelimiterClosing)
 	{
 		Oops(lTab2MergeDelimiterInNewName, strMergeDelimiterOpening, strMergeDelimiterClosing)
 		return
 	}
-	if StrLen(strMergeEscaped) and StrLen(strMergeNewNameEscaped)
-		strSelectEscaped := strCurrentHeader . strCurrentFieldDelimiter . strMergeDelimiterOpening . strMergeDelimiterOpening . strMergeEscaped . strMergeDelimiterClosing
-			. strMergeDelimiterOpening . strMergeNewNameEscaped . strMergeDelimiterClosing . strMergeDelimiterClosing
+	if StrLen(strMerge) and StrLen(strMergeNewName)
+		strSelect := strCurrentHeader . strCurrentFieldDelimiter . strMergeDelimiterOpening . strMergeDelimiterOpening . strMerge . strMergeDelimiterClosing
+			. strMergeDelimiterOpening . strMergeNewName . strMergeDelimiterClosing . strMergeDelimiterClosing
 	else
 	{
 		Oops(lTab2MergeNoString, strMergeDelimiterOpening, strMergeDelimiterClosing)
@@ -1161,8 +1244,8 @@ if (A_ThisLabel = "ButtonSetMerge")
 	}
 }
 else if (A_ThisLabel = "ButtonUndoMerge")
-	strSelectEscaped := strCurrentHeaderEscapedBK
-else if !StrLen(strSelectEscaped)
+	strSelect := strCurrentHeaderEscapedBK
+else if !StrLen(strSelect)
 {
 	Oops(lTab2SelectNoString, strCurrentVisibleFieldDelimiter)
 	return
@@ -1177,7 +1260,7 @@ objCurrentHeader := ObjCSV_ReturnDSVObjectArray(strCurrentHeader, strCurrentFiel
 objCurrentHeaderPositionByName := Object()
 for intPositionInArray, strFieldName in objCurrentHeader
 	objCurrentHeaderPositionByName[strFieldName] := intPositionInArray
-objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strSelectEscaped), strCurrentFieldDelimiter, strCurrentFieldEncapsulator, true, strMergeDelimiters)
+objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strSelect), strCurrentFieldDelimiter, strCurrentFieldEncapsulator, true, strMergeDelimiters)
 objNewHeaderPositionByName := Object()
 for intPositionInArray, strFieldName in objNewHeader
 	objNewHeaderPositionByName[strFieldName] := intPositionInArray
@@ -1331,8 +1414,8 @@ Gui, 1:Submit, NoHide
 GoSub, RemoveSorting
 
 if (A_ThisLabel = "ButtonUndoOrder")
-	strOrderEscaped := strCurrentHeaderEscapedBK
-else if !StrLen(strOrderEscaped)
+	strOrder := strCurrentHeaderEscapedBK
+else if !StrLen(strOrder)
 {
 	Oops(lTab2OrderNoString, strCurrentVisibleFieldDelimiter)
 	return
@@ -1348,7 +1431,7 @@ objCurrentHeader := ObjCSV_ReturnDSVObjectArray(strCurrentHeader, strCurrentFiel
 objCurrentHeaderPositionByName := Object()
 for intPositionInArray, strFieldName in objCurrentHeader
 	objCurrentHeaderPositionByName[strFieldName] := intPositionInArray
-objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strOrderEscaped), strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
+objNewHeader := ObjCSV_ReturnDSVObjectArray(StrUnEscape(strOrder), strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
 for intKey, strVal in objNewHeader
 	if !objCurrentHeaderPositionByName.HasKey(strVal)
 	{
@@ -1358,14 +1441,14 @@ for intKey, strVal in objNewHeader
 LV_Modify(0, "-Select") ; Make sure all rows will be transfered to objNewCollection
 ; ObjCSV_ListView2Collection([strGuiID = "", strListViewID = "", strFieldOrder = "", strFieldDelimiter = ","
 ;	, strEncapsulator = """", intProgressType = 0, strProgressText = ""])
-objNewCollection := ObjCSV_ListView2Collection("1", "lvData", StrUnEscape(strOrderEscaped), strCurrentFieldDelimiter
+objNewCollection := ObjCSV_ListView2Collection("1", "lvData", StrUnEscape(strOrder), strCurrentFieldDelimiter
 	, strCurrentFieldEncapsulator, intProgressType, L(lTab0ReadingFromList))
 LV_Delete() ; better performance on large files when we delete rows before columns
 loop, % LV_GetCount("Column")
 	LV_DeleteCol(1) ; delete all rows
 ; ObjCSV_Collection2ListView(objCollection [, strGuiID = "", strListViewID = "", strFieldOrder = "", strFieldDelimiter = ","
 ;	, strEncapsulator = """", strSortFields = "", strSortOptions = "", intProgressType = 0, strProgressText = ""])
-ObjCSV_Collection2ListView(objNewCollection, "1", "lvData", StrUnEscape(strOrderEscaped), strCurrentFieldDelimiter
+ObjCSV_Collection2ListView(objNewCollection, "1", "lvData", StrUnEscape(strOrder), strCurrentFieldDelimiter
 	, strCurrentFieldEncapsulator, , , intProgressType, lTab0LoadingToList)
 if (ErrorLevel)
 	Oops(lTab2OrderNotLoaded)
@@ -1506,13 +1589,14 @@ return
 
 
 ButtonSaveFile:
+ButtonSaveFileOverwrite: ; for CSV Buddy Messenger
 Gui, 1:Submit, NoHide
 if !DelimitersOK(3)
 	return
-blnOverwrite := CheckIfFileExistOverwrite(strFileToSave, True)
+blnOverwrite := (A_ThisLabel = "ButtonSaveFileOverwrite" or CheckIfFileExistOverwrite(strFileToSave, True))
 if (blnOverwrite < 0)
 	return
-if !CheckOneRow()
+if (A_ThisLabel = "ButtonSaveFile" and !CheckOneRow())
 	return
 
 GoSub, RemoveSorting
@@ -2581,21 +2665,21 @@ GuiControl, 1:Move, btnPreviewFile, % "X" . (A_GuiWidth - intTab1aCol4X)
 GuiControl, 1:Move, btnLoadFile, % "X" . (A_GuiWidth - intTab1aCol4X)
 
 ; tab 2
-GuiControl, 1:Move, strRenameEscaped, % "W" . (A_GuiWidth - intTab2EditW)
+GuiControl, 1:Move, strRename, % "W" . (A_GuiWidth - intTab2EditW)
 GuiControl, 1:Move, btnSetRename, % "X" . (A_GuiWidth - intTab2Col4X)
 GuiControl, 1:Move, btnHelpRename, % "X" . (A_GuiWidth - intTab2Col5X)
 GuiControl, 1:Move, btnUndoRename, % "X" . (A_GuiWidth - intTab2Col6X)
-GuiControl, 1:Move, strOrderEscaped, % "W" . (A_GuiWidth - intTab2EditW)
+GuiControl, 1:Move, strOrder, % "W" . (A_GuiWidth - intTab2EditW)
 GuiControl, 1:Move, btnSetOrder, % "X" . (A_GuiWidth - intTab2Col4X)
 GuiControl, 1:Move, btnHelpOrder, % "X" . (A_GuiWidth - intTab2Col5X)
 GuiControl, 1:Move, btnUndoOrder, % "X" . (A_GuiWidth - intTab2Col6X)
-GuiControl, 1:Move, strSelectEscaped, % "W" . (A_GuiWidth - intTab2EditW)
+GuiControl, 1:Move, strSelect, % "W" . (A_GuiWidth - intTab2EditW)
 GuiControl, 1:Move, btnSetSelect, % "X" . (A_GuiWidth - intTab2Col4X)
 GuiControl, 1:Move, btnHelpSelect, % "X" . (A_GuiWidth - intTab2Col5X)
 GuiControl, 1:Move, btnUndoSelect, % "X" . (A_GuiWidth - intTab2Col6X)
-GuiControl, 1:Move, strMergeEscaped, % "W" . (A_GuiWidth - intTab2EditMergeW)
+GuiControl, 1:Move, strMerge, % "W" . (A_GuiWidth - intTab2EditMergeW)
 GuiControl, 1:Move, lblMergeFieldsNewName, % "X" . (A_GuiWidth - intTab2Col3aX)
-GuiControl, 1:Move, strMergeNewNameEscaped, % "X" . (A_GuiWidth - intTab2Col3bX)
+GuiControl, 1:Move, strMergeNewName, % "X" . (A_GuiWidth - intTab2Col3bX)
 GuiControl, 1:Move, btnSetMerge, % "X" . (A_GuiWidth - intTab2Col4X)
 GuiControl, 1:Move, btnHelpMerge, % "X" . (A_GuiWidth - intTab2Col5X)
 GuiControl, 1:Move, btnUndoMerge, % "X" . (A_GuiWidth - intTab2Col6X)
@@ -2785,11 +2869,11 @@ Gui, 1:Submit, NoHide
 strCurrentHeaderEscapedBK := strCurrentHeaderEscaped
 strCurrentHeader := GetListViewHeader(strCurrentFieldDelimiter, strCurrentFieldEncapsulator)
 strCurrentHeaderEscaped := StrEscape(strCurrentHeader)
-GuiControl, 1:, strRenameEscaped, %strCurrentHeaderEscaped%
-GuiControl, 1:, strOrderEscaped, %strCurrentHeaderEscaped%
-GuiControl, 1:, strSelectEscaped, %strCurrentHeaderEscaped%
-GuiControl, 1:, strMergeEscaped
-GuiControl, 1:, strMergeNewNameEscaped
+GuiControl, 1:, strRename, %strCurrentHeaderEscaped%
+GuiControl, 1:, strOrder, %strCurrentHeaderEscaped%
+GuiControl, 1:, strSelect, %strCurrentHeaderEscaped%
+GuiControl, 1:, strMerge
+GuiControl, 1:, strMergeNewName
 if (radFixed)
 	Gosub, ClickRadFixed
 else if (radExpress)
@@ -3204,7 +3288,6 @@ CheckIfFileExistOverwrite(strFileName, blnCanAppend)
 				return True ; overwrite
 			return -1 ; cancel
 		}
-
 	}
 }
 
