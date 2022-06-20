@@ -101,6 +101,7 @@ Help(lTab4HelpExportHTML)
 Help(lTab4HelpExportXML)
 Help(lTab4HelpExportExpress)
 
+N("inioptions")
 H(3, lDocIniTitle)
 I("CSVBuddy-tab5.png")
 W(lDocIniHelp)
@@ -108,11 +109,33 @@ W(lDocIniHelp)
 H(2, lDocKeyboardHelp)
 W(lDocKeyboardHelpDetail)
 
-H(2, lDocAdvancedTopicsTitle)
-N("inioptions")
-
-H(3, lDocCommandLineTitle)
+H(2, lDocCommandLineTitle)
 W(lDocCommandLineHelp)
+
+W("<A name=""scripting""></a>")
+H(2, lDocScriptingTitle)
+W(lDocScriptingIntro)
+
+H(3, lDocScriptingControlsTitle)
+W(lDocScriptingControlsDetails)
+
+H(3, lDocScriptingCommandsTitle)
+W(lDocScriptingCommandsDetails)
+
+H(3, lDocScriptingMessagesTitle)
+W(lDocScriptingMessagesIntro1)
+W(lDocScriptingMessagesIntro2)
+W(lDocScriptingMessagesIntro3)
+W(lDocScriptingMessagesTable)
+
+H(3, lDocScriptingOtherCommandsTitle)
+W(lDocScriptingOtherCommandsIntro)
+W(lDocScriptingOtherCommandsDetails)
+
+H(3, lDocScriptingFileTitle)
+W(lDocScriptingFileIntro)
+W(lDocScriptingFileDetails1)
+W(lDocScriptingFileDetails2)
 
 H(2, lDocSupportTitle)
 P(lDocSupportText)
