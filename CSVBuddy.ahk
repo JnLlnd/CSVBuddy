@@ -625,9 +625,9 @@ Gui, 1:Add, Text, w%intOptionsW% right, %lTab6SaveCodePage%
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, ys x+5 w90 r1 vstrTextEditorExe, %strTextEditorExe%
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
-drpRecordEditor := (intRecordEditor = 1 ? "Field-by-field" : "Full screen")
-Gui, 1:Add, DropDownList, w90 vdrpRecordEditor, % StrReplace(L(lTab6RecordEditors), drpRecordEditor . "|", drpRecordEditor . "||") 
-Gui, 1:Add, DropDownList, w90 vdrpDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsDetect), strIniFileEncoding . "|", strIniFileEncoding . "||") 
+strRecordEditor := (intRecordEditor = 1 ? "Field-by-field" : "Full screen")
+Gui, 1:Add, DropDownList, w90 vstrRecordEditor, % StrReplace(L(lTab6RecordEditors), strRecordEditor . "|", strRecordEditor . "||") 
+Gui, 1:Add, DropDownList, w90 vstrDefaultEileEncoding, % StrReplace(L(lFileEncodings, strCodePageSave, lFileEncodingsDetect), strIniFileEncoding . "|", strIniFileEncoding . "||") 
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
 Gui, 1:Add, Edit, w90 r1 center vstrCodePageLoad, %strCodePageLoad%
 Gui, 1:Add, Edit, w90 r1 center vstrCodePageSave, %strCodePageSave%
@@ -651,8 +651,8 @@ Gui, 1:Add, Edit, w30 r1 center vstrTemplateDelimiter, %strTemplateDelimiter%
 Gui, 1:Add, Edit, w30 r1 center vstrMergeDelimiters, %strMergeDelimiters%
 Gui, 1:Font, % "s" . strFontSizeLabels, %strFontNameLabels%
 
-Gui, 1:Add, Button, ys x+25 w80 gButtonSaveOptions, %lTab6SaveOptions%
-Gui, 1:Add, Button, w80 gButtonOptionsHelp, %lTab6OptionsHelp%
+Gui, 1:Add, Button, ys x+25 w80 vbtnSaveOptions gButtonSaveOptions, %lTab6SaveOptions%
+Gui, 1:Add, Button, w80 vbtnOptionsHelp gButtonOptionsHelp, %lTab6OptionsHelp%
 
 Gui, 1:Tab, 6
 Gui, 1:Font, s12 w700, Verdana
@@ -721,28 +721,28 @@ Button	btnPreviewFile	ButtonPreviewFile	Exec|ButtonPreviewFile
 Radio	radGetHeader	ClickRadGetHeader	Set|radGetHeader|1
 Radio	radSetHeader	ClickRadSetHeader	Set|radSetHeader|1
 Edit	strFieldDelimiter1	ChangedFieldDelimiter1	Set|strFieldDelimiter1|;
-Edit	strFieldEncapsulator1	ChangedFieldEncapsulator1	Set|strFieldEncapsulator1,*
+Edit	strFieldEncapsulator1	ChangedFieldEncapsulator1	Set|strFieldEncapsulator1|*
 Checkbox	blnMultiline1	ChangedMultiline1	Set|blnMultiline1|1	("Exec|ChangedMultiline1" to see strEndoflineReplacement1) 
 Edit	strEndoflineReplacement1	Set|strEndoflineReplacement1|¶
 DropDownList	strFileEncoding1	Choose|strFileEncoding1|UTF-8
 Button	btnLoadFile	ButtonLoadFile	Exec|ButtonLoadFile
 Button	btnLoadFile	ButtonLoadFile	Exec|ButtonLoadFileAdd
 Button	btnLoadFile	ButtonLoadFile	Exec|ButtonLoadFileReplace
-Button	btnCreateFile	ButtonCreateNewFile
+Button	btnCreateFile	ButtonCreateNewFile	Exec|ButtonCreateNewFile
 */
 ; TAB 1 examples
-RECEIVE_CSVBUDDYMESSENGER("test", A_ScriptDir . "\messenger_script.txt")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToLoad|o:\temp\countrylist.csv")
+; RECEIVE_CSVBUDDYMESSENGER("test", A_ScriptDir . "\messenger_script.txt")
+RECEIVE_CSVBUDDYMESSENGER("test", "Tab|1")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToLoad|o:\temp\countrylist.csv")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter1|,")
+RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonLoadFile")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnMultiline1|true")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonLoadFile")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonPreviewFile")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSelectFileToLoad")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonPreviewFile")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeader|A,B,C")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radGetHeader|1")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSetHeader|1")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Delim$")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set$strFieldDelimiter1$|")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Delim|")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator1|*")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ChangedMultiline1")
@@ -753,13 +753,13 @@ RECEIVE_CSVBUDDYMESSENGER("test", A_ScriptDir . "\messenger_script.txt")
 /*
 TAB 2
 Edit	strRename	Set|strRename|A,B,C
-Button	btnSetRename ButtonSetRename	Exec|ButtonSetRename
-Button	btnUndoRename	 ButtonUndoRename	Exec|ButtonUndoRename
+Button	btnSetRename	ButtonSetRename	Exec|ButtonSetRename
+Button	btnUndoRename	ButtonUndoRename	Exec|ButtonUndoRename
 Edit	strOrder	Set|strOrder|A,B,C
 Button	btnSetOrder	ButtonSetOrder	Exec|ButtonSetOrder
 Button	btnUndoOrder	ButtonUndoOrder	Exec|btnUndoOrder
 Edit	strSelect	Set|strSelect|A,B,C
-Button	btnSetSelect	Exec|btnSetSelect
+Button	btnSetSelect	ButtonSetSelect	Exec|ButtonSetSelect
 Button	btnUndoSelect	ButtonUndoSelect	Exec|ButtonUndoSelect
 Edit	strMerge	Set|strMerge|A,B,C
 Edit	strMergeNewName	Set|strMergeNewName|ABC
@@ -767,28 +767,28 @@ Button	btnSetMerge	ButtonSetMerge	Exec|ButtonSetMerge
 Button	btnUndoMerge	ButtonUndoMerge	Exec|btnUndoMerge
 */
 ; TAB 2 examples
-RECEIVE_CSVBUDDYMESSENGER("test", "Tab|2")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strRename|A,B,C")
-RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetRename")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|2")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strRename|A,B,C")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetRename")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonUndoRename")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strOrder|C,B,A")
-RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetOrder")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strSelect|B,A")
-RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetSelect")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMerge|Test: [B]-[A]")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMergeNewName|D")
-RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetMerge")
-RECEIVE_CSVBUDDYMESSENGER("test", "Tab|3")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter3|;")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator3|*")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strOrder|C,B,A")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetOrder")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strSelect|B,A")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetSelect")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMerge|Test: [B]-[A]")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMergeNewName|D")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetMerge")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|3")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter3|;")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator3|*")
 /*
 TAB 3
 Edit	strFileToSave	ChangedFileToSave	Set|strFileToSave|o:\temp\countrylist-rev.csv
 Button	btnSelectFileToSave	ButtonSelectFileToSave	Exec|ButtonSelectFileToSave
 Edit	strFieldDelimiter3	ChangedFieldDelimiter3	Set|strFieldDelimiter3|;
 Edit	strFieldEncapsulator3	ChangedFieldEncapsulator3	Set|strFieldEncapsulator3|*
-Radio	radSaveWithHeader	???	Set|radSaveWithHeader|1
-Radio	radSaveNoHeader	???	Set|radSaveNoHeader|1
+Radio	radSaveWithHeader		Set|radSaveWithHeader|1
+Radio	radSaveNoHeader		Set|radSaveNoHeader|1
 Radio	radSaveMultiline	ClickRadSaveMultiline	Set|radSaveMultiline|1
 Radio	radSaveSingleline	ClickRadSaveSingleline	Set|radSaveSingleline|1
 Edit	strEndoflineReplacement3	Set|strEndoflineReplacement3|¶
@@ -799,35 +799,120 @@ Button	btnCheckFile	ButtonCheckFile	Exec|ButtonCheckFile
 */
 ; TAB 3 examples
 RECEIVE_CSVBUDDYMESSENGER("test", "Tab|3")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToSave|o:\temp\countrylist-rev.csv")
+RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToSave|o:\temp\countrylist-semicolon.csv")
 RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter3|;")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator3|*")
+RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSaveFileOverwrite")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator3|*")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveWithHeader|1")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveNoHeader|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveNoHeader|1")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveMultiline|1")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ClickRadSaveMultiline")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveSingleline|1")
-RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ClickRadSaveSingleline")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strEndoflineReplacement3|+")
-RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strFileEncoding1|UTF-16")
-RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSaveFileOverwrite")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveSingleline|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ClickRadSaveSingleline")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strEndoflineReplacement3|+")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strFileEncoding1|UTF-16")
+/*
+TAB 4
+Edit	strFileToExport	ChangedFileToExport	Set|strFileToExport|o:\temp\countrylist.txt
+Button	btnSelectFileToExport	ButtonSelectFileToExport	Exec|ButtonSelectFileToExport
+Radio	radFixed	ClickRadFixed	Set|radFixed|1
+Radio	radHTML	ClickRadHTML	Set|radHTML|1
+Radio	radXML	ClickRadXML	Set|radXML|1
+Radio	radExpress	ClickRadExpress	Set|radExpress|1
+Button	btnExportFile	ButtonExportFile	Exec|ButtonExportFile
+Edit	strMultiPurpose	ChangedMultiPurpose (unused)	Set|strMultiPurpose|String
+Button	btnMultiPurpose	ButtonMultiPurpose (change default width, select HTML template)	Exec|ButtonMultiPurpose
+Button	btnCheckExportFile	ButtonCheckExportFile	Exec|ButtonCheckExportFile
+*/
+; TAB 4 examples
+; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|4")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToExport|o:\temp\countrylist-type.txt")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radFixed|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radHTML|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radXML|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radExpress|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMultiPurpose|Sort Order,5,Common Name,10,Capital,15")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonExportFile")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonMultiPurpose")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonCheckExportFile")
+/*
+TAB 5
+Edit	strFontNameLabels	Set|strFontNameLabels|Microsoft Sans Serif
+Edit	strFontNameEdit	Set|strFontNameEdit|Courier New
+Edit	strFontNameList	Set|strFontNameList|Microsoft Sans Serif
+Edit	strListBackgroundColor	Set|strListBackgroundColor|D0D0D0
+Edit	strListTextColor	Set|strListTextColor|000000
+Edit	strFontSizeLabels	Set|strFontSizeLabels|12
+Edit	strFontSizeEdit	Set|strFontSizeEdit|11
+Edit	strFontSizeList	Set|strFontSizeList|10	
+Edit	intSreenHeightCorrection	Set|intSreenHeightCorrection|-100
+Edit	intSreenWidthCorrection	Set|intSreenWidthCorrection|-100
+Edit	strTextEditorExe	Set|strTextEditorExe|C:\Program Files (x86)\Notepad++\notepad++.exe
+DropDownList	strRecordEditor	Choose|strRecordEditor|Full screen (or Field-by-field)
+DropDownList	strDefaultEileEncoding	Choose|strDefaultEileEncoding|UTF-8
+Edit	strCodePageLoad	Set|strCodePageLoad|1242
+Edit	strCodePageSave	Set|strCodePageSave|1242
+Checkbox	blnAlwaysEncapsulate	Set|blnAlwaysEncapsulate|1
+Checkbox	blnSkipHelpReadyToEdit	Set|blnSkipHelpReadyToEdit|1
+Checkbox	blnListGrid	Set|blnListGrid|1
+Edit	intDefaultWidth	Set|intDefaultWidth|16
+Edit	strTemplateDelimiter	Set|strTemplateDelimiter|~
+Edit	strMergeDelimiters	Set|strMergeDelimiters|[]
+Button	btnSaveOptions	ButtonSaveOptions	Exec|ButtonSaveOptions
+*/
+; TAB 5 examples
+; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|5")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontNameLabels|Courier New")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontNameEdit|Courier New")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontNameList|Microsoft Sans Serif")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strListBackgroundColor|000000")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strListTextColor|FFFFFF")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontSizeLabels|16")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontSizeEdit|14")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontSizeList|12")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|intSreenHeightCorrection|-500")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|intSreenWidthCorrection|-500")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strTextEditorExe|notepad.exe")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strRecordEditor|Field-by-field")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strDefaultEileEncoding|UTF-16")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnAlwaysEncapsulate|0")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnSkipHelpReadyToEdit|0")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnListGrid|0")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|intDefaultWidth|24")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strTemplateDelimiter|$")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMergeDelimiters|()")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSaveOptions")
+/*
+TAB 6
+Button	btnCheck4Update	ButtonCheck4Update	Exec|ButtonCheck4Update
+Button	btnDonate	ButtonDonate	Exec|ButtonDonate
+*/
+; TAB 6 examples
+; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|6")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonCheck4Update")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonDonate")
 /*
 OTHER COMMANDS
+Tab|n
 Window|Maximize
 Window|Minimize
 Window|Restore
-[filepath] (file path alone, COMMANDS INSIDE SCRIPT)
 */
+; OTHER COMMANDS examples
+; RECEIVE_CSVBUDDYMESSENGER("test", "Window|Maximize")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Window|Restore")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Window|Minimize")
 /*
+SCRIPT COMMANDS
+[filepath] (file path alone, launch this script)
+	example
+	RECEIVE_CSVBUDDYMESSENGER("C:\Path\Script.txt")
 COMMANDS INSIDE SCRIPT
 Debug|1
 Debug|0
 Exit
 Sleep|n
 */
-RECEIVE_CSVBUDDYMESSENGER("test", "Window|Maximize")
-RECEIVE_CSVBUDDYMESSENGER("test", "Window|Restore")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Window|Minimize")
 return
 
 
@@ -1912,7 +1997,7 @@ IniWrite, %strFontNameEdit%, %strIniFile%, global, FontNameEdit
 IniWrite, %strFontSizeEdit%, %strIniFile%, global, FontSizeEdit
 IniWrite, %strFontNameList%, %strIniFile%, global, FontNameList
 IniWrite, %strFontSizeList%, %strIniFile%, global, FontSizeList
-IniWrite, % (drpRecordEditor = "Field-by-field" ? 1 : 2), %strIniFile%, Global, RecordEditor
+IniWrite, % (strRecordEditor = "Field-by-field" ? 1 : 2), %strIniFile%, Global, RecordEditor
 IniWrite, %intSreenHeightCorrection%, %strIniFile%, Global, SreenHeightCorrection
 IniWrite, %intSreenWidthCorrection%, %strIniFile%, Global, SreenWidthCorrection
 IniWrite, %strTextEditorExe%, %strIniFile%, Global, TextEditorExe
@@ -1922,7 +2007,7 @@ IniWrite, %blnListGrid%, %strIniFile%, Global, ListGrid
 IniWrite, %blnSkipHelpReadyToEdit%, %strIniFile%, Global, SkipHelpReadyToEdit
 IniWrite, %strCodePageLoad%, %strIniFile%, Global, CodePageLoad
 IniWrite, %strCodePageSave%, %strIniFile%, Global, CodePageSave
-IniWrite, %drpDefaultEileEncoding%, %strIniFile%, Global, DefaultFileEncoding
+IniWrite, %strDefaultEileEncoding%, %strIniFile%, Global, DefaultFileEncoding
 IniWrite, %intDefaultWidth%, %strIniFile%, Global, DefaultWidth
 IniWrite, %strTemplateDelimiter%, %strIniFile%, Global, TemplateDelimiter
 IniWrite, %strMergeDelimiters%, %strIniFile%, Global, MergeDelimiters
@@ -3596,11 +3681,9 @@ ProcessMessage(strCopyOfData, strCopyDataDelim)
 	
 	else if (saData[1] = "Set")
 	
-        if SubStr(saData[2], 1, 3) = "str"
+        if InStr("str|int", SubStr(saData[2], 1, 3))
             GuiControl, 1:, % saData[2], % saData[3]
-        else if SubStr(saData[2], 1, 3) = "rad"
-            GuiControl, 1:, % saData[2], % saData[3] = 1 or saData[3] = "true"
-        else if SubStr(saData[2], 1, 3) = "bln"
+        else if InStr("rad|bln", SubStr(saData[2], 1, 3))
             GuiControl, 1:, % saData[2], % saData[3] = 1 or saData[3] = "true"
         else
             return 0
