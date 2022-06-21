@@ -26,6 +26,8 @@ H(1, L("~1~ (~2~) - ~3~", lAppName,  "v" . lAppVersion, lDocDocumentation))
 
 P(lDocDesc450)
 
+W(lDocQuickJump)
+
 H(2, lDocIntro)
 
 H(4, lDocInstallationTitle)
@@ -116,11 +118,11 @@ W("<A name=""scripting""></a>")
 H(2, lDocScriptingTitle)
 W(lDocScriptingIntro)
 
-H(3, lDocScriptingControlsTitle)
-W(lDocScriptingControlsDetails)
-
 H(3, lDocScriptingCommandsTitle)
 W(lDocScriptingCommandsDetails)
+
+H(3, lDocScriptingControlsTitle)
+W(lDocScriptingControlsDetails)
 
 H(3, lDocScriptingMessagesTitle)
 W(lDocScriptingMessagesIntro1)
