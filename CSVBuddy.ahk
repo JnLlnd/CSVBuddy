@@ -22,10 +22,16 @@ limitations under the License.
 Version history
 ---------------
 
-2022-06-?? BETA v2.2.9.1
-- respond to message 0x2225 sent from CSVBuddyMessenger, returning true to confirm that CSV Buddy is running
-- receive CopyData (0x4a) message sent from CSVBuddyMessenger
-- take action on messages Tab, Exec, Set, Choose and Delim
+2022-06-21 BETA v2.1.9.6
+- addition of the CSV Buddy companion application CSV Buddy Messenger to send scripting messages to CSV Buddy
+- before sending scripting messages, CSVBuddyMessenger checks that CSV Buddy is running and has only one instance running
+- CSV Buddy responds to message 0x2225 sent from CSVBuddyMessenger, returning true to confirm that CSV Buddy is running
+- CSV Buddy receives CopyData (0x4a) scripting messages sent from CSVBuddyMessenger and take action on scripting messages Tab, Exec, Set, Choose, Delim, Window (Minimize, Maximize and Restore), Debug, Exit and Sleep (see online documentation at http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html#scripting)
+- Process a script file when receiving a scripting message containing only a path and file name
+- rename some controls and variables to simplify scripting messages
+- fix bug to flag changes in file when file load is adding lines
+- fix bug opening the wrong editor (Field-by-field instead of Full screen, or vice-versa) when creating a new file;
+- update online documentation
 
 2022-04-18 BETA v2.1.9.5
 - support custom fonts and screen scaling in full screen editor and zoom windows
@@ -244,7 +250,7 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion 2.2.9.1
+;@Ahk2Exe-SetVersion v2.1.9.6
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
@@ -642,7 +648,7 @@ Gui, 1:Add, Checkbox, y+15 w%intOptionsW% right vblnListGrid, %lTab6ListGridLine
 GuiControl, 1:, blnListGrid, %blnListGrid%
 
 intOptionsW := GetWidestControl("Text", lTab6FixedWidthDefault, lTab6HTMLTemplateDelimiter, lTab6MergeDelimiters)
-Gui, 1:Add, Text, ys x+10 w%intOptionsW%  section, %lTab6FixedWidthDefault%
+Gui, 1:Add, Text, ys x+10 w%intOptionsW% right section, %lTab6FixedWidthDefault%
 Gui, 1:Add, Text, w%intOptionsW% right, %lTab6HTMLTemplateDelimiter%
 Gui, 1:Add, Text, w%intOptionsW% right, %lTab6MergeDelimiters%
 Gui, 1:Font, % "s" . strFontSizeEdit, %strFontNameEdit%
@@ -732,10 +738,10 @@ Button	btnCreateFile	ButtonCreateNewFile	Exec|ButtonCreateNewFile
 */
 ; TAB 1 examples
 ; RECEIVE_CSVBUDDYMESSENGER("test", A_ScriptDir . "\messenger_script.txt")
-RECEIVE_CSVBUDDYMESSENGER("test", "Tab|1")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToLoad|o:\temp\countrylist.csv")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter1|,")
-RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonLoadFile")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|1")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToLoad|o:\temp\countrylist.csv")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter1|,")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonLoadFile")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnMultiline1|true")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSelectFileToLoad")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonPreviewFile")
@@ -798,10 +804,10 @@ Button	btnSaveFile	ButtonSaveFile	Exec|ButtonSaveFileOverwrite
 Button	btnCheckFile	ButtonCheckFile	Exec|ButtonCheckFile
 */
 ; TAB 3 examples
-RECEIVE_CSVBUDDYMESSENGER("test", "Tab|3")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToSave|o:\temp\countrylist-semicolon.csv")
-RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter3|;")
-RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSaveFileOverwrite")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|3")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToSave|o:\temp\countrylist-semicolon.csv")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter3|;")
+; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSaveFileOverwrite")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator3|*")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveWithHeader|1")
 ; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveNoHeader|1")
@@ -2070,9 +2076,9 @@ if (A_GuiEvent = "DoubleClick")
 {
 	intRowNumber := A_EventInfo
 	if (intRecordEditor = 1)
-		Gosub, MenuEditRecord
+		Gosub, MenuEditRow ; Full screen
 	else
-		Gosub, MenuEditRow
+		Gosub, MenuEditRecord ; Field-by-field
 }
 if LV_GetCount("Selected")
 	SB_SetText(L(lLvEventsRecordsSelected, LV_GetCount("Selected")), 2)
@@ -2123,8 +2129,8 @@ if !LV_GetCount("Column")
 	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), ButtonCreateNewFile
 else if !LV_GetCount("")
 {
-	Menu, ContextMenu, Add, % L(lLvEventsAddrowField), MenuAddRecord
-	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
+	Menu, ContextMenu, Add, % L(lLvEventsAddrowField), MenuAddRecord ; Field-by-field
+	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow ; Full screen
 	Menu, ContextMenu, Add, % L(lLvEventsCreateNewFile), ButtonCreateNewFile
 	Menu, ContextMenu, Add, % ((lLvEventsFilterReload)), MenuFilterReload
 	Menu, ContextMenu, % blnFilterActive ? "Enable" : "Disable", %lLvEventsFilterReload%
@@ -2136,11 +2142,11 @@ else
 	Menu, ContextMenu, Add, % L(lLvEventsDeselectAll), MenuSelectNone
 	Menu, ContextMenu, Add, % L(lLvEventsReverseSelection), MenuSelectReverse
 	Menu, ContextMenu, Add
-	Menu, ContextMenu, Add, % L(lLvEditRecordMenu), MenuEditRecord
-	Menu, ContextMenu, Add, % L(lLvEventsAddrowField), MenuAddRecord
+	Menu, ContextMenu, Add, % L(lLvEditRecordMenu), MenuEditRecord ; Field-by-field
+	Menu, ContextMenu, Add, % L(lLvEventsAddrowField), MenuAddRecord ; Field-by-field
 	Menu, ContextMenu, Add
-	Menu, ContextMenu, Add, % L(lLvEventsEditrowMenu), MenuEditRow
-	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow
+	Menu, ContextMenu, Add, % L(lLvEventsEditrowMenu), MenuEditRow ; Full screen
+	Menu, ContextMenu, Add, % L(lLvEventsAddrowMenu), MenuAddRow ; Full screen
 	Menu, ContextMenu, Add
 	Menu, ContextMenu, Add, % L(lLvEventsDeleteRowMenu), MenuDeleteRow
 	Menu, ContextMenu, Add
@@ -2194,9 +2200,9 @@ else
 		LV_InsertCol(intIndex, "", Trim(strFieldName))
 	LV_ModifyCol()
 	if (intRecordEditor = 1)
-		gosub, MenuAddRow
+		Gosub, MenuAddRecord ; Field-by-field
 	else
-		Gosub, MenuAddRecord
+		gosub, MenuAddRow ; Full screen
 	gosub, UpdateCurrentHeader
 	loop, % LV_GetCount("Column")
 		LV_ModifyCol(A_Index, "AutoHdr")
@@ -2245,6 +2251,7 @@ IsRowSelected(intRow)
 
 MenuAddRow:
 MenuEditRow:
+; Full screen
 SearchShowRecord:
 ReplaceShowRecord:
 strShowRecordLabel := A_ThisLabel
@@ -2547,6 +2554,7 @@ NotMatchingRow(intRow, strFilter, intColNumber, ByRef intColFound, blnReplaceCas
 
 MenuAddRecord:
 MenuEditRecord:
+; Field-by-field
 blnRecordChanged := false
 Gui, 1:Submit, NoHide
 if (A_ThisLabel = "MenuAddRecord")
