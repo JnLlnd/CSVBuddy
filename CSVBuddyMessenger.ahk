@@ -48,16 +48,17 @@ global g_strAppNameFile := "CSVBuddyMessenger"
 global g_strAppVersion := "0.1"
 global g_strAppVersionBranch := "beta"
 global g_strAppVersionLong := "v" . g_strAppVersion . (g_strAppVersionBranch <> "prod" ? " " . g_strAppVersionBranch : "")
-global g_strTargetAppTitle := "CSV Buddy ahk_class AutoHotkeyGUI" ; not JeanLalonde.ca yet
+global g_strTargetAppTitle := "CSV Buddy ahk_class JeanLalonde.ca"
 global g_strTargetAppName := "CSV Buddy"
 global g_strCSVBuddyNameFile := "CSVBuddy"
 
 gosub, SetWorkingDirectory
 gosub, InitLanguageVariables
 
-global g_blnDiagMode := False
 global g_strDiagFile := A_WorkingDir . "\" . g_strAppNameFile . "-DIAG.txt"
 global g_strIniFile := A_WorkingDir . "\" . g_strCSVBuddyNameFile . ".ini"
+global g_blnDiagMode
+IniRead, g_blnDiagMode, %g_strIniFile%, Global, MessengerDiagMode, 0
 
 if CSVBuddyIsRunning()
     if CSVBuddySingleInstance()
@@ -72,9 +73,13 @@ if CSVBuddyIsRunning()
 
         if (g_strParam0 > 0) and StrLen(g_strParam1)
         {
-            Diag("Send_WM_COPYDATA:Param", g_strParam1 . "|" . g_strParam2 . "|" . g_strParam3)
+			strParams := ""
+			loop, %g_strParam0%
+				strParams .= g_strParam%A_Index% . "|"
+			strParams := SubStr(strParams, 1, -1) ; remove last delimiter
+            Diag("Send_WM_COPYDATA:Param", strParams)
             Diag("Send_WM_COPYDATA:g_strTargetAppTitle", g_strTargetAppTitle)
-            intResult := Send_WM_COPYDATA(g_strParam1 . "|" . g_strParam2 . "|" . g_strParam3, g_strTargetAppTitle)
+            intResult := Send_WM_COPYDATA(strParams, g_strTargetAppTitle)
             ; returns FAIL or 0 if an error occurred, 0xFFFF if a CSV Buddy window is open or 1 if success
             Diag("Send_WM_COPYDATA (1=OK)", intResult)
             
@@ -124,7 +129,7 @@ Send_WM_COPYDATA(ByRef strStringToSend, ByRef strTargetScriptTitle) ; ByRef save
     DetectHiddenWindows On
     SetTitleMatchMode 2
 	
-    SendMessage, 0x4a, 0, &varCopyDataStruct, , %strTargetScriptTitle% ; 0x4a is WM_COPYDATA. Must use Send not Post.
+    SendMessage, 0x4a, 0, &varCopyDataStruct, , %strTargetScriptTitle%, , , , 30000 ; 0x4a is WM_COPYDATA. Must use Send not Post.
 	
     DetectHiddenWindows %strPrevDetectHiddenWindows% ; Restore original setting for the caller.
     SetTitleMatchMode %intPrevTitleMatchMode% ; Same.
@@ -186,6 +191,7 @@ CSVBuddySingleInstance()
 ;------------------------------------------------------------
 {
     WinGet, intNbInstances, Count, %g_strTargetAppTitle%
+	Diag("CSVBuddySingleInstance:intNbInstances (1=OK)", intNbInstances)
     return (intNbInstances = 1) ; only one instance of CSV Buddy is running
 }
 ;------------------------------------------------------------
