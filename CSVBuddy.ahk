@@ -2673,6 +2673,7 @@ loop, % LV_GetCount("Column")
 	LV_Modify(intRowNumber, "Col" . A_Index, strFieldData)
 }
 blnRecordChanged := false
+LV_ModifyCol()
 gosub, EditRecordGuiClose
 ChangesToSave(true)
 return
@@ -2866,6 +2867,7 @@ loop, % LV_GetCount("Column")
 	if (A_Index <= intLastFieldIn2Gui)
 		LV_Modify(intRowNumber, "Col" . A_Index, strEdit%A_Index%)
 Gosub, 2GuiClose
+LV_ModifyCol()
 ChangesToSave(true)
 return
 
@@ -3667,6 +3669,9 @@ ProcessMessage(strCopyOfData, strCopyDataDelim)
 {
     static blnDebug := false
     
+	if InStr(";'", SubStr(strCopyOfData, 1, 1)) ; skip lines commented out starting with ' or ;
+		return 1 ; success
+	
 	saData := StrSplit(strCopyOfData, strCopyDataDelim)
     strDebug1 := saData[1]
     strDebug2 := saData[2]
@@ -3694,7 +3699,7 @@ ProcessMessage(strCopyOfData, strCopyDataDelim)
         else if InStr("rad|bln", SubStr(saData[2], 1, 3))
             GuiControl, 1:, % saData[2], % saData[3] = 1 or saData[3] = "true"
         else
-            return 0
+            return 0 ; exit with error code
 	
 	else if (saData[1] = "Choose")
         
@@ -3719,7 +3724,7 @@ ProcessMessage(strCopyOfData, strCopyDataDelim)
 		
 	else
         
-		return 0
+		return 0 ; exit with error code
         
     Sleep, 50 ; give some time if a gLabel needs to be executed
 	
