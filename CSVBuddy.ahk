@@ -22,7 +22,7 @@ limitations under the License.
 Version history
 ---------------
 
-2022-06-21 BETA v2.1.9.6
+2022-06-22 BETA v2.1.9.6
 - addition of the CSV Buddy companion application CSV Buddy Messenger to send scripting messages to CSV Buddy
 - before sending scripting messages, CSVBuddyMessenger checks that CSV Buddy is running and has only one instance running
 - CSV Buddy responds to message 0x2225 sent from CSVBuddyMessenger, returning true to confirm that CSV Buddy is running
