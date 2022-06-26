@@ -17,7 +17,7 @@ See RECEIVE_CSVBUDDYMESSENGER function in CSVBuddy.ahk for details.
 HISTORY
 =======
 
-Version: 0.1 (2022-06-08)
+Version: 0.2 (2022-06-08)
 - initial code from QAPmessenger.ahk for Quick Access Popup converted to CSVBuddyMessenger for CSV Buddy
 
 */ 
@@ -45,7 +45,7 @@ ListLines, Off
 
 global g_strAppNameText := "CSV Buddy Messenger"
 global g_strAppNameFile := "CSVBuddyMessenger"
-global g_strAppVersion := "0.1"
+global g_strAppVersion := "0.2"
 global g_strAppVersionBranch := "beta"
 global g_strAppVersionLong := "v" . g_strAppVersion . (g_strAppVersionBranch <> "prod" ? " " . g_strAppVersionBranch : "")
 global g_strTargetAppTitle := "CSV Buddy ahk_class JeanLalonde.ca"
@@ -58,7 +58,8 @@ gosub, InitLanguageVariables
 global g_strDiagFile := A_WorkingDir . "\" . g_strAppNameFile . "-DIAG.txt"
 global g_strIniFile := A_WorkingDir . "\" . g_strCSVBuddyNameFile . ".ini"
 global g_blnDiagMode
-IniRead, g_blnDiagMode, %g_strIniFile%, Global, MessengerDiagMode, 0
+IniRead, g_intVerbose, %g_strIniFile%, Messenger, MessengerVerbose, 1 ; after execution: 0) no dialog box, 1) dialog on error only, 2 or more) dialog box always with timeout at 2 or more seconds
+; IniRead, g_intTimeout, %g_strIniFile%, Messenger, MessengerTimeout, 0
 
 if CSVBuddyIsRunning()
     if CSVBuddySingleInstance()
@@ -82,19 +83,39 @@ if CSVBuddyIsRunning()
             intResult := Send_WM_COPYDATA(strParams, g_strTargetAppTitle)
             ; returns FAIL or 0 if an error occurred, 0xFFFF if a CSV Buddy window is open or 1 if success
             Diag("Send_WM_COPYDATA (1=OK)", intResult)
-            
-            if (intResult = 0xFFFF) ; not implemented in CSV Buddy
+            if (intResult = 0xFFFF and g_intVerbose) ; not implemented in CSV Buddy
                 Oops(lMessengerCloseDialog . "`n`n" . lMessengerHelp, g_strTargetAppName)
+			else if (intResult <> 1 and g_intVerbose = 1) ; dialog on error only
+				Oops(lMessengerError, strParams)
+			else if (intResult = 1 and g_intVerbose >= 2) ; success, dialog box always
+				MsgBox, 0, %g_strAppNameText%, % L(lMessengerSuccess, strParams), %g_intVerbose%
+			; else no dialog box
+			
+			ExitApp, % (intResult <> 1 ? 4 : 0) ; if intResult is not 1 flag CSV Buddy error to caller with result 4, else return 0 no error
         }
         else
-            Oops(lMessengerErrorNoParam . "`n`n" . lMessengerHelp, g_strAppNameFile)
+		{
+			if (g_intVerbose)
+				Oops(lMessengerErrorNoParam . "`n`n" . lMessengerHelp, g_strAppNameFile)
+			ExitApp, 3 ; error no parameter
+		}
     }
     else
-        Oops(lMessengerSingleInstanceError . "`n`n" . lMessengerHelp, g_strTargetAppName, g_strAppNameText)
+	{
+		if (g_intVerbose)
+			Oops(lMessengerSingleInstanceError . "`n`n" . lMessengerHelp, g_strTargetAppName, g_strAppNameText)
+		ExitApp, 2 ; error more than one CSV Buddy instance running
+	}
 else
-	Oops(lMessengerErrorNotRunning . "`n`n" . lMessengerHelp, g_strTargetAppName, g_strAppNameText)
+{
+	if (g_intVerbose)
+		Oops(lMessengerErrorNotRunning . "`n`n" . lMessengerHelp, g_strTargetAppName, g_strAppNameText)
+	ExitApp, 1 ; error CSV Buddy not running
+}
 
-return
+; we never get here
+
+;===========================================================
 
 
 ;-----------------------------------------------------------
@@ -102,9 +123,11 @@ InitLanguageVariables:
 ;-----------------------------------------------------------
 
 lMessengerHelp := "Search for ""Messenger"" on csvbuddy.QuickAccessPopup.com for help."
+lMessengerError := "CSV Buddy Messenger command:`n`n~1~`n`n`nError (or stopped)..."
 lMessengerErrorNotRunning := "An error occurred.`n`nMake sure ~1~ is running before sending commands using ~2~."
 lMessengerErrorNoParam := "No action parameter detected after ~1~ command."
 lMessengerSingleInstanceError := "More than one instance of ~1~ is running.`n`nMake sure only one instance ~1~ is running before sending commands using  ~2~."
+lMessengerSuccess := "CSV Buddy Messenger command:`n`n~1~`n`n`nSuccess!"
 
 return
 ;-----------------------------------------------------------
