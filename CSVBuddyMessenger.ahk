@@ -125,7 +125,7 @@ if CSVBuddyIsRunning()
 else
 {
 	if (g_intVerbose)
-		Oops(lMessengerErrorNotRunning . "`n`n" . lMessengerHelp, g_strTargetAppName, g_strAppNameText)
+		Oops(lMessengerErrorNotRunning . "`n`n" . lMessengerHelp, g_strTargetAppName . " v2.1.9.7 or more recent)", g_strAppNameText)
 	ExitApp, 1 ; error CSV Buddy not running
 }
 
