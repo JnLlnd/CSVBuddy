@@ -24,6 +24,14 @@ Version history
 
 2022-06-27 BETA v2.1.9.7
 - rename "CSV Buddy Messenger" to "CSV Messenger"
+- add value MessengerVerbose under section [Messenger] in CSVBuddy.ini to control messages from CSV Messenger with possible values 0, 1 or 2
+  - 0 Silent: no dialog box or command line message shown after CSV Messenger commands
+  - 1 Errors only: display a dialog box only when an error occurred in CSV Buddy (default)
+  - 2 Always: after each command executed in CSV Buddy, display a dialog box (on launch errors) or a command line message (on success or command errors)
+- when exiting CSV Messenger, return an exit code to the caller (batch file of other script): 1 (CSV Buddy not running), 2 (more than one instance of CSV Buddy), 3 (no parameter) or 4 (execution error)
+- add "Timeout nnn" command to change the timeout default value 30000 ms (30 seconds)
+- add support for pipe character in CSB Messenger values
+- See CSV Buddy Scripting help at https://csvbuddy.quickaccesspopup.com/csv-buddy-scripting/
 
 2022-06-22 BETA v2.1.9.6
 - addition of the CSV Buddy companion application CSV Buddy Messenger to send scripting messages to CSV Buddy
