@@ -1,7 +1,7 @@
 ;===============================================
 /*
 
-CSV Buddy Messenger
+CSV Messenger
 Written using AutoHotkey_L v1.1.09.03+ (http://ahkscript.org/)
 By Jean Lalonde (JnLlnd on AHKScript.org forum)
 	
@@ -12,12 +12,15 @@ Called from the command line, file shortcuts, the Explorer context menus, etc. t
 - activate a command (click a button)
 - ...
 
-See RECEIVE_CSVBUDDYMESSENGER function in CSVBuddy.ahk for details.
+See RECEIVE_CSVMESSENGER function in CSVBuddy.ahk for details.
 
 HISTORY
 =======
 
-Version: 0.2 (2022-06-08)
+Version: 0.2 (2022-06-27)
+- rename "CSV Buddy Messenger" to "CSV Messenger"
+
+Version: 0.1 (2022-06-08)
 - initial code from QAPmessenger.ahk for Quick Access Popup converted to CSVBuddyMessenger for CSV Buddy
 
 */ 
@@ -28,10 +31,10 @@ Version: 0.2 (2022-06-08)
 ; Doc: http://fincs.ahk4.net/Ahk2ExeDirectives.htm
 ; Note: prefix comma with `
 
-;@Ahk2Exe-SetName CSV Buddy Messenger
+;@Ahk2Exe-SetName CSV Messenger
 ;@Ahk2Exe-SetDescription Send messages to CSV Buddy
 ;@Ahk2Exe-SetVersion 0.1
-;@Ahk2Exe-SetOrigFilename CSVBuddyMessenger.exe
+;@Ahk2Exe-SetOrigFilename CSVMessenger.exe
 ;@Ahk2Exe-ConsoleApp
 
 
@@ -44,8 +47,8 @@ Version: 0.2 (2022-06-08)
 #KeyHistory 0
 ListLines, Off
 
-global g_strAppNameText := "CSV Buddy Messenger"
-global g_strAppNameFile := "CSVBuddyMessenger"
+global g_strAppNameText := "CSV Messenger"
+global g_strAppNameFile := "CSVMessenger"
 global g_strAppVersion := "0.2"
 global g_strAppVersionBranch := "beta"
 global g_strAppVersionLong := "v" . g_strAppVersion . (g_strAppVersionBranch <> "prod" ? " " . g_strAppVersionBranch : "")
@@ -82,7 +85,7 @@ if CSVBuddyIsRunning()
 
         if (g_strParam0 > 0) and StrLen(g_strParam1)
         {
-			; CSV Buddy Messenger will return an error code if CSV Buddy does not complete a command under the timeout delay (default 30 seconds)
+			; CSV Messenger will return an error code if CSV Buddy does not complete a command under the timeout delay (default 30 seconds)
 			if (g_strParam1 = "Timeout")
 				if g_strParam2 is number
 					IniWrite, %g_strParam2%, %g_strIniFile%, Messenger, MessengerTimeout
