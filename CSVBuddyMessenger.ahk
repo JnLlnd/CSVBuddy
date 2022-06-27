@@ -32,6 +32,7 @@ Version: 0.2 (2022-06-08)
 ;@Ahk2Exe-SetDescription Send messages to CSV Buddy
 ;@Ahk2Exe-SetVersion 0.1
 ;@Ahk2Exe-SetOrigFilename CSVBuddyMessenger.exe
+;@Ahk2Exe-ConsoleApp
 
 
 ;========================================================================================================================
@@ -58,12 +59,19 @@ gosub, InitLanguageVariables
 global g_strDiagFile := A_WorkingDir . "\" . g_strAppNameFile . "-DIAG.txt"
 global g_strIniFile := A_WorkingDir . "\" . g_strCSVBuddyNameFile . ".ini"
 global g_blnDiagMode
-IniRead, g_intVerbose, %g_strIniFile%, Messenger, MessengerVerbose, 1 ; after execution: 0) no dialog box, 1) dialog on error only, 2 or more) dialog box always with timeout at 2 or more seconds
-; IniRead, g_intTimeout, %g_strIniFile%, Messenger, MessengerTimeout, 0
+global g_intVerbose
+global g_intTimeout
+
+; after execution: 0) silent, 1) dialog or command line message on error only, 2) always command line message
+IniRead, g_intVerbose, %g_strIniFile%, Messenger, MessengerVerbose, 1
 
 if CSVBuddyIsRunning()
     if CSVBuddySingleInstance()
     {
+		if (g_intVerbose)
+			oStdOut := FileOpen("*", 0x1) ; 0x1 for write (from: https://www.reddit.com/r/AutoHotkey/comments/rf9krl/stdout_to_console/)
+			; oStdOut.Write("...") or oStdOut.WriteLine("...") and oStdOut.Close()
+
         ; Use traditional method, not expression
         g_strParam0 = %0% ; number of parameters
         g_strParam1 = %1% ; fisrt parameter, the command name
@@ -74,6 +82,14 @@ if CSVBuddyIsRunning()
 
         if (g_strParam0 > 0) and StrLen(g_strParam1)
         {
+			; CSV Buddy Messenger will return an error code if CSV Buddy does not complete a command under the timeout delay (default 30 seconds)
+			if (g_strParam1 = "Timeout")
+				if g_strParam2 is number
+					IniWrite, %g_strParam2%, %g_strIniFile%, Messenger, MessengerTimeout
+			; else leave the current value (or absence of value)
+			IniRead, g_intTimeout, %g_strIniFile%, Messenger, MessengerTimeout, 30000 ; send an  use command "Timeout nnn" to change it.
+			; Note: This value is saved for future uses of Messenger until CSV Buddy is restarted (and reset to default 30000 ms).
+				
 			strParams := ""
 			loop, %g_strParam0%
 				strParams .= g_strParam%A_Index% . "|"
@@ -85,18 +101,18 @@ if CSVBuddyIsRunning()
             Diag("Send_WM_COPYDATA (1=OK)", intResult)
             if (intResult = 0xFFFF and g_intVerbose) ; not implemented in CSV Buddy
                 Oops(lMessengerCloseDialog . "`n`n" . lMessengerHelp, g_strTargetAppName)
-			else if (intResult <> 1 and g_intVerbose = 1) ; dialog on error only
-				Oops(lMessengerError, strParams)
-			else if (intResult = 1 and g_intVerbose >= 2) ; success, dialog box always
-				MsgBox, 0, %g_strAppNameText%, % L(lMessengerSuccess, strParams), %g_intVerbose%
-			; else no dialog box
+			else if (intResult <> 1 and g_intVerbose) ; command line message on error only
+				oStdOut.WriteLine(L(lMessengerCmdLineError, strParams))
+			else if (intResult = 1 and g_intVerbose >= 2) ; success, always command line message
+				oStdOut.WriteLine(L(lMessengerCmdLineSuccess, strParams))
+			; else no dialog box or command line message
 			
 			ExitApp, % (intResult <> 1 ? 4 : 0) ; if intResult is not 1 flag CSV Buddy error to caller with result 4, else return 0 no error
         }
         else
 		{
 			if (g_intVerbose)
-				Oops(lMessengerErrorNoParam . "`n`n" . lMessengerHelp, g_strAppNameFile)
+				oStdOut.WriteLine(L(lMessengerCmdLineNoParam . "`n`n" . lMessengerHelp, g_strAppNameFile))
 			ExitApp, 3 ; error no parameter
 		}
     }
@@ -122,12 +138,12 @@ else
 InitLanguageVariables:
 ;-----------------------------------------------------------
 
-lMessengerHelp := "Search for ""Messenger"" on csvbuddy.QuickAccessPopup.com for help."
-lMessengerError := "CSV Buddy Messenger command:`n`n~1~`n`n`nError (or stopped)..."
+lMessengerCmdLineError := "Command: ""~1~"" / ERROR (or stopped)..."
+lMessengerCmdLineNoParam := "ERROR: No action parameter after ~1~ command."
+lMessengerCmdLineSuccess := "Command: ""~1~"" / OK"
 lMessengerErrorNotRunning := "An error occurred.`n`nMake sure ~1~ is running before sending commands using ~2~."
-lMessengerErrorNoParam := "No action parameter detected after ~1~ command."
+lMessengerHelp := "Look for menu ""CSV Buddy Scripting"" on csvbuddy.QuickAccessPopup.com for help."
 lMessengerSingleInstanceError := "More than one instance of ~1~ is running.`n`nMake sure only one instance ~1~ is running before sending commands using  ~2~."
-lMessengerSuccess := "CSV Buddy Messenger command:`n`n~1~`n`n`nSuccess!"
 
 return
 ;-----------------------------------------------------------
@@ -152,7 +168,7 @@ Send_WM_COPYDATA(ByRef strStringToSend, ByRef strTargetScriptTitle) ; ByRef save
     DetectHiddenWindows On
     SetTitleMatchMode 2
 	
-    SendMessage, 0x4a, 0, &varCopyDataStruct, , %strTargetScriptTitle%, , , , 30000 ; 0x4a is WM_COPYDATA. Must use Send not Post.
+    SendMessage, 0x4a, 0, &varCopyDataStruct, , %strTargetScriptTitle%, , , , %g_intTimeout% ; 0x4a is WM_COPYDATA. Must use Send not Post.
 	
     DetectHiddenWindows %strPrevDetectHiddenWindows% ; Restore original setting for the caller.
     SetTitleMatchMode %intPrevTitleMatchMode% ; Same.
