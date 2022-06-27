@@ -1,5 +1,5 @@
 global lAppName := "CSV Buddy"
-global lAppVersion := "2.1.9.6" ; major.minor.fixes *** check strAppVersionLong for BETA or PROD
+global lAppVersion := "2.1.9.7" ; major.minor.fixes *** check strAppVersionLong for BETA or PROD
 global lChangesUnSaved := "Changes unsaved"
 global lDonatePrompt := "Are you happy with ~1~?`n`n~1~ is not only FREE of charge but also FREE of nasty advertising or adware that you never know if they carry spyware or malware.`n`n~2~ times so far, ~1~ has helped you in your work. How about supporting freeware now?"
 global lDonateThankyou := "Thank you for being fair and support freeware!"
@@ -82,7 +82,7 @@ global lLvEventsStop := "Stop"
 global lLvEventsZoomIn := " - "
 global lLvEventsZoomOut := "+"
 global lLvEventsZoomTitle := "~1~ - Zommed field"
-global lMessengerDebug := "CSV Buddy Messenger command:`n`n~1~`n`n`nContinue?"
+global lMessengerDebug := "CSV Messenger command:`n`n~1~`n`n`nContinue?"
 global lQuitUnsaved := "Discard changes and quit ~1~?"
 global lSBEmpty := "Empty"
 global lSBHelp := "Left-click on a column header, double-click or righ-click a line for additional features."

@@ -22,6 +22,9 @@ limitations under the License.
 Version history
 ---------------
 
+2022-06-27 BETA v2.1.9.7
+- rename "CSV Buddy Messenger" to "CSV Messenger"
+
 2022-06-22 BETA v2.1.9.6
 - addition of the CSV Buddy companion application CSV Buddy Messenger to send scripting messages to CSV Buddy
 - before sending scripting messages, CSVBuddyMessenger checks that CSV Buddy is running and has only one instance running
@@ -250,17 +253,17 @@ SetWorkingDir, %A_ScriptDir%
 
 ;@Ahk2Exe-SetName CSV Buddy
 ;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion v2.1.9.6
+;@Ahk2Exe-SetVersion v2.1.9.7
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
 
-; Respond to SendMessage sent by CSVBuddyMessenger to respond that CSV Buddy is running
+; Respond to SendMessage sent by CSVMessenger to respond that CSV Buddy is running
 ; No specific reason for 0x2225, except that is is > 0x1000 (http://ahkscript.org/docs/commands/OnMessage.htm) and QAP is using 0x2224
 OnMessage(0x2225, "REPLY_CSVBUDDYISRUNNING")
 
-; Respond to CopyData SendMessage sent by CSVBuddyMessenger after execution of the requested action
-OnMessage(0x4a, "RECEIVE_CSVBUDDYMESSENGER")
+; Respond to CopyData SendMessage sent by CSVMessenger after execution of the requested action
+OnMessage(0x4a, "RECEIVE_CSVMESSENGER")
 
 ; --------------------- GLOBAL AND DEFAULT VALUES --------------------------
 
@@ -346,6 +349,9 @@ if !StrLen(strIniFileEncoding)
 	strIniFileEncoding := lFileEncodingsDetect
 strDefaultFileEncoding := L(lFileEncodings, strCodePageLoad, lFileEncodingsDetect)
 StringReplace, strDefaultFileEncoding, strDefaultFileEncoding, %strIniFileEncoding%|, %strIniFileEncoding%||
+
+; reset CSV Messenger default timeout to 30 seconds (used in CSV Messenger only, can be changed by Messenger command "Timeout nnn")
+IniWrite, 30000, %strIniFile%, Messenger, MessengerTimeout
 
 intProgressType := -2 ; Status Bar, part 2
 
@@ -718,207 +724,117 @@ Sleep, 10 ; if not, lvData grid and color are not always set correctly
 GuiControl, 1:Choose, tabCSVBuddy, 1
 */
 
-/*
-TAB 1
-Edit	strFileToLoad	ChangedFileToLoad	Set|strFileToLoad|o:\temp\countrylist.csv
-Button	btnSelectFileToLoad	ButtonSelectFileToLoad	Exec|ButtonSelectFileToLoad
-Edit	strFileHeader	Set|strFileHeader|A,B,C
-Button	btnPreviewFile	ButtonPreviewFile	Exec|ButtonPreviewFile
-Radio	radGetHeader	ClickRadGetHeader	Set|radGetHeader|1
-Radio	radSetHeader	ClickRadSetHeader	Set|radSetHeader|1
-Edit	strFieldDelimiter1	ChangedFieldDelimiter1	Set|strFieldDelimiter1|;
-Edit	strFieldEncapsulator1	ChangedFieldEncapsulator1	Set|strFieldEncapsulator1|*
-Checkbox	blnMultiline1	ChangedMultiline1	Set|blnMultiline1|1	("Exec|ChangedMultiline1" to see strEndoflineReplacement1) 
-Edit	strEndoflineReplacement1	Set|strEndoflineReplacement1|¶
-DropDownList	strFileEncoding1	Choose|strFileEncoding1|UTF-8
-Button	btnLoadFile	ButtonLoadFile	Exec|ButtonLoadFile
-Button	btnLoadFile	ButtonLoadFile	Exec|ButtonLoadFileAdd
-Button	btnLoadFile	ButtonLoadFile	Exec|ButtonLoadFileReplace
-Button	btnCreateFile	ButtonCreateNewFile	Exec|ButtonCreateNewFile
-*/
 ; TAB 1 examples
-; RECEIVE_CSVBUDDYMESSENGER("test", A_ScriptDir . "\messenger_script.txt")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToLoad|o:\temp\countrylist.csv")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter1|,")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonLoadFile")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnMultiline1|true")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSelectFileToLoad")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonPreviewFile")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeader|A,B,C")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radGetHeader|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSetHeader|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Delim$")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Delim|")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator1|*")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ChangedMultiline1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strEndoflineReplacement1|¶")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strFileEncoding1|UTF-8")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileHeader|A,B,C")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonCreateNewFile")
-/*
-TAB 2
-Edit	strRename	Set|strRename|A,B,C
-Button	btnSetRename	ButtonSetRename	Exec|ButtonSetRename
-Button	btnUndoRename	ButtonUndoRename	Exec|ButtonUndoRename
-Edit	strOrder	Set|strOrder|A,B,C
-Button	btnSetOrder	ButtonSetOrder	Exec|ButtonSetOrder
-Button	btnUndoOrder	ButtonUndoOrder	Exec|btnUndoOrder
-Edit	strSelect	Set|strSelect|A,B,C
-Button	btnSetSelect	ButtonSetSelect	Exec|ButtonSetSelect
-Button	btnUndoSelect	ButtonUndoSelect	Exec|ButtonUndoSelect
-Edit	strMerge	Set|strMerge|A,B,C
-Edit	strMergeNewName	Set|strMergeNewName|ABC
-Button	btnSetMerge	ButtonSetMerge	Exec|ButtonSetMerge
-Button	btnUndoMerge	ButtonUndoMerge	Exec|btnUndoMerge
-*/
+; RECEIVE_CSVMESSENGER("test", "Tab|1")
+; RECEIVE_CSVMESSENGER("test", "Set|strFileToLoad|o:\temp\countrylist.csv")
+; RECEIVE_CSVMESSENGER("test", "Set|strFieldDelimiter1|,")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonLoadFile")
+; RECEIVE_CSVMESSENGER("test", "Set|blnMultiline1|true")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonSelectFileToLoad")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonPreviewFile")
+; RECEIVE_CSVMESSENGER("test", "Set|strFileHeader|A,B,C")
+; RECEIVE_CSVMESSENGER("test", "Set|radGetHeader|1")
+; RECEIVE_CSVMESSENGER("test", "Set|radSetHeader|1")
+; RECEIVE_CSVMESSENGER("test", "Delim$")
+; RECEIVE_CSVMESSENGER("test", "Delim|")
+; RECEIVE_CSVMESSENGER("test", "Set|strFieldEncapsulator1|*")
+; RECEIVE_CSVMESSENGER("test", "Exec|ChangedMultiline1")
+; RECEIVE_CSVMESSENGER("test", "Set|strEndoflineReplacement1|¶")
+; RECEIVE_CSVMESSENGER("test", "Choose|strFileEncoding1|UTF-8")
+; RECEIVE_CSVMESSENGER("test", "Set|strFileHeader|A,B,C")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonCreateNewFile")
+
 ; TAB 2 examples
-; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|2")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strRename|A,B,C")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetRename")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonUndoRename")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strOrder|C,B,A")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetOrder")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strSelect|B,A")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetSelect")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMerge|Test: [B]-[A]")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMergeNewName|D")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSetMerge")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|3")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter3|;")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator3|*")
-/*
-TAB 3
-Edit	strFileToSave	ChangedFileToSave	Set|strFileToSave|o:\temp\countrylist-rev.csv
-Button	btnSelectFileToSave	ButtonSelectFileToSave	Exec|ButtonSelectFileToSave
-Edit	strFieldDelimiter3	ChangedFieldDelimiter3	Set|strFieldDelimiter3|;
-Edit	strFieldEncapsulator3	ChangedFieldEncapsulator3	Set|strFieldEncapsulator3|*
-Radio	radSaveWithHeader		Set|radSaveWithHeader|1
-Radio	radSaveNoHeader		Set|radSaveNoHeader|1
-Radio	radSaveMultiline	ClickRadSaveMultiline	Set|radSaveMultiline|1
-Radio	radSaveSingleline	ClickRadSaveSingleline	Set|radSaveSingleline|1
-Edit	strEndoflineReplacement3	Set|strEndoflineReplacement3|¶
-DropDownList	strFileEncoding3	Choose|strFileEncoding1|UTF-8
-Button	btnSaveFile	ButtonSaveFile	Exec|ButtonSaveFile
-Button	btnSaveFile	ButtonSaveFile	Exec|ButtonSaveFileOverwrite
-Button	btnCheckFile	ButtonCheckFile	Exec|ButtonCheckFile
-*/
+; RECEIVE_CSVMESSENGER("test", "Tab|2")
+; RECEIVE_CSVMESSENGER("test", "Set|strRename|A,B,C")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonSetRename")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonUndoRename")
+; RECEIVE_CSVMESSENGER("test", "Set|strOrder|C,B,A")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonSetOrder")
+; RECEIVE_CSVMESSENGER("test", "Set|strSelect|B,A")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonSetSelect")
+; RECEIVE_CSVMESSENGER("test", "Set|strMerge|Test: [B]-[A]")
+; RECEIVE_CSVMESSENGER("test", "Set|strMergeNewName|D")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonSetMerge")
+; RECEIVE_CSVMESSENGER("test", "Tab|3")
+; RECEIVE_CSVMESSENGER("test", "Set|strFieldDelimiter3|;")
+; RECEIVE_CSVMESSENGER("test", "Set|strFieldEncapsulator3|*")
+
 ; TAB 3 examples
-; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|3")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToSave|o:\temp\countrylist-semicolon.csv")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldDelimiter3|;")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSaveFileOverwrite")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFieldEncapsulator3|*")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveWithHeader|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveNoHeader|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveMultiline|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ClickRadSaveMultiline")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radSaveSingleline|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ClickRadSaveSingleline")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strEndoflineReplacement3|+")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strFileEncoding1|UTF-16")
-/*
-TAB 4
-Edit	strFileToExport	ChangedFileToExport	Set|strFileToExport|o:\temp\countrylist.txt
-Button	btnSelectFileToExport	ButtonSelectFileToExport	Exec|ButtonSelectFileToExport
-Radio	radFixed	ClickRadFixed	Set|radFixed|1
-Radio	radHTML	ClickRadHTML	Set|radHTML|1
-Radio	radXML	ClickRadXML	Set|radXML|1
-Radio	radExpress	ClickRadExpress	Set|radExpress|1
-Button	btnExportFile	ButtonExportFile	Exec|ButtonExportFile
-Edit	strMultiPurpose	ChangedMultiPurpose (unused)	Set|strMultiPurpose|String
-Button	btnMultiPurpose	ButtonMultiPurpose (change default width, select HTML template)	Exec|ButtonMultiPurpose
-Button	btnCheckExportFile	ButtonCheckExportFile	Exec|ButtonCheckExportFile
-*/
+; RECEIVE_CSVMESSENGER("test", "Tab|3")
+; RECEIVE_CSVMESSENGER("test", "Set|strFileToSave|o:\temp\countrylist-semicolon.csv")
+; RECEIVE_CSVMESSENGER("test", "Set|strFieldDelimiter3|;")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonSaveFileOverwrite")
+; RECEIVE_CSVMESSENGER("test", "Set|strFieldEncapsulator3|*")
+; RECEIVE_CSVMESSENGER("test", "Set|radSaveWithHeader|1")
+; RECEIVE_CSVMESSENGER("test", "Set|radSaveNoHeader|1")
+; RECEIVE_CSVMESSENGER("test", "Set|radSaveMultiline|1")
+; RECEIVE_CSVMESSENGER("test", "Exec|ClickRadSaveMultiline")
+; RECEIVE_CSVMESSENGER("test", "Set|radSaveSingleline|1")
+; RECEIVE_CSVMESSENGER("test", "Exec|ClickRadSaveSingleline")
+; RECEIVE_CSVMESSENGER("test", "Set|strEndoflineReplacement3|+")
+; RECEIVE_CSVMESSENGER("test", "Choose|strFileEncoding1|UTF-16")
+
 ; TAB 4 examples
-; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|4")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFileToExport|o:\temp\countrylist-type.txt")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radFixed|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radHTML|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radXML|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|radExpress|1")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMultiPurpose|Sort Order,5,Common Name,10,Capital,15")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonExportFile")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonMultiPurpose")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonCheckExportFile")
-/*
-TAB 5
-Edit	strFontNameLabels	Set|strFontNameLabels|Microsoft Sans Serif
-Edit	strFontNameEdit	Set|strFontNameEdit|Courier New
-Edit	strFontNameList	Set|strFontNameList|Microsoft Sans Serif
-Edit	strListBackgroundColor	Set|strListBackgroundColor|D0D0D0
-Edit	strListTextColor	Set|strListTextColor|000000
-Edit	strFontSizeLabels	Set|strFontSizeLabels|12
-Edit	strFontSizeEdit	Set|strFontSizeEdit|11
-Edit	strFontSizeList	Set|strFontSizeList|10	
-Edit	intSreenHeightCorrection	Set|intSreenHeightCorrection|-100
-Edit	intSreenWidthCorrection	Set|intSreenWidthCorrection|-100
-Edit	strTextEditorExe	Set|strTextEditorExe|C:\Program Files (x86)\Notepad++\notepad++.exe
-DropDownList	strRecordEditor	Choose|strRecordEditor|Full screen (or Field-by-field)
-DropDownList	strDefaultEileEncoding	Choose|strDefaultEileEncoding|UTF-8
-Edit	strCodePageLoad	Set|strCodePageLoad|1242
-Edit	strCodePageSave	Set|strCodePageSave|1242
-Checkbox	blnAlwaysEncapsulate	Set|blnAlwaysEncapsulate|1
-Checkbox	blnSkipHelpReadyToEdit	Set|blnSkipHelpReadyToEdit|1
-Checkbox	blnListGrid	Set|blnListGrid|1
-Edit	intDefaultWidth	Set|intDefaultWidth|16
-Edit	strTemplateDelimiter	Set|strTemplateDelimiter|~
-Edit	strMergeDelimiters	Set|strMergeDelimiters|[]
-Button	btnSaveOptions	ButtonSaveOptions	Exec|ButtonSaveOptions
-*/
+; RECEIVE_CSVMESSENGER("test", "Tab|4")
+; RECEIVE_CSVMESSENGER("test", "Set|strFileToExport|o:\temp\countrylist-type.txt")
+; RECEIVE_CSVMESSENGER("test", "Set|radFixed|1")
+; RECEIVE_CSVMESSENGER("test", "Set|radHTML|1")
+; RECEIVE_CSVMESSENGER("test", "Set|radXML|1")
+; RECEIVE_CSVMESSENGER("test", "Set|radExpress|1")
+; RECEIVE_CSVMESSENGER("test", "Set|strMultiPurpose|Sort Order,5,Common Name,10,Capital,15")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonExportFile")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonMultiPurpose")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonCheckExportFile")
+
 ; TAB 5 examples
-; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|5")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontNameLabels|Courier New")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontNameEdit|Courier New")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontNameList|Microsoft Sans Serif")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strListBackgroundColor|000000")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strListTextColor|FFFFFF")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontSizeLabels|16")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontSizeEdit|14")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strFontSizeList|12")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|intSreenHeightCorrection|-500")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|intSreenWidthCorrection|-500")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strTextEditorExe|notepad.exe")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strRecordEditor|Field-by-field")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Choose|strDefaultEileEncoding|UTF-16")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnAlwaysEncapsulate|0")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnSkipHelpReadyToEdit|0")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|blnListGrid|0")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|intDefaultWidth|24")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strTemplateDelimiter|$")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Set|strMergeDelimiters|()")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonSaveOptions")
-/*
-TAB 6
-Button	btnCheck4Update	ButtonCheck4Update	Exec|ButtonCheck4Update
-Button	btnDonate	ButtonDonate	Exec|ButtonDonate
-*/
+; RECEIVE_CSVMESSENGER("test", "Tab|5")
+; RECEIVE_CSVMESSENGER("test", "Set|strFontNameLabels|Courier New")
+; RECEIVE_CSVMESSENGER("test", "Set|strFontNameEdit|Courier New")
+; RECEIVE_CSVMESSENGER("test", "Set|strFontNameList|Microsoft Sans Serif")
+; RECEIVE_CSVMESSENGER("test", "Set|strListBackgroundColor|000000")
+; RECEIVE_CSVMESSENGER("test", "Set|strListTextColor|FFFFFF")
+; RECEIVE_CSVMESSENGER("test", "Set|strFontSizeLabels|16")
+; RECEIVE_CSVMESSENGER("test", "Set|strFontSizeEdit|14")
+; RECEIVE_CSVMESSENGER("test", "Set|strFontSizeList|12")
+; RECEIVE_CSVMESSENGER("test", "Set|intSreenHeightCorrection|-500")
+; RECEIVE_CSVMESSENGER("test", "Set|intSreenWidthCorrection|-500")
+; RECEIVE_CSVMESSENGER("test", "Set|strTextEditorExe|notepad.exe")
+; RECEIVE_CSVMESSENGER("test", "Choose|strRecordEditor|Field-by-field")
+; RECEIVE_CSVMESSENGER("test", "Choose|strDefaultEileEncoding|UTF-16")
+; RECEIVE_CSVMESSENGER("test", "Set|blnAlwaysEncapsulate|0")
+; RECEIVE_CSVMESSENGER("test", "Set|blnSkipHelpReadyToEdit|0")
+; RECEIVE_CSVMESSENGER("test", "Set|blnListGrid|0")
+; RECEIVE_CSVMESSENGER("test", "Set|intDefaultWidth|24")
+; RECEIVE_CSVMESSENGER("test", "Set|strTemplateDelimiter|$")
+; RECEIVE_CSVMESSENGER("test", "Set|strMergeDelimiters|()")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonSaveOptions")
+
 ; TAB 6 examples
-; RECEIVE_CSVBUDDYMESSENGER("test", "Tab|6")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonCheck4Update")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Exec|ButtonDonate")
-/*
-OTHER COMMANDS
-Tab|n
-Window|Maximize
-Window|Minimize
-Window|Restore
-*/
+; RECEIVE_CSVMESSENGER("test", "Tab|6")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonCheck4Update")
+; RECEIVE_CSVMESSENGER("test", "Exec|ButtonDonate")
+
 ; OTHER COMMANDS examples
-; RECEIVE_CSVBUDDYMESSENGER("test", "Window|Maximize")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Window|Restore")
-; RECEIVE_CSVBUDDYMESSENGER("test", "Window|Minimize")
+; RECEIVE_CSVMESSENGER("test", "Tab|2")
+; RECEIVE_CSVMESSENGER("test", "Window|Maximize")
+; RECEIVE_CSVMESSENGER("test", "Window|Restore")
+; RECEIVE_CSVMESSENGER("test", "Window|Minimize")
 /*
 SCRIPT COMMANDS
 [filepath] (file path alone, launch this script)
 	example
-	RECEIVE_CSVBUDDYMESSENGER("C:\Path\Script.txt")
+	RECEIVE_CSVMESSENGER("C:\Path\Script.txt")
+
 COMMANDS INSIDE SCRIPT
 Debug|1
 Debug|0
 Exit
 Sleep|n
 */
+; SCRIPT COMMANDS examples
+; RECEIVE_CSVMESSENGER("test", A_ScriptDir . "\messenger_script.txt")
+
 return
 
 
@@ -1127,8 +1043,8 @@ return
 
 
 ButtonLoadFile:
-ButtonLoadFileAdd: ; for CSV Buddy Messenger
-ButtonLoadFileReplace: ; for CSV Buddy Messenger
+ButtonLoadFileAdd: ; for CSV Messenger
+ButtonLoadFileReplace: ; for CSV Messenger
 Gui, 1:+OwnDialogs
 Gui, 1:Submit, NoHide
 if !DelimitersOK(1)
@@ -1690,7 +1606,7 @@ return
 
 
 ButtonSaveFile:
-ButtonSaveFileOverwrite: ; for CSV Buddy Messenger
+ButtonSaveFileOverwrite: ; for CSV Messenger
 Gui, 1:Submit, NoHide
 if !DelimitersOK(3)
 	return
@@ -3616,7 +3532,7 @@ ScreenScaling(intSize)
 
 ;------------------------------------------------------------
 REPLY_CSVBUDDYISRUNNING(wParam, lParam) 
-; Respond to message 0x2225 sent from CSVBuddyMessenger, returning true to confirm that CSV Buddy is running
+; Respond to message 0x2225 sent from CSVMessenger, returning true to confirm that CSV Buddy is running
 ;------------------------------------------------------------
 {
 	return true
@@ -3625,9 +3541,9 @@ REPLY_CSVBUDDYISRUNNING(wParam, lParam)
 
 
 ;------------------------------------------------------------
-RECEIVE_CSVBUDDYMESSENGER(wParam, lParam)
+RECEIVE_CSVMESSENGER(wParam, lParam)
 ; Adapted from AHK documentation (https://autohotkey.com/docs/commands/OnMessage.htm)
-; Receive CopyData (0x4a) message sent from CSVBuddyMessenger
+; Receive CopyData (0x4a) message sent from CSVMessenger
 ; returns FAIL or 0 if an error occurred, 0xFFFF if a CSV Buddy window is open or 1 if success
 ;------------------------------------------------------------
 {
@@ -3673,6 +3589,9 @@ ProcessMessage(strCopyOfData, strCopyDataDelim)
 		return 1 ; success
 	
 	saData := StrSplit(strCopyOfData, strCopyDataDelim)
+	for intIndex, strSnippet in saData
+		if (intIndex > 3) ; merge parts of saData[3] that we did not want to be split by |
+			saData[3] .= strCopyDataDelim . strSnippet
     strDebug1 := saData[1]
     strDebug2 := saData[2]
     strDebug3 := saData[3]
