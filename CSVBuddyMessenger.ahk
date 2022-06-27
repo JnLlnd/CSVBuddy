@@ -19,6 +19,7 @@ HISTORY
 
 Version: 0.2 (2022-06-27)
 - rename "CSV Buddy Messenger" to "CSV Messenger"
+- see CSV Buddy v2.1.9.7 for changes
 
 Version: 0.1 (2022-06-08)
 - initial code from QAPmessenger.ahk for Quick Access Popup converted to CSVBuddyMessenger for CSV Buddy
@@ -33,7 +34,7 @@ Version: 0.1 (2022-06-08)
 
 ;@Ahk2Exe-SetName CSV Messenger
 ;@Ahk2Exe-SetDescription Send messages to CSV Buddy
-;@Ahk2Exe-SetVersion 0.1
+;@Ahk2Exe-SetVersion 0.2
 ;@Ahk2Exe-SetOrigFilename CSVMessenger.exe
 ;@Ahk2Exe-ConsoleApp
 
