@@ -2,58 +2,69 @@
 # CSV Buddy (v2.1.9.4) - Read me
 
 
-CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, merge fields in new columns, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Unicode ready. Freeware.
+CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, merge fields in new columns, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Automate tasks with scripting. Unicode ready. Freeware.
 
 
-Written using AutoHotkey_L v1.1.09.03+ (http://www.ahkscript.org)  
+Written using AutoHotkey_L v1.1.09.03+ (https://www.autohotkey.com/)  
 By Jean Lalonde (JnLlnd on [AHK forum](http://www.autohotkey.com/boards/)  
 First official release: 2013-11-30
 
 
 ## Links
 
-* [Application home](http://code.jeanlalonde.ca/csvbuddy/)
-* [Download 32-bits / 64-bits](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy.zip) (latest version)
-* [Description and documentation](http://code.jeanlalonde.ca/ahk/csvbuddy/csvbuddy-doc.html)
+* [Application home](https://csvbuddy.quickaccesspopup.com/)
+* [Download 32-bits / 64-bits](https://csvbuddy.quickaccesspopup.com/download/csvbuddy.zip) (latest version)
+* [Description](https://csvbuddy.quickaccesspopup.com/features/)
+* [Installation](https://csvbuddy.quickaccesspopup.com/installation/)
+* [Using CSV Buddy](https://csvbuddy.quickaccesspopup.com/help/)
+* [CSV Buddy Scripting](https://csvbuddy.quickaccesspopup.com/csv-buddy-scripting/)
 
 ## History
 
+### 2022-07-14 v3.0
 
-### 2022-04-15 v2.1.9.4
-
-* adjust display of tabs content for HDPI screens
-* fix bug opening the wrong record editor
-* increase size of the undo buttons
-
-### 2022-04-06 v2.1.9.3
-
-* Merge fields
-* add a "Merge" command in tab 2 (previously named "Reuse") with separate text boxes for 1) fields and format (including existing fields enclosed by merge delimiters, for example "[FirstName] [LastName]) and 2) new field name
-* display error message if a merge field has invalid syntax when loading a CSV file
-* support placeholder ROWNUMBER (enclosed with reuse delimiters) in reuse fields format section, for example "#[ROWNUMBER]"
-* update status bar with progress during build merge fields
-* User interface
-* redesign the user interface to support font changes in the main window
-* new font settings in "Options" tab for labels (default Microsoft Sans Serif, 11), text input (default Courier New, 10) and list (default Microsoft Sans Serif, 10)
+**Merge fields**
+* add a "Merge" command in tab "2) Edit Columns" with two text boxes to set 1) the template of the new field with including existing fields enclosed by merge delimiters, for example "Full name: [FirstName] [LastName]") and 2) the name of the new field (see documentation)
+* configurable Merge opening and closing delimiters in the "Options" tab
+* support for placeholder ROWNUMBER (enclosed with merge delimiters) in merge fields format section, for example "#[ROWNUMBER]"
+* when loading a file, support for merged fields in the file header allowing to create an new field using a template inserting values from of previous fields in each row (see documentation)
+ 
+**User interface - Font size and screen scaling**
+* redesign the user interface to support font changes in the main window, full screen editor and zoom windows
+* new font settings in "Options" tab for labels (default Microsoft Sans Serif, size 11), text input (default Courier New, size 10) and list (default Microsoft Sans Serif, size 10)
+* adjust display for HDPI screen scaling
+ 
+**User interface - Various improvements**
 * change the order of commands in tab 2 to "Rename", "Order", "Select" and "Merge"
-* add Undo buttons for each commands in tab 2 allowing to revert the last change
-* track changes in list data and alert user for unsaved changes before quiting the application; add a section to status bar to show that changes need to be saved
-* remove the previous prompt when quitting (and its associated option in tab 6)
-* stop quitting the app on Escape key
-* fix bug preventing from search something and replace it with nothing
-* disable window during loading file, loading to listview, saving to csv or exporting data
-
-### 2022-03-01 v2.1.9.2
-
-* Support multiple reuse in select command
-* Known limitation: when adding reuse fields, all existing fields must be present in the Select list (abort select command if required)
-
-### 2022-02-25 v2.1.9.1
-
-* Reuse fields allowing, when loading a file or using the Select command, to create an new field based on the content of previous fields in each row
-* See reuse specifications and examples at https://github.com/JnLlnd/CSVBuddy/issues/53
-* Configurable reuse opening and closing delimiters in the "Options" tab
-* In this release, reuse fields are not supported in Export and only one reuse field can be set when loading a file or selecting fields (multiple reuse are planned for future beta releases).
+* add "Undo" buttons for each commands in tab 2 allowing to revert the last change
+* track changes in list data and alert user for unsaved changes before quiting the application
+* add a section to the status bar to show that changes need to be saved
+* disable application's window during loading file, loading to listview, saving to csv or exporting data
+* stop quitting the application when user hit the Escape key
+* display error message if trying to open a file that does not exist
+* put more info in error message displayed if a file does not load correctly
+* in Search and replace, fix bug not allowing to replace it nothing
+* fix a bug opening the wrong record editor
+ 
+**Scripting (beta)**
+* new CSV Buddy companion application "CSV Messenger" to send scripting messages to CSV Buddy
+* before sending scripting messages, CSV Messenger checks that CSV Buddy is running and that only one instance is running
+* CSV Buddy scripting messages sent from CSV Messenger and take action on scripting messages "Tab", "Exec", "Set", "Choose", "Delim", "Window" (Minimize, Maximize and Restore), "Debug", "Exit", "Sleep" and "Timeout" (see online documentation)
+* messages can be sent from CSV Messenger to CSV Buddy using 2 methods:
+    * 1) using the command line, for example C:\>CSVMessenger Set strFileToLoad "c:\myfiles\example.csv"
+    * 2) sending a script file to CSV Buddy with a command like C:\>CSVMessenger "c:\myfiles\script.txt" (see documentation for script file syntax)
+* control progress messages displayed by CSV Messenger with value "MessengerVerbose" under section [Messenger] in CSVBuddy.ini with possible values 0, 1 or 2:
+    * 0 Silent: no dialog box or command line message shown after CSV Messenger sends commands
+    * Errors only: display a dialog box only when an error occurred in CSV Buddy (default)
+    * Always: after each command executed in CSV Buddy, display a dialog box (for launch errors) or a command line message (on commands success or errors)
+* when exiting CSV Messenger, return an exit code to the caller (batch file of other script) aloowing to control the execution of the remaining of the script:
+    * 1: CSV Buddy is not running
+    * 2: More than one instance of CSV Buddy is running
+    * 3: No parameter on the command line
+    * 4: Execution error
+* add "Timeout nnn" command to change the timeout default value of 30000 ms (30 seconds)
+* See CSV Buddy Scripting help at https://csvbuddy.quickaccesspopup.com/csv-buddy-scripting/
+* NOTE: CSV Buddy scripting is still in beta developement; please report bugs or suggestions at https://forum.quickaccesspopup.com/forumdisplay.php?fid=32
 
 ### 2017-12-10 v2.1.6
 
