@@ -22,7 +22,7 @@ limitations under the License.
 Version history
 ---------------
 
-2022-07-?? v3.0
+2022-07-18 v3.0
  
 Merge fields
 - add a "Merge" command in tab "2) Edit Columns" with two text boxes to set 1) the template of the new field with including existing fields enclosed by merge delimiters, for example "Full name: [FirstName] [LastName]") and 2) the name of the new field (see documentation)
