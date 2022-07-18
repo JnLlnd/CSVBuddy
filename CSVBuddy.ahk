@@ -22,6 +22,51 @@ limitations under the License.
 Version history
 ---------------
 
+2022-07-?? v3.0
+ 
+Merge fields
+- add a "Merge" command in tab "2) Edit Columns" with two text boxes to set 1) the template of the new field with including existing fields enclosed by merge delimiters, for example "Full name: [FirstName] [LastName]") and 2) the name of the new field (see documentation)
+- configurable Merge opening and closing delimiters in the "Options" tab
+- support for placeholder ROWNUMBER (enclosed with merge delimiters) in merge fields format section, for example "#[ROWNUMBER]"
+- when loading a file, support for merged fields in the file header allowing to create an new field using a template inserting values from of previous fields in each row (see documentation)
+ 
+User interface - Font size and screen scaling
+- redesign the user interface to support font changes in the main window, full screen editor and zoom windows
+- new font settings in "Options" tab for labels (default Microsoft Sans Serif, size 11), text input (default Courier New, size 10) and list (default Microsoft Sans Serif, size 10)
+- adjust display for HDPI screen scaling
+ 
+User interface - Various improvements
+- change the order of commands in tab 2 to "Rename", "Order", "Select" and "Merge"
+- add "Undo" buttons for each commands in tab 2 allowing to revert the last change
+- track changes in list data and alert user for unsaved changes before quiting the application
+- add a section to the status bar to show that changes need to be saved
+- disable application's window during loading file, loading to listview, saving to csv or exporting data
+- stop quitting the application when user hit the Escape key
+- display error message if trying to open a file that does not exist
+- put more info in error message displayed if a file does not load correctly
+- in Search and replace, fix bug not allowing to replace it nothing
+- fix a bug opening the wrong record editor
+ 
+Scripting (beta)
+- new CSV Buddy companion application "CSV Messenger" to send scripting messages to CSV Buddy
+- before sending scripting messages, CSV Messenger checks that CSV Buddy is running and that only one instance is running
+- CSV Buddy scripting messages sent from CSV Messenger and take action on scripting messages "Tab", "Exec", "Set", "Choose", "Delim", "Window" (Minimize, Maximize and Restore), "Debug", "Exit", "Sleep" and "Timeout" (see online documentation)
+- messages can be sent from CSV Messenger to CSV Buddy using 2 methods:
+  1) using the command line, for example C:\>CSVMessenger Set strFileToLoad "c:\myfiles\example.csv"
+  2) sending a script file to CSV Buddy with a command like C:\>CSVMessenger "c:\myfiles\script.txt" (see documentation for script file syntax)
+- control progress messages displayed by CSV Messenger with value "MessengerVerbose" under section [Messenger] in CSVBuddy.ini with possible values 0, 1 or 2:
+  - 0 Silent: no dialog box or command line message shown after CSV Messenger sends commands
+  - 1 Errors only: display a dialog box only when an error occurred in CSV Buddy (default)
+  - 2 Always: after each command executed in CSV Buddy, display a dialog box (for launch errors) or a command line message (on commands success or errors)
+- when exiting CSV Messenger, return an exit code to the caller (batch file of other script) aloowing to control the execution of the remaining of the script:
+  - 1: CSV Buddy is not running
+  - 2: More than one instance of CSV Buddy is running
+  - 3: No parameter on the command line
+  - 4: Execution error
+- add "Timeout nnn" command to change the timeout default value of 30000 ms (30 seconds)
+- See CSV Buddy Scripting help at https://csvbuddy.quickaccesspopup.com/csv-buddy-scripting/
+- NOTE: CSV Buddy scripting is still in beta development; please report bugs or suggestions at https://forum.quickaccesspopup.com/forumdisplay.php?fid=32
+
 2022-06-27 BETA v2.1.9.7
 - rename "CSV Buddy Messenger" to "CSV Messenger"
 - add value MessengerVerbose under section [Messenger] in CSVBuddy.ini to control messages from CSV Messenger with possible values 0, 1 or 2
@@ -260,11 +305,12 @@ SetWorkingDir, %A_ScriptDir%
 ; --------------------- COMPILER DIRECTIVES --------------------------
 
 ;@Ahk2Exe-SetName CSV Buddy
-;@Ahk2Exe-SetDescription Load`, edit`, save and export CSV files
-;@Ahk2Exe-SetVersion v2.1.9.7
+;@Ahk2Exe-SetDescription CSV Buddy: Load`, edit`, save and export CSV files
+;@Ahk2Exe-SetVersion v3.0
 ;@Ahk2Exe-SetCopyright Jean Lalonde
 ;@Ahk2Exe-SetOrigFilename CSVBuddy.exe
 
+; --------------------- CSV MESSENGER SETUP --------------------------
 
 ; Respond to SendMessage sent by CSVMessenger to respond that CSV Buddy is running
 ; No specific reason for 0x2225, except that is is > 0x1000 (http://ahkscript.org/docs/commands/OnMessage.htm) and QAP is using 0x2224
@@ -276,8 +322,8 @@ OnMessage(0x4a, "RECEIVE_CSVMESSENGER")
 ; --------------------- GLOBAL AND DEFAULT VALUES --------------------------
 
 
-global strAppVersionLong := "v" . lAppVersion . " BETA"
-; global strAppVersionLong := "v" . lAppVersion
+; global strAppVersionLong := "v" . lAppVersion . " BETA"
+global strAppVersionLong := "v" . lAppVersion
 global intCurrentSortColumn
 global strFontNameLabels := "Microsoft Sans Serif"
 global strFontSizeLabels := 11

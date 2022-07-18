@@ -1,5 +1,5 @@
 ﻿
-# CSV Buddy (v2.1.9.4) - Read me
+# CSV Buddy (v3.0) - Read me
 
 
 CSV Buddy helps you make your CSV files ready to be imported by a variety of software. Load files with all sort of field delimiters (comma, tad, semi-colon) and encapsulators (double/single-quotes or any other). Convert line breaks in data field (XL ready). Rename/reorder fields, merge fields in new columns, add/edit records, filter or search, search and replace, save with any delimiters and export to fixed-width, HTML templates or XML formats. Automate tasks with scripting. Unicode ready. Freeware.
